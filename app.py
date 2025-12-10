@@ -1,434 +1,608 @@
+# app.py
+# ===============================
+# Marketing / E‑commerce Dashboard
+# ===============================
+
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
-from datetime import datetime
-import plotly.io as pio
-import base64
-from PIL import Image
+from pathlib import Path
 
-# ═══════════════════════════════════════════════════════════════════════════
-# PAGE CONFIG
-# ═══════════════════════════════════════════════════════════════════════════
-
+# ========= إعداد عام للتطبيق =========
 st.set_page_config(
-    page_title="E-Commerce Analytics Dashboard",
-    page_icon="📊",
+    page_title="Marketing Performance Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# ═══════════════════════════════════════════════════════════════════════════
-# COLORS CONFIGURATION - احترافي
-# ═══════════════════════════════════════════════════════════════════════════
-
-COLORS = {
-    'primary': '#3647F5',      # أزرق
-    'dark': '#1B2346',         # أسود مائل
-    'accent': '#FF9F0D',       # برتقالي
-    'bg_dark': '#040D2F',      # خلفية مظلمة
-    'light': '#D9D9D9',        # رمادي فاتح
-    'success': '#00C851',      # أخضر
-    'warning': '#ffbb33',      # أصفر
-    'danger': '#ff4444'        # أحمر
+# ========= إعداد أسماء الأعمدة (عدّليها حسب داتا مشروعك) =========
+COLUMN_CONFIG = {
+    "date": "date",                            # تاريخ العملية
+    "channel": "marketingchannel",             # قناة التسويق
+    "campaign": "marketingcampaign",           # الحملة
+    "spend": "netrevenue",                     # أو ad_spend لو عندك عمود منفصل
+    "revenue": "grossrevenuenetrevenueroi".split("netrevenue")[0].strip() \
+        if "grossrevenue" in [] else "grossrevenue",  # غيّريها لاسم عمود الإيراد
+    "impressions": "impressions",              # عدديها لو موجودة
+    "clicks": "clicks",                        # عدديها لو موجودة
+    "conversions": "conversions",              # أو استخدمي عدد الأوردرز
+    "order_id": "orderid",
+    "region": "region",
+    "city": "city",
 }
 
-# Custom CSS Styling
-st.markdown(f"""
-<style>
-    /* Main Background */
-    .main {{
-        background-color: {COLORS['bg_dark']};
-        color: {COLORS['light']};
-    }}
-    
-    /* Sidebar Styling */
-    .sidebar .sidebar-content {{
-        background-color: {COLORS['dark']};
-    }}
-    
-    /* Metrics Cards */
-    .stMetric {{
-        background-color: {COLORS['dark']};
-        padding: 20px;
+# لو الأعمدة مش موجودة بالأسماء دي في cleaned_data.csv عدّلي القيم فوق قبل التشغيل.
+
+
+# ========= CSS للتصميم (ألوان وكروت وتابات) =========
+st.markdown(
+    """
+    <style>
+    /* خلفية عامة */
+    .main {
+        background-color: #0f172a;
+        color: #f9fafb;
+    }
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #111827;
+        padding-top: 1rem;
+    }
+    /* عنوان الداشبورد */
+    .dashboard-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #f9fafb;
+        margin-bottom: 0.25rem;
+    }
+    .dashboard-subtitle {
+        font-size: 14px;
+        color: #9ca3af;
+        margin-bottom: 1.5rem;
+    }
+
+    /* كروت KPIs */
+    .kpi-card {
         border-radius: 12px;
-        border-left: 5px solid {COLORS['accent']};
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }}
-    
-    /* Headers */
-    h1, h2, h3, h4, h5, h6 {{
-        color: {COLORS['accent']};
-        font-weight: 600;
-    }}
-    
+        padding: 16px 18px;
+        color: #f9fafb;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .kpi-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #e5e7eb;
+        letter-spacing: 0.06em;
+    }
+    .kpi-value {
+        font-size: 24px;
+        font-weight: 700;
+    }
+    .kpi-sub {
+        font-size: 12px;
+        color: #d1d5db;
+    }
+    .kpi-blue  { background: #1d4ed8; }
+    .kpi-amber { background: #f59e0b; }
+    .kpi-indigo{ background: #4f46e5; }
+    .kpi-rose  { background: #e11d48; }
+
     /* Tabs */
-    .stTabs [data-baseweb="tab-list"] button {{
-        background-color: {COLORS['dark']};
-        color: {COLORS['light']};
-        border-radius: 8px;
-    }}
-    
-    /* Buttons */
-    .stButton > button {{
-        background-color: {COLORS['primary']};
-        color: white;
-        border-radius: 8px;
-        border: none;
-        padding: 12px 24px;
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 6px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #111827;
+        color: #9ca3af;
+        border-radius: 8px 8px 0 0;
+        padding-top: 8px;
+        padding-bottom: 8px;
         font-weight: 600;
-    }}
-    
-    .stButton > button:hover {{
-        background-color: {COLORS['accent']};
-    }}
-    
-    /* Selectbox and Multiselect */
-    .stSelectbox, .stMultiSelect {{
-        color: {COLORS['light']};
-    }}
-    
-    /* Info/Success/Warning boxes */
-    .stInfo {{
-        background-color: rgba(54, 71, 245, 0.1);
-        border: 1px solid {COLORS['primary']};
-    }}
-    
-    .stSuccess {{
-        background-color: rgba(255, 159, 13, 0.1);
-        border: 1px solid {COLORS['accent']};
-    }}
-    
-    /* Dataframes */
-    .dataframe {{
-        background-color: {COLORS['dark']} !important;
-        color: {COLORS['light']} !important;
-    }}
-    
-    /* Plotly chart styling */
-    .js-plotly-plot .plotly {{
-        background-color: {COLORS['bg_dark']} !important;
-    }}
-</style>
-""", unsafe_allow_html=True)
+        font-size: 13px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #1f2937;
+        color: #f9fafb;
+        border-bottom: 2px solid #6366f1;
+    }
 
-# ═══════════════════════════════════════════════════════════════════════════
-# DISPLAY DASHBOARD IMAGE
-# ═══════════════════════════════════════════════════════════════════════════
+    /* بطاقات داخل التابات */
+    .card {
+        background-color: #111827;
+        border-radius: 12px;
+        padding: 16px 18px;
+    }
+    .card-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 0.5rem;
+        color: #e5e7eb;
+    }
+    .card-subtitle {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
 
-def add_logo():
+    /* إخفاء footer الافتراضي لستريمليت */
+    footer {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ========= تحميل البيانات =========
+@st.cache_data
+def load_data(csv_path: str) -> pd.DataFrame:
+    path = Path(csv_path)
+    if not path.exists():
+        st.error(f"لم أجد الملف {csv_path} – تأكد أنه في نفس فولدر app.py.")
+        st.stop()
+
+    df = pd.read_csv(csv_path)
+
+    # تحويل التاريخ
+    date_col = COLUMN_CONFIG["date"]
+    if date_col in df.columns:
+        df[date_col] = pd.to_datetime(df[date_col])
+
+        if "month" not in df.columns:
+            df["month"] = df[date_col].dt.to_period("M").astype(str)
+
+        if "year" not in df.columns:
+            df["year"] = df[date_col].dt.year
+
+    return df
+
+
+df_raw = load_data("cleaned_data.csv")
+
+
+# ========= تحضير KPIs و الأعمدة المحسوبة =========
+def add_calculated_columns(df: pd.DataFrame) -> pd.DataFrame:
+    cfg = COLUMN_CONFIG.copy()
+    df = df.copy()
+
+    # أسماء الأعمدة
+    ch_col  = cfg["channel"]
+    rev_col = cfg["revenue"]
+    sp_col  = cfg["spend"]
+    imp_col = cfg["impressions"]
+    clk_col = cfg["clicks"]
+    conv_col = cfg["conversions"]
+
+    # تأكّد من وجود أعمدة الإنفاق والإيراد
+    if sp_col not in df.columns:
+        st.warning(f"عمود الإنفاق '{sp_col}' غير موجود، سيتم افتراض الإنفاق = finalamount.")
+        if "finalamount" in df.columns:
+            df[sp_col] = df["finalamount"]
+        else:
+            df[sp_col] = np.nan
+
+    if rev_col not in df.columns:
+        if "grossrevenue" in df.columns:
+            df[rev_col] = df["grossrevenue"]
+        elif "netrevenue" in df.columns:
+            df[rev_col] = df["netrevenue"]
+        else:
+            st.warning("لا يوجد عمود واضح للإيراد، سيتم استخدام finalamount كإيراد.")
+            df[rev_col] = df[sp_col]
+
+    # CTR = Clicks / Impressions
+    if imp_col in df.columns and clk_col in df.columns:
+        df["CTR"] = df[clk_col] / df[imp_col]
+    else:
+        df["CTR"] = np.nan
+
+    # CPC = Spend / Clicks
+    if clk_col in df.columns:
+        df["CPC"] = np.where(df[clk_col] > 0, df[sp_col] / df[clk_col], np.nan)
+    else:
+        df["CPC"] = np.nan
+
+    # Conversion Rate = Conversions / Clicks
+    if conv_col in df.columns and clk_col in df.columns:
+        df["Conversion_Rate"] = np.where(
+            df[clk_col] > 0, df[conv_col] / df[clk_col], np.nan
+        )
+    else:
+        # fallback: اعتبر كل أوردر Conversion
+        df["Conversion_Rate"] = 1.0
+
+    # ROI = (Revenue - Spend) / Spend
+    df["ROI"] = np.where(
+        df[sp_col] > 0,
+        (df[rev_col] - df[sp_col]) / df[sp_col],
+        np.nan,
+    )
+
+    return df
+
+
+df = add_calculated_columns(df_raw)
+
+# ========= تطبيق الفلاتر (Sidebar) =========
+with st.sidebar:
+    st.markdown("### NexaVerse")
+    st.markdown("لوحة تحكم أداء التسويق والمبيعات")
+
+    ch_col = COLUMN_CONFIG["channel"]
+    date_col = COLUMN_CONFIG["date"]
+
+    # Filter by channel
+    if ch_col in df.columns:
+        all_channels = sorted(df[ch_col].dropna().unique())
+        selected_channels = st.multiselect(
+            "Marketing Channel",
+            options=all_channels,
+            default=all_channels,
+        )
+    else:
+        selected_channels = None
+
+    # Filter by month range
+    if "month" in df.columns:
+        months = sorted(df["month"].unique())
+        if months:
+            month_range = st.select_slider(
+                "Month range",
+                options=months,
+                value=(months[0], months[-1]),
+            )
+        else:
+            month_range = None
+    else:
+        month_range = None
+
+    st.markdown("---")
+    st.markdown("**ملاحظات:** غيّر أسماء الأعمدة في أعلى الملف لو اختلفت عن داتاسيتك.")
+
+# تطبيق الفلاتر
+df_filtered = df.copy()
+
+if selected_channels and ch_col in df_filtered.columns:
+    df_filtered = df_filtered[df_filtered[ch_col].isin(selected_channels)]
+
+if month_range and "month" in df_filtered.columns:
+    start_m, end_m = month_range
+    df_filtered = df_filtered[
+        (df_filtered["month"] >= start_m) & (df_filtered["month"] <= end_m)
+    ]
+
+# ========= حساب KPIs إجمالية =========
+cfg = COLUMN_CONFIG
+rev_col = cfg["revenue"]
+sp_col = cfg["spend"]
+
+total_revenue = df_filtered[rev_col].sum()
+total_spend   = df_filtered[sp_col].sum()
+total_orders  = len(df_filtered)
+avg_roi       = df_filtered["ROI"].mean(skipna=True)
+avg_conv_rate = df_filtered["Conversion_Rate"].mean(skipna=True)
+
+# ========= Header =========
+st.markdown('<div class="dashboard-title">Dashboard</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="dashboard-subtitle">Marketing & E‑commerce Performance Overview</div>',
+    unsafe_allow_html=True,
+)
+
+# ========= كروت KPIs أعلى الصفحة =========
+kpi_cols = st.columns(4)
+
+with kpi_cols[0]:
     st.markdown(
-        """
-        <style>
-            [data-testid="stSidebar"] {
-                background-image: url(https://i.ibb.co/7jLm1cv/WhatsApp-Image-2025-12-08-at-21-32-57-cf4377fb.jpg);
-                background-repeat: no-repeat;
-                background-size: cover;
-                background-position: center top;
-            }
-        </style>
+        f"""
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value">${total_revenue:,.0f}</div>
+            <div class="kpi-sub">Filtered period</div>
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-add_logo()
+with kpi_cols[1]:
+    st.markdown(
+        f"""
+        <div class="kpi-card kpi-amber">
+            <div class="kpi-label">Total Spend</div>
+            <div class="kpi-value">${total_spend:,.0f}</div>
+            <div class="kpi-sub">Acquisition & marketing cost</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-# ═══════════════════════════════════════════════════════════════════════════
-# LOAD & PROCESS DATA - FIXED
-# ═══════════════════════════════════════════════════════════════════════════
+with kpi_cols[2]:
+    st.markdown(
+        f"""
+        <div class="kpi-card kpi-indigo">
+            <div class="kpi-label">AVG ROI</div>
+            <div class="kpi-value">{avg_roi:,.2f}x</div>
+            <div class="kpi-sub">Return on investment</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-@st.cache_data
-def load_and_process_data():
-    try:
-        df = pd.read_csv('cleaned_data.csv')
-        df['date'] = pd.to_datetime(df['date'])
-        df['year_month'] = df['date'].dt.to_period('M')
-        df['month_name'] = df['date'].dt.month_name()
-        
-        # Calculate all KPIs EXACTLY from notebook
-        df['Average Order Value'] = df['final_amount'] / df['quantity']
-        df['revenue_per_customer'] = df['final_amount'].sum() / df['customer_id'].nunique()
-        df['discount_amount'] = df['price'] * df['discount_percent'] / 100
-        df['gross_revenue'] = df['price'] * df['quantity']
-        df['net_revenue'] = df['final_amount']
-        df['roi'] = (df['net_revenue'] - df['discount_amount']) / df['discount_amount']
-        
-        # Conversion rate per customer
-        orders_per_customer = df.groupby('customer_id').size()
-        df['conversion_rate'] = df['customer_id'].map(orders_per_customer)
-        
-        return df
-    except FileNotFoundError:
-        st.error("❌ File 'cleaned_data.csv' not found. Please upload it first.")
-        return pd.DataFrame()
+with kpi_cols[3]:
+    st.markdown(
+        f"""
+        <div class="kpi-card kpi-rose">
+            <div class="kpi-label">AVG Conversion Rate</div>
+            <div class="kpi-value">{avg_conv_rate*100:,.2f}%</div>
+            <div class="kpi-sub">Across all channels</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-df = load_and_process_data()
+st.markdown("")
 
-if df.empty:
-    st.stop()
+# ========= Tabs الرئيسية =========
+overview_tab, trends_tab, efficiency_tab, recs_tab = st.tabs(
+    ["Overview", "Trends", "Efficiency", "Recommendations"]
+)
 
-# ═══════════════════════════════════════════════════════════════════════════
-# FIXED KPI CALCULATIONS - MATCH NOTEBOOK EXACTLY
-# ═══════════════════════════════════════════════════════════════════════════
+# -------------------- 1) Overview Tab --------------------
+with overview_tab:
+    col_left, col_right = st.columns([2, 1])
 
-def calculate_all_kpis(filtered_df):
-    """Calculate KPIs exactly as in the notebook"""
-    
-    # Category KPIs
-    kpi_category = filtered_df.groupby('category').agg({
-        'gross_revenue': 'sum',
-        'net_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum'
-    }).round(2)
-    kpi_category['avg_order_value'] = kpi_category['net_revenue'] / kpi_category['quantity']
-    kpi_category['roi'] = (kpi_category['net_revenue'] - kpi_category['discount_amount']) / kpi_category['discount_amount']
-    
-    # Campaign KPIs
-    kpi_campaign = filtered_df.groupby('marketing_campaign').agg({
-        'net_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum',
-        'customer_id': 'nunique'
-    }).round(2)
-    kpi_campaign['revenue_per_customer'] = kpi_campaign['net_revenue'] / kpi_campaign['customer_id']
-    kpi_campaign['roi'] = (kpi_campaign['net_revenue'] - kpi_campaign['discount_amount']) / kpi_campaign['discount_amount']
-    
-    # Channel KPIs
-    kpi_channel = filtered_df.groupby('marketing_channel').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum',
-        'customer_id': 'nunique'
-    }).round(2)
-    kpi_channel['avg_order_value'] = kpi_channel['net_revenue'] / kpi_channel['quantity']
-    kpi_channel['revenue_per_customer'] = kpi_channel['net_revenue'] / kpi_channel['customer_id']
-    kpi_channel['roi'] = (kpi_channel['net_revenue'] - kpi_channel['discount_amount']) / kpi_channel['discount_amount']
-    
-    # Customer Segment KPIs
-    kpi_segment = filtered_df.groupby('customer_segment').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum',
-        'customer_id': 'nunique',
-        'customer_lifetime_value': 'mean',
-        'retention_score': 'mean'
-    }).round(2)
-    kpi_segment['avg_order_value'] = kpi_segment['net_revenue'] / kpi_segment['quantity']
-    kpi_segment['revenue_per_customer'] = kpi_segment['net_revenue'] / kpi_segment['customer_id']
-    kpi_segment['roi'] = (kpi_segment['net_revenue'] - kpi_segment['discount_amount']) / kpi_segment['discount_amount']
-    
-    # Region KPIs
-    kpi_region = filtered_df.groupby('region').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum',
-        'customer_id': 'nunique'
-    }).round(2)
-    kpi_region['avg_order_value'] = kpi_region['net_revenue'] / kpi_region['quantity']
-    kpi_region['revenue_per_customer'] = kpi_region['net_revenue'] / kpi_region['customer_id']
-    kpi_region['roi'] = (kpi_region['net_revenue'] - kpi_region['discount_amount']) / kpi_region['discount_amount']
-    
-    # Month KPIs
-    kpi_month = filtered_df.groupby('month').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum'
-    }).round(2)
-    kpi_month['avg_order_value'] = kpi_month['net_revenue'] / kpi_month['quantity']
-    kpi_month['roi'] = (kpi_month['net_revenue'] - kpi_month['discount_amount']) / kpi_month['discount_amount']
-    
-    # Quarter KPIs
-    kpi_quarter = filtered_df.groupby('quarter').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum'
-    }).round(2)
-    kpi_quarter['avg_order_value'] = kpi_quarter['net_revenue'] / kpi_quarter['quantity']
-    kpi_quarter['roi'] = (kpi_quarter['net_revenue'] - kpi_quarter['discount_amount']) / kpi_quarter['discount_amount']
-    
-    # Season KPIs
-    kpi_season = filtered_df.groupby('season').agg({
-        'net_revenue': 'sum',
-        'gross_revenue': 'sum',
-        'discount_amount': 'sum',
-        'quantity': 'sum'
-    }).round(2)
-    kpi_season['avg_order_value'] = kpi_season['net_revenue'] / kpi_season['quantity']
-    kpi_season['roi'] = (kpi_season['net_revenue'] - kpi_season['discount_amount']) / kpi_season['discount_amount']
-    
-    # Channel Performance (Fixed)
-    channel_perf = filtered_df.groupby('marketing_channel').agg({
-        'discount_percent': 'sum',
-        'final_amount': 'sum',
-        'customer_id': 'nunique'
-    }).round(2)
-    channel_perf['total_spend'] = channel_perf['discount_percent']
-    channel_perf['total_revenue'] = channel_perf['final_amount']
-    channel_perf['total_conversions'] = channel_perf['customer_id']
-    channel_perf['avg_roi'] = (channel_perf['total_revenue'] - channel_perf['total_spend']) / channel_perf['total_spend']
-    
-    return {
-        'kpi_category': kpi_category,
-        'kpi_campaign': kpi_campaign,
-        'kpi_channel': kpi_channel,
-        'kpi_segment': kpi_segment,
-        'kpi_region': kpi_region,
-        'kpi_month': kpi_month,
-        'kpi_quarter': kpi_quarter,
-        'kpi_season': kpi_season,
-        'channel_perf': channel_perf
-    }
+    # Trend (Revenue by month & channel)
+    with col_left:
+        if "month" in df_filtered.columns and ch_col in df_filtered.columns:
+            trend_df = (
+                df_filtered.groupby(["month", ch_col])[rev_col]
+                .sum()
+                .reset_index()
+                .sort_values("month")
+            )
+            fig_trend = px.bar(
+                trend_df,
+                x="month",
+                y=rev_col,
+                color=ch_col,
+                barmode="group",
+                title="Revenue trend by month & channel",
+            )
+            fig_trend.update_layout(
+                template="plotly_dark",
+                height=320,
+                margin=dict(l=10, r=10, t=40, b=10),
+            )
+            st.plotly_chart(fig_trend, use_container_width=True)
+        else:
+            st.info("لا يوجد عمود month أو channel كافي لبناء ترند.")
 
-# ═══════════════════════════════════════════════════════════════════════════
-# LOGO & HEADER
-# ═══════════════════════════════════════════════════════════════════════════
+    # Sales donut by channel
+    with col_right:
+        if ch_col in df_filtered.columns:
+            channel_rev = (
+                df_filtered.groupby(ch_col)[rev_col]
+                .sum()
+                .reset_index()
+                .sort_values(rev_col, ascending=False)
+            )
+            fig_donut = go.Figure(
+                data=[
+                    go.Pie(
+                        labels=channel_rev[ch_col],
+                        values=channel_rev[rev_col],
+                        hole=0.6,
+                    )
+                ]
+            )
+            fig_donut.update_layout(
+                template="plotly_dark",
+                title="Revenue share by channel",
+                margin=dict(l=0, r=0, t=40, b=0),
+                height=320,
+            )
+            st.plotly_chart(fig_donut, use_container_width=True)
+        else:
+            st.info("لا يوجد عمود channel لبناء Donut Chart.")
 
-col_logo, col_title = st.columns([1, 10])
-with col_logo:
-    st.markdown(f'<h1 style="color: {COLORS["accent"]};font-size: 2em;">📊</h1>', unsafe_allow_html=True)
-with col_title:
-    st.title("E-Commerce Analytics Dashboard")
-    st.markdown(f"<p style='color: {COLORS['light']}; margin-top: -20px;'>Data-Driven Business Intelligence | All Charts from Notebook</p>", unsafe_allow_html=True)
+    # جدول معاملات (Top orders)
+    st.markdown("### Top Transactions")
+    order_col = cfg["order_id"]
+    cols_to_show = [
+        order_col if order_col in df_filtered.columns else df_filtered.columns[0],
+        date_col if date_col in df_filtered.columns else None,
+        ch_col if ch_col in df_filtered.columns else None,
+        rev_col,
+        sp_col,
+        "ROI",
+        "Conversion_Rate",
+    ]
+    cols_to_show = [c for c in cols_to_show if c and c in df_filtered.columns]
 
-st.markdown("---")
+    st.dataframe(
+        df_filtered.sort_values(rev_col, ascending=False)[cols_to_show].head(15),
+        use_container_width=True,
+        height=350,
+    )
 
-# ═══════════════════════════════════════════════════════════════════════════
-# SIDEBAR - FILTERS (Simplified)
-# ═══════════════════════════════════════════════════════════════════════════
+# -------------------- 2) Trends Tab --------------------
+with trends_tab:
+    st.markdown('<div class="card"><div class="card-title">Time trends</div>', unsafe_allow_html=True)
 
-with st.sidebar:
-    st.markdown(f'<h2 style="color: {COLORS["accent"]};">🎛️ FILTERS</h2>', unsafe_allow_html=True)
-    st.markdown("---")
-    
-    # Date Range
-    col_date1, col_date2 = st.columns(2)
-    with col_date1:
-        start_date = st.date_input("📅 Start Date", value=df['date'].min().date())
-    with col_date2:
-        end_date = st.date_input("📅 End Date", value=df['date'].max().date())
-    
-    # Key Filters
-    selected_channels = st.multiselect("📢 Channels", options=sorted(df['marketing_channel'].unique()), default=sorted(df['marketing_channel'].unique()))
-    
-    st.markdown("---")
-    show_tables = st.checkbox("📋 Show Data Tables", value=False)
-
-# Apply Filters
-filtered_df = df[
-    (df['date'].dt.date >= start_date) &
-    (df['date'].dt.date <= end_date) &
-    (df['marketing_channel'].isin(selected_channels))
-].reset_index(drop=True)
-
-kpis = calculate_all_kpis(filtered_df)
-
-# ═══════════════════════════════════════════════════════════════════════════
-# TABS - SIMPLIFIED WITH WORKING CHARTS
-# ═══════════════════════════════════════════════════════════════════════════
-
-tab1, tab2, tab3 = st.tabs(["📊 Overview", "🎯 Performance", "📋 Tables"])
-
-with tab1:
-    st.markdown(f'<h2 style="color: {COLORS["accent"]};">📊 Executive Overview</h2>', unsafe_allow_html=True)
-    
-    # KPI Cards
-    col1, col2, col3, col4 = st.columns(4)
-    total_revenue = filtered_df['net_revenue'].sum()
-    total_customers = filtered_df['customer_id'].nunique()
-    total_orders = len(filtered_df)
-    avg_order_value = filtered_df['final_amount'].mean()
-    
-    with col1: st.metric("💰 Total Revenue", f"${total_revenue:,.0f}")
-    with col2: st.metric("👥 Total Customers", f"{total_customers:,}")
-    with col3: st.metric("📦 Total Orders", f"{total_orders:,}")
-    with col4: st.metric("💵 Avg Order Value", f"${avg_order_value:.2f}")
-    
-    # Charts from Notebook Style
-    col_a, col_b = st.columns(2)
-    
-    with col_a:
-        # Revenue by Channel (Notebook Style)
-        fig_channel = px.bar(
-            kpis['kpi_channel'][['net_revenue']].reset_index().sort_values('net_revenue', ascending=False),
-            x='marketing_channel', y='net_revenue',
-            title='💰 Revenue by Channel',
-            color='net_revenue',
-            color_continuous_scale=['#FF9F0D', '#3647F5'],
-            text_auto='$.0f'
+    if "month" in df_filtered.columns and ch_col in df_filtered.columns:
+        monthly = (
+            df_filtered.groupby(["month", ch_col])
+            .agg(
+                revenue=(rev_col, "sum"),
+                spend=(sp_col, "sum"),
+                avg_roi=("ROI", "mean"),
+            )
+            .reset_index()
+            .sort_values("month")
         )
-        fig_channel.update_layout(
-            plot_bgcolor='#040D2F', paper_bgcolor='#040D2F',
-            font=dict(color='#D9D9D9'), height=400
-        )
-        st.plotly_chart(fig_channel, use_container_width=True)
-    
-    with col_b:
-        # Top Categories (Notebook Style)
-        top_cats = kpis['kpi_category']['net_revenue'].sort_values(ascending=False).head(10)
-        fig_cat = px.bar(
-            x=top_cats.values, y=top_cats.index,
-            orientation='h', title='📦 Top Categories',
-            color=top_cats.values,
-            color_continuous_scale=['#FF9F0D', '#3647F5']
-        )
-        fig_cat.update_layout(
-            plot_bgcolor='#040D2F', paper_bgcolor='#040D2F',
-            font=dict(color='#D9D9D9'), height=400
-        )
-        st.plotly_chart(fig_cat, use_container_width=True)
 
-with tab2:
-    st.markdown(f'<h2 style="color: {COLORS["accent"]};">📈 Performance Analysis</h2>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # ROI by Channel
-        fig_roi = px.bar(
-            kpis['kpi_channel'][['roi']].sort_values('roi', ascending=False).reset_index(),
-            x='marketing_channel', y='roi',
-            title='📈 ROI by Channel',
-            color='roi',
-            color_continuous_scale=['#FF4444', '#FF9F0D', '#00C851'],
-            text_auto='.2f'
-        )
-        fig_roi.update_layout(plot_bgcolor='#040D2F', paper_bgcolor='#040D2F', height=400)
-        st.plotly_chart(fig_roi, use_container_width=True)
-    
-    with col2:
-        # Campaign Performance
-        fig_campaign = px.bar(
-            kpis['kpi_campaign'][['net_revenue']].sort_values('net_revenue', ascending=False).reset_index(),
-            x='marketing_campaign', y='net_revenue',
-            title='🎯 Campaign Revenue',
-            color='net_revenue',
-            color_continuous_scale=['#FF9F0D', '#3647F5'],
-            text_auto='$.0f'
-        )
-        fig_campaign.update_layout(plot_bgcolor='#040D2F', paper_bgcolor='#040D2F', height=400)
-        st.plotly_chart(fig_campaign, use_container_width=True)
+        c1, c2 = st.columns(2)
 
-with tab3:
-    if show_tables:
-        st.markdown(f'<h2 style="color: {COLORS["accent"]};">📋 All KPI Tables</h2>', unsafe_allow_html=True)
-        
-        st.subheader("📦 Category Performance")
-        st.dataframe(kpis['kpi_category'])
-        
-        st.subheader("📢 Channel Performance")
-        st.dataframe(kpis['kpi_channel'])
-        
-        st.subheader("🎪 Campaign Performance")
-        st.dataframe(kpis['kpi_campaign'])
+        with c1:
+            fig_rev = px.line(
+                monthly,
+                x="month",
+                y="revenue",
+                color=ch_col,
+                markers=True,
+                title="Monthly revenue by channel",
+            )
+            fig_rev.update_layout(template="plotly_dark", height=320)
+            st.plotly_chart(fig_rev, use_container_width=True)
+
+        with c2:
+            fig_roi = px.line(
+                monthly,
+                x="month",
+                y="avg_roi",
+                color=ch_col,
+                markers=True,
+                title="Monthly ROI by channel",
+            )
+            fig_roi.update_layout(template="plotly_dark", height=320)
+            st.plotly_chart(fig_roi, use_container_width=True)
+
     else:
-        st.info("✅ Enable 'Show Data Tables' in sidebar to view detailed KPIs")
+        st.info("يلزم وجود month و channel لتحليل الترند الزمني.")
 
-st.markdown("---")
-st.markdown(f"<p style='text-align: center; color: {COLORS['light']};'>✨ Dashboard powered by notebook analysis | {len(filtered_df):,} records analyzed</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------- 3) Efficiency Tab --------------------
+with efficiency_tab:
+    st.markdown('<div class="card"><div class="card-title">Cost efficiency</div>', unsafe_allow_html=True)
+
+    if ch_col in df_filtered.columns:
+        eff = (
+            df_filtered.groupby(ch_col)
+            .agg(
+                total_spend=(sp_col, "sum"),
+                total_revenue=(rev_col, "sum"),
+                avg_cpc=("CPC", "mean"),
+                avg_ctr=("CTR", "mean"),
+                avg_conv=("Conversion_Rate", "mean"),
+                avg_roi=("ROI", "mean"),
+            )
+            .reset_index()
+        )
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+            fig_cpc = px.bar(
+                eff.sort_values("avg_cpc"),
+                x=ch_col,
+                y="avg_cpc",
+                title="Average CPC by channel",
+                color=ch_col,
+            )
+            fig_cpc.update_layout(template="plotly_dark", height=320, showlegend=False)
+            st.plotly_chart(fig_cpc, use_container_width=True)
+
+        with c2:
+            fig_conv = px.bar(
+                eff.sort_values("avg_conv", ascending=False),
+                x=ch_col,
+                y="avg_conv",
+                title="Conversion rate by channel",
+                color=ch_col,
+            )
+            fig_conv.update_layout(template="plotly_dark", height=320, showlegend=False)
+            st.plotly_chart(fig_conv, use_container_width=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title">Spend impact & correlations</div>', unsafe_allow_html=True)
+
+        # Scatter Spend vs Revenue / Conversions
+        c3, c4 = st.columns(2)
+
+        with c3:
+            fig_sr = px.scatter(
+                df_filtered,
+                x=sp_col,
+                y=rev_col,
+                color=ch_col if ch_col in df_filtered.columns else None,
+                trendline="ols",
+                title="Spend vs Revenue",
+            )
+            fig_sr.update_layout(template="plotly_dark", height=320)
+            st.plotly_chart(fig_sr, use_container_width=True)
+
+        conv_col = cfg["conversions"]
+        if conv_col in df_filtered.columns:
+            with c4:
+                fig_sc = px.scatter(
+                    df_filtered,
+                    x=sp_col,
+                    y=conv_col,
+                    color=ch_col if ch_col in df_filtered.columns else None,
+                    trendline="ols",
+                    title="Spend vs Conversions",
+                )
+                fig_sc.update_layout(template="plotly_dark", height=320)
+                st.plotly_chart(fig_sc, use_container_width=True)
+
+        # Correlation table
+        numeric_cols = [c for c in [sp_col, rev_col, conv_col] if c in df_filtered.columns]
+        corr_df = df_filtered[numeric_cols].corr().round(3)
+        st.markdown("#### Correlation matrix")
+        st.dataframe(corr_df, use_container_width=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.info("لا يوجد عمود channel لإجراء تحليل الكفاءة.")
+
+# -------------------- 4) Recommendations Tab --------------------
+with recs_tab:
+    st.markdown(
+        '<div class="card"><div class="card-title">Automatic recommendations</div>'
+        '<div class="card-subtitle">ملخص لأداء القنوات والفترات بناءً على ROI و Conversion Rate.</div>',
+        unsafe_allow_html=True,
+    )
+
+    if ch_col in df_filtered.columns:
+        eff = (
+            df_filtered.groupby(ch_col)
+            .agg(
+                avg_roi=("ROI", "mean"),
+                avg_conv=("Conversion_Rate", "mean"),
+                total_revenue=(rev_col, "sum"),
+            )
+            .reset_index()
+        )
+
+        best_roi = eff.sort_values("avg_roi", ascending=False).head(3)
+        worst_roi = eff.sort_values("avg_roi", ascending=True).head(3)
+        best_conv = eff.sort_values("avg_conv", ascending=False).head(3)
+
+        st.markdown("##### أفضل القنوات (ROI):")
+        for _, row in best_roi.iterrows():
+            st.write(
+                f"- **{row[ch_col]}**: ROI متوسط ≈ {row['avg_roi']:.2f}x "
+                f"وإيراد إجمالي ≈ ${row['total_revenue']:,.0f}"
+            )
+
+        st.markdown("##### قنوات تحتاج تحسين (ROI الأقل):")
+        for _, row in worst_roi.iterrows():
+            st.write(
+                f"- **{row[ch_col]}**: ROI منخفض ≈ {row['avg_roi']:.2f}x. "
+                "جرّبي تقليل الإنفاق أو تحسين الاستهداف / الكريتيف."
+            )
+
+        st.markdown("##### أعلى القنوات في Conversion Rate:")
+        for _, row in best_conv.iterrows():
+            st.write(
+                f"- **{row[ch_col]}**: Conversion Rate متوسط ≈ {row['avg_conv']*100:.1f}% – "
+                "مناسبة لتخصيص مزيد من الميزانية."
+            )
+
+    else:
+        st.info("لا يوجد عمود channel لبناء توصيات على مستوى القناة.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
