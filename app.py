@@ -1,447 +1,390 @@
-# app.py - Part 1: Imports and Setup
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime
-import warnings
-warnings.filterwarnings('ignore')
 
-# Page config
+# =========================
+# 1) PAGE CONFIG + THEME COLORS
+# =========================
 st.set_page_config(
-    page_title="NexaVerse Dashboard",
+    page_title="Marketing Analytics Dashboard",
+    page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded"
 )
 
-# CSS Styling
-st.markdown("""
-    <style>
-    .main {background-color: #f3f4f6;}
-    section[data-testid="stSidebar"] {background-color: #e5e7eb; padding-top: 1.5rem;}
-    .sidebar-logo {font-weight: 800; font-size: 22px; color: #111827; margin-bottom: 2rem; 
-                    display: flex; align-items: center; gap: 0.5rem; padding: 0 1rem;}
-    .sidebar-logo-circle {width: 32px; height: 32px; border-radius: 999px; background-color: #111827;}
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    .kpi-card {border-radius: 16px; padding: 20px; color: #f9fafb; margin-bottom: 10px; 
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);}
-    .kpi-label {font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; 
-                 color: #e5e7eb; margin-bottom: 8px;}
-    .kpi-value {font-size: 28px; font-weight: 700; margin: 8px 0;}
-    .kpi-sub {font-size: 12px; color: #e5e7eb;}
-    .kpi-navy {background-color: #111827;}
-    .kpi-orange {background-color: #f59e0b;}
-    .kpi-blue {background-color: #2563eb;}
-    .kpi-indigo {background-color: #4f46e5;}
-    
-    .stTabs [data-baseweb="tab-list"] {gap: 8px; background-color: white; border-radius: 12px; padding: 8px;}
-    .stTabs [data-baseweb="tab"] {height: 50px; background-color: transparent; border-radius: 8px; 
-                                    color: #111827; font-weight: 600; font-size: 14px;}
-    .stTabs [aria-selected="true"] {background-color: #111827; color: white;}
-    
-    .content-card {background-color: white; border-radius: 16px; padding: 20px; 
-                   margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
-    .card-title {font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 16px;}
-    
-    .dash-header {background-color: white; border-radius: 12px; padding: 20px 24px; 
-                  margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
-    .dash-title {font-size: 28px; font-weight: 700; color: #111827; margin: 0;}
-    </style>
+COL = {
+    "primary": "#3647F5",
+    "navy": "#1B2346",
+    "accent": "#FF9F0D",
+    "dark": "#040D2F",
+    "soft": "#D9D9D9",
+}
+
+st.markdown(f"""
+<style>
+/* Background + base typography */
+.stApp {{
+    background: linear-gradient(180deg, {COL['navy']} 0%, {COL['dark']} 100%);
+    color: #ffffff;
+}}
+
+/* Headings */
+h1, h2, h3, h4 {{
+    color: #FFFFFF !important;
+}}
+
+/* Cards (KPI + content) */
+.kpi-card {{
+    background: linear-gradient(145deg, rgba(27,35,70,.92), rgba(4,13,47,.92));
+    border: 1px solid rgba(217, 217, 217, 0.22);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.45);
+    height: 100%;
+}}
+.kpi-label {{ color: rgba(217,217,217,.9); font-size: 13px; }}
+.kpi-value {{ color: #FFFFFF; font-size: 22px; font-weight: 800; letter-spacing: .2px; margin-top: 2px; }}
+
+.subtle {{ color: rgba(217,217,217,.9); }}
+</style>
 """, unsafe_allow_html=True)
 
-# Load Data
+# =========================
+# 2) DATA LOADING + PREP (Member 1)
+# =========================
 @st.cache_data
-def load_data():
-    try:
-        df = pd.read_csv("cleaned_data.csv")
-        df['date'] = pd.to_datetime(df['date'])
-        df['month_year'] = df['date'].dt.to_period('M').astype(str)
-        
-        # Add calculated columns
-        if 'marketing_spend' not in df.columns:
-            df['marketing_spend'] = df['price'] * df['quantity'] * 0.2
-        if 'clicks' not in df.columns:
-            df['clicks'] = df['quantity'] * 50
-        if 'cpc' not in df.columns:
-            df['cpc'] = df['marketing_spend'] / df['clicks']
-        if 'visits' not in df.columns:
-            df['visits'] = df['quantity'] * 100
-            
-        return df
-    except Exception as e:
-        st.error(f"Error: {str(e)}")
-        return None
+def load_data(path: str = "cleaned_data.csv") -> pd.DataFrame:
+    df = pd.read_csv(path)
 
-df = load_data()
-if df is None:
+    # ---- Clean object columns (missing/blank) ----
+    for col in df.select_dtypes(include=["object"]).columns:
+        df[col] = (df[col].astype(str)
+                          .str.strip()
+                          .replace({"": np.nan, "nan": np.nan, "None": np.nan}))
+
+    # ---- Fix date types (date + registration_date) ----
+    for dcol in ["date", "registration_date"]:
+        if dcol in df.columns:
+            df[dcol] = pd.to_datetime(df[dcol], errors="coerce")
+
+    # ---- Month column: ensure a usable month period for filtering ----
+    if "month" in df.columns:
+        df["month"] = pd.to_datetime(df["month"], errors="coerce")
+
+    if "month" not in df.columns or df["month"].isna().mean() > 0.5:
+        if "date" in df.columns:
+            df["month"] = df["date"].dt.to_period("M").dt.to_timestamp()
+
+    # ---- Numeric coercion for key measures (safe) ----
+    numeric_cols = [
+        "price", "quantity", "discount_percent", "final_amount",
+        "income", "customer_lifetime_value", "retention_score",
+        "Average Order Value", "revenue_per_customer", "discount_amount",
+        "gross_revenue", "net_revenue", "roi", "conversion_rate"
+    ]
+    for c in numeric_cols:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+
+    # ---- Derived / standardized columns (Member 1 required KPIs) ----
+    # CTR/CPC: only if base columns exist; otherwise they remain NaN (no fabrication)
+    if "impressions" not in df.columns:
+        df["impressions"] = np.nan
+    if "clicks" not in df.columns:
+        df["clicks"] = np.nan
+    if "spend" not in df.columns:
+        df["spend"] = np.nan
+
+    df["ctr"] = np.where((df["impressions"] > 0) & (df["clicks"] >= 0),
+                         df["clicks"] / df["impressions"], np.nan)
+
+    df["cpc"] = np.where((df["clicks"] > 0) & (df["spend"] >= 0),
+                         df["spend"] / df["clicks"], np.nan)
+
+    # Conversion rate (if not provided, try build from conversions/clicks if available)
+    if "conversion_rate" not in df.columns or df["conversion_rate"].isna().all():
+        if "conversions" in df.columns:
+            df["conversion_rate"] = np.where((df["clicks"] > 0) & (df["conversions"] >= 0),
+                                           df["conversions"] / df["clicks"], np.nan)
+        else:
+            df["conversion_rate"] = np.nan
+
+    # ROI (if not provided): (revenue - spend) / spend (only when spend exists)
+    if "roi" not in df.columns or df["roi"].isna().all():
+        base_rev = df["net_revenue"] if "net_revenue" in df.columns else df.get("final_amount", np.nan)
+        df["roi"] = np.where((df["spend"] > 0) & pd.Series(base_rev).notna(),
+                             (base_rev - df["spend"]) / df["spend"], np.nan)
+
+    return df
+
+df = load_data("cleaned_data.csv")
+
+if df.empty:
+    st.error("Data is empty or 'cleaned_data.csv' is missing/invalid.")
     st.stop()
 
-# Sidebar
-with st.sidebar:
-    st.markdown('<div class="sidebar-logo"><div class="sidebar-logo-circle"></div><span>NexaVerse</span></div>', 
-                unsafe_allow_html=True)
-    st.markdown("---")
-    st.subheader("🎯 Filters")
-    
-    all_channels = ['All Channels'] + sorted(df['marketing_channel'].unique().tolist())
-    selected_channel = st.selectbox("Marketing Channel", options=all_channels, index=0)
-    
-    st.markdown("#### 📅 Month Range")
-    min_date = df['date'].min()
-    max_date = df['date'].max()
-    date_range = st.date_input("Select Date Range", value=(min_date, max_date), 
-                                min_value=min_date, max_value=max_date)
-    
-    st.markdown("---")
-    st.markdown("### 📊 Dashboard Info")
-    st.info(f"""
-    **Total Records:** {len(df):,}  
-    **Date Range:** {min_date.strftime('%Y-%m')} to {max_date.strftime('%Y-%m')}  
-    **Channels:** {df['marketing_channel'].nunique()}
-    """)
-    st.markdown("---")
-    st.markdown("**© 2024 NexaVerse Analytics**")
+# =========================
+# 3) SIDEBAR FILTERS (Channel + Month range as Dropdowns)
+# =========================
+st.sidebar.markdown("## Filters")
 
-# Apply Filters
-filtered_df = df.copy()
-if selected_channel != 'All Channels':
-    filtered_df = filtered_df[filtered_df['marketing_channel'] == selected_channel]
-if len(date_range) == 2:
-    start_date, end_date = date_range
-    filtered_df = filtered_df[(filtered_df['date'].dt.date >= start_date) & 
-                              (filtered_df['date'].dt.date <= end_date)]
+# --- Channel (dropdown multi-select) ---
+channels = sorted([c for c in df.get("marketing_channel", pd.Series([])).dropna().unique() if str(c).strip() != ""])
+sel_channels = st.sidebar.multiselect("Channel", options=channels, default=channels)
 
-# Header
-st.markdown('<div class="dash-header"><h1 class="dash-title">📊 E-Commerce Analytics Dashboard</h1></div>', 
-            unsafe_allow_html=True)
+# --- Month range (two dropdowns: start + end) ---
+months = sorted([m for m in df.get("month", pd.Series([])).dropna().unique()])
+if len(months) == 0:
+    st.sidebar.warning("No valid 'month' values found (check 'date' / 'month' columns).")
+    start_month = end_month = None
+else:
+    month_labels = [pd.to_datetime(m).strftime("%b %Y") for m in months]
+    label_to_month = {lab: pd.to_datetime(m) for lab, m in zip(month_labels, months)}
 
-# Calculate KPIs
-total_revenue = filtered_df['net_revenue'].sum()
-total_customers = filtered_df['customer_id'].nunique()
-total_orders = len(filtered_df)
-discount_sum = filtered_df['discount_amount'].sum()
-total_roi = ((total_revenue - discount_sum) / discount_sum * 100) if discount_sum > 0 else 0
+    start_label = st.sidebar.selectbox("Start month", options=month_labels, index=0)
+    end_label = st.sidebar.selectbox("End month", options=month_labels, index=len(month_labels) - 1)
 
-# Create Tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📈 KPIs & Overview", "🎯 Channel Performance", "📅 Time Trends", 
-    "⚡ Efficiency Analysis", "💡 About & Recommendations"
+    start_month = label_to_month[start_label]
+    end_month = label_to_month[end_label]
+
+# =========================
+# 4) APPLY FILTERS
+# =========================
+df_f = df.copy()
+
+if sel_channels:
+    df_f = df_f[df_f["marketing_channel"].isin(sel_channels)]
+
+if start_month is not None and end_month is not None:
+    if start_month > end_month:
+        start_month, end_month = end_month, start_month
+    df_f = df_f[(pd.to_datetime(df_f["month"]) >= start_month) &
+                (pd.to_datetime(df_f["month"]) <= end_month)]
+
+# =========================
+# 5) KPI CALCULATIONS (Member 1 deliverables)
+# =========================
+def safe_sum(s): 
+    return float(pd.Series(s).fillna(0).sum())
+
+def safe_mean(s):
+    s = pd.Series(s).dropna()
+    return float(s.mean()) if len(s) else np.nan
+
+total_orders = df_f["order_id"].nunique() if "order_id" in df_f.columns else 0
+total_customers = df_f["customer_id"].nunique() if "customer_id" in df_f.columns else 0
+
+net_revenue = safe_sum(df_f["net_revenue"]) if "net_revenue" in df_f.columns else safe_sum(df_f.get("final_amount", 0))
+gross_revenue = safe_sum(df_f["gross_revenue"]) if "gross_revenue" in df_f.columns else net_revenue
+
+aov = (net_revenue / total_orders) if total_orders else np.nan
+rev_per_customer = safe_mean(df_f["revenue_per_customer"]) if "revenue_per_customer" in df_f.columns else (net_revenue / total_customers if total_customers else np.nan)
+clv = safe_mean(df_f["customer_lifetime_value"]) if "customer_lifetime_value" in df_f.columns else np.nan
+retention = safe_mean(df_f["retention_score"]) if "retention_score" in df_f.columns else np.nan
+conv_rate = safe_mean(df_f["conversion_rate"]) if "conversion_rate" in df_f.columns else np.nan
+roi_avg = safe_mean(df_f["roi"]) if "roi" in df_f.columns else np.nan
+
+# =========================
+# 6) HEADER + TABS (Required structure)
+# =========================
+st.title("📊 Marketing Analytics Dashboard (Streamlit)")
+st.caption("Filters (Channel + Month range) apply to all tabs. All metrics are computed from the loaded dataset (no external data).")
+
+tab_kpis, tab_channel, tab_trends, tab_eff, tab_about = st.tabs([
+    "KPIs & Overview",
+    "Analyze total performance per channel",
+    "Time trends analysis",
+    "Efficiency",
+    "About & Recommendations"
 ])
 
-# ========== TAB 1: KPIs & Overview ==========
-with tab1:
-    # KPI Cards
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(f'<div class="kpi-card kpi-navy"><div class="kpi-label">Total Revenue</div>'
-                   f'<div class="kpi-value">${total_revenue:,.0f}</div>'
-                   f'<div class="kpi-sub">Net revenue from all sales</div></div>', 
-                   unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f'<div class="kpi-card kpi-orange"><div class="kpi-label">Total Customers</div>'
-                   f'<div class="kpi-value">{total_customers:,}</div>'
-                   f'<div class="kpi-sub">Unique customers</div></div>', 
-                   unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown(f'<div class="kpi-card kpi-blue"><div class="kpi-label">Total Orders</div>'
-                   f'<div class="kpi-value">{total_orders:,}</div>'
-                   f'<div class="kpi-sub">Total transactions</div></div>', 
-                   unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f'<div class="kpi-card kpi-indigo"><div class="kpi-label">Average ROI</div>'
-                   f'<div class="kpi-value">{total_roi:.1f}%</div>'
-                   f'<div class="kpi-sub">Return on investment</div></div>', 
-                   unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Charts Row
-    col_left, col_right = st.columns([2, 1])
-    
-    with col_left:
-        st.markdown("### 📊 Revenue by Category")
-        category_revenue = filtered_df.groupby('category')['net_revenue'].sum().sort_values(ascending=False)
-        
-        fig_category = px.bar(
-            x=category_revenue.values, y=category_revenue.index, orientation='h',
-            labels={'x': 'Revenue ($)', 'y': 'Category'},
-            color=category_revenue.values,
-            color_continuous_scale=['#3647F5', '#FF9F0D']
-        )
-        fig_category.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=400, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb'),
-            yaxis=dict(showgrid=False), coloraxis_showscale=False
-        )
-        fig_category.update_traces(marker_line_width=0)
-        st.plotly_chart(fig_category, use_container_width=True, key="cat_revenue")
-    
-    with col_right:
-        st.markdown("### 🎯 Sales by Region")
-        region_sales = filtered_df.groupby('region')['net_revenue'].sum()
-        
-        fig_donut = go.Figure(data=[go.Pie(
-            labels=region_sales.index, values=region_sales.values, hole=0.6,
-            marker=dict(colors=['#111827', '#f59e0b', '#2563eb', '#4f46e5', '#10b981', '#ef4444'])
-        )])
-        fig_donut.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827', size=12),
-            height=400, showlegend=True, margin=dict(l=20, r=20, t=40, b=20),
-            legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.02)
-        )
-        st.plotly_chart(fig_donut, use_container_width=True, key="region_donut")
-    
-    # Summary Tables
-    st.markdown("### 📋 KPIs Summary")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        kpi_segment = filtered_df.groupby('customer_segment').agg({
-            'net_revenue': 'sum', 'customer_id': 'nunique', 
-            'quantity': 'sum', 'Average Order Value': 'mean'
-        }).round(2)
-        kpi_segment.columns = ['Revenue ($)', 'Customers', 'Orders', 'Avg Order Value ($)']
-        st.markdown("**By Customer Segment**")
-        st.dataframe(kpi_segment.sort_values('Revenue ($)', ascending=False), use_container_width=True)
-    
-    with col2:
-        kpi_payment = filtered_df.groupby('payment_method').agg({
-            'net_revenue': 'sum', 'customer_id': 'nunique', 'quantity': 'sum'
-        }).round(2)
-        kpi_payment.columns = ['Revenue ($)', 'Customers', 'Orders']
-        st.markdown("**By Payment Method**")
-        st.dataframe(kpi_payment.sort_values('Revenue ($)', ascending=False), use_container_width=True)
+# =========================
+# 7) TAB 1 — KPIs & OVERVIEW (Member 1)
+# =========================
+with tab_kpis:
+    st.subheader("KPIs (Overview)")
 
-# ========== TAB 2: Channel Performance ==========
-with tab2:
-    st.markdown("### 🎯 Total Performance per Channel")
-    
-    channel_performance = filtered_df.groupby('marketing_channel').agg({
-        'marketing_spend': 'sum', 'net_revenue': 'sum', 
-        'customer_id': 'nunique', 'discount_amount': 'sum'
-    }).round(2)
-    channel_performance.columns = ['Total Spend', 'Total Revenue', 'Total Conversions', 'Total Discount']
-    channel_performance['Average ROI'] = 0.0
-    
-    for idx in channel_performance.index:
-        discount = channel_performance.loc[idx, 'Total Discount']
-        revenue = channel_performance.loc[idx, 'Total Revenue']
-        if discount > 0:
-            channel_performance.loc[idx, 'Average ROI'] = ((revenue - discount) / discount * 100)
-    
-    channel_performance = channel_performance.sort_values('Total Revenue', ascending=False)
-    st.dataframe(channel_performance, use_container_width=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Charts
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 💰 Total Revenue by Channel")
-        fig_revenue = px.bar(
-            channel_performance.reset_index().sort_values('Total Revenue', ascending=True),
-            x='Total Revenue', y='marketing_channel', orientation='h',
-            color='Total Revenue', color_continuous_scale=['#3647F5', '#FF9F0D'],
-            labels={'marketing_channel': 'Channel', 'Total Revenue': 'Revenue ($)'}
+    c1, c2, c3, c4 = st.columns(4)
+    def kpi(col, label, value):
+        col.markdown(
+            f"<div class='kpi-card'><div class='kpi-label'>{label}</div>"
+            f"<div class='kpi-value'>{value}</div></div>",
+            unsafe_allow_html=True
         )
-        fig_revenue.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=500, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb'),
-            yaxis=dict(showgrid=False), coloraxis_showscale=False
-        )
-        fig_revenue.update_traces(marker_line_width=0)
-        st.plotly_chart(fig_revenue, use_container_width=True, key="channel_rev")
-    
-    with col2:
-        st.markdown("### 👥 Total Conversions by Channel")
-        fig_conversions = px.bar(
-            channel_performance.reset_index().sort_values('Total Conversions', ascending=True),
-            x='Total Conversions', y='marketing_channel', orientation='h',
-            color='Total Conversions', color_continuous_scale=['#10b981', '#f59e0b'],
-            labels={'marketing_channel': 'Channel', 'Total Conversions': 'Conversions'}
-        )
-        fig_conversions.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=500, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb'),
-            yaxis=dict(showgrid=False), coloraxis_showscale=False
-        )
-        fig_conversions.update_traces(marker_line_width=0)
-        st.plotly_chart(fig_conversions, use_container_width=True, key="channel_conv")
-    
-    # ROI Chart
-    st.markdown("### 📈 ROI Comparison")
-    fig_roi = px.bar(
-        channel_performance.reset_index().sort_values('Average ROI', ascending=False),
-        x='marketing_channel', y='Average ROI',
-        color='Average ROI', color_continuous_scale=['#ef4444', '#10b981'],
-        labels={'marketing_channel': 'Channel', 'Average ROI': 'ROI (%)'}
-    )
-    fig_roi.update_layout(
-        plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-        showlegend=False, height=400, margin=dict(l=20, r=20, t=40, b=20),
-        xaxis=dict(showgrid=False, tickangle=45),
-        yaxis=dict(showgrid=True, gridcolor='#e5e7eb'), coloraxis_showscale=False
-    )
-    fig_roi.update_traces(marker_line_width=0)
-    st.plotly_chart(fig_roi, use_container_width=True, key="roi_chart")
 
-# ========== TAB 3: Time Trends ==========
-with tab3:
-    monthly_data = filtered_df.groupby(['month_year', 'marketing_channel']).agg({
-        'net_revenue': 'sum', 'customer_id': 'nunique'
-    }).reset_index()
-    monthly_data.columns = ['month', 'channel', 'revenue', 'conversions']
-    
-    monthly_total = filtered_df.groupby('month_year').agg({
-        'net_revenue': 'sum', 'customer_id': 'nunique'
-    }).reset_index()
-    monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 💵 Monthly Revenue Trend")
-        fig_revenue_trend = px.line(
-            monthly_total, x='month', y='total_revenue', markers=True,
-            labels={'month': 'Month', 'total_revenue': 'Revenue ($)'}
-        )
-        fig_revenue_trend.update_traces(
-            line=dict(color='#3647F5', width=3),
-            marker=dict(size=8, color='#FF9F0D')
-        )
-        fig_revenue_trend.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=350, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb', tickangle=45),
-            yaxis=dict(showgrid=True, gridcolor='#e5e7eb')
-        )
-        st.plotly_chart(fig_revenue_trend, use_container_width=True, key="monthly_rev")
-    
-    with col2:
-        st.markdown("### 👥 Monthly Conversions Trend")
-        fig_conv_trend = px.line(
-            monthly_total, x='month', y='total_conversions', markers=True,
-            labels={'month': 'Month', 'total_conversions': 'Conversions'}
-        )
-        fig_conv_trend.update_traces(
-            line=dict(color='#FF9F0D', width=3),
-            marker=dict(size=8, color='#3647F5')
-        )
-        fig_conv_trend.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=350, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb', tickangle=45),
-            yaxis=dict(showgrid=True, gridcolor='#e5e7eb')
-        )
-        st.plotly_chart(fig_conv_trend, use_container_width=True, key="monthly_conv")
-    
-    st.markdown("### 📊 Monthly Revenue by Channel")
-    fig_channel_time = px.line(
-        monthly_data, x='month', y='revenue', color='channel', markers=True,
-        labels={'month': 'Month', 'revenue': 'Revenue ($)', 'channel': 'Channel'}
-    )
-    fig_channel_time.update_layout(
-        plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-        height=450, margin=dict(l=20, r=20, t=40, b=20),
-        xaxis=dict(showgrid=True, gridcolor='#e5e7eb', tickangle=45),
-        yaxis=dict(showgrid=True, gridcolor='#e5e7eb'),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig_channel_time, use_container_width=True, key="channel_time_rev")
-    
-    if len(monthly_total) > 0:
-        peak_month = monthly_total.loc[monthly_total['total_revenue'].idxmax(), 'month']
-        peak_value = monthly_total['total_revenue'].max()
-        low_month = monthly_total.loc[monthly_total['total_revenue'].idxmin(), 'month']
-        low_value = monthly_total['total_revenue'].min()
-        growth = ((peak_value - low_value) / low_value * 100) if low_value > 0 else 0
-        
-        st.success(f"""
-        **Peak:** ${peak_value:,.0f} in {peak_month} | **Low:** ${low_value:,.0f} in {low_month} | **Growth:** {growth:,.1f}%
-        """)
+    kpi(c1, "Net Revenue", f"${net_revenue:,.0f}")
+    kpi(c2, "Orders", f"{total_orders:,}")
+    kpi(c3, "Customers", f"{total_customers:,}")
+    kpi(c4, "AOV", "—" if np.isnan(aov) else f"${aov:,.0f}")
 
-# ========== TAB 4: Efficiency ==========
-with tab4:
-    cpc_by_channel = filtered_df.groupby('marketing_channel').agg({
-        'cpc': 'mean', 'marketing_spend': 'sum', 'clicks': 'sum'
-    }).reset_index()
-    cpc_by_channel.columns = ['Channel', 'Avg_CPC', 'Total_Spend', 'Total_Clicks']
-    cpc_by_channel = cpc_by_channel.sort_values('Avg_CPC')
-    
-    conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
-        'customer_id': 'nunique', 'visits': 'sum'
-    }).reset_index()
-    conversion_by_channel['conversion_rate'] = (
-        conversion_by_channel['customer_id'] / conversion_by_channel['visits'] * 100
-    ).round(3)
-    conversion_by_channel.columns = ['Channel', 'Conversions', 'Total_Visits', 'Conversion_Rate']
-    conversion_by_channel = conversion_by_channel.sort_values('Conversion_Rate', ascending=False)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 💲 CPC by Channel")
-        fig_cpc = px.bar(
-            cpc_by_channel.sort_values('Avg_CPC'), x='Avg_CPC', y='Channel', orientation='h',
-            color='Avg_CPC', color_continuous_scale=['#10b981', '#3647F5', '#FF9F0D'],
-            labels={'Avg_CPC': 'Average CPC ($)', 'Channel': 'Marketing Channel'}
-        )
-        fig_cpc.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=450, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=True, gridcolor='#e5e7eb'),
-            yaxis=dict(showgrid=False), coloraxis_showscale=False
-        )
-        fig_cpc.update_traces(marker_line_width=0)
-        st.plotly_chart(fig_cpc, use_container_width=True, key="cpc_chart")
-    
-    with col2:
-        st.markdown("### 📊 Conversion Rate by Channel")
-        fig_conv_rate = px.bar(
-            conversion_by_channel.sort_values('Conversion_Rate', ascending=False),
-            x='Channel', y='Conversion_Rate',
-            color='Conversion_Rate', color_continuous_scale=['#3647F5', '#10b981'],
-            labels={'Conversion_Rate': 'Conversion Rate (%)', 'Channel': 'Marketing Channel'}
-        )
-        fig_conv_rate.update_layout(
-            plot_bgcolor='white', paper_bgcolor='white', font=dict(color='#111827'),
-            showlegend=False, height=450, margin=dict(l=20, r=20, t=40, b=20),
-            xaxis=dict(showgrid=False, tickangle=45),
-            yaxis=dict(showgrid=True, gridcolor='#e5e7eb'), coloraxis_showscale=False
-        )
-        fig_conv_rate.update_traces(marker_line_width=0)
-        st.plotly_chart(fig_conv_rate, use_container_width=True, key="conv_rate_chart")
+    c5, c6, c7, c8 = st.columns(4)
+    kpi(c5, "Conversion Rate", "—" if np.isnan(conv_rate) else f"{conv_rate*100:.2f}%")
+    kpi(c6, "Avg ROI", "—" if np.isnan(roi_avg) else f"{roi_avg:.2f}x")
+    kpi(c7, "CLV (avg)", "—" if np.isnan(clv) else f"${clv:,.0f}")
+    kpi(c8, "Retention (avg)", "—" if np.isnan(retention) else f"{retention:.2f}")
 
-# ========== TAB 5: About ==========
-with tab5:
-    st.markdown("### 📊 About This Dashboard")
-    st.markdown("""
-    Dashboard تحليل شامل للأداء التسويقي والمبيعات، يوفر رؤى احترافية حول:
-    - 📈 المؤشرات الرئيسية (KPIs)
-    - 🎯 أداء القنوات التسويقية
-    - 📅 الاتجاهات الزمنية
-    - ⚡ تحليل الكفاءة والتكلفة
-    
-    **Team:** Zaid Tarek, Mayar, Ahmed, Toqa | **© 2024 NexaVerse Analytics**
+    st.markdown("---")
+    st.markdown("### Quick snapshot (available fields)")
+    st.write("This app uses your dataset columns (e.g., `net_revenue`, `roi`, `conversion_rate`, etc.). "
+             "If some columns (like `spend/clicks/impressions`) are missing, related KPIs will show as ‘—’ (no invented numbers).")
+
+# =========================
+# 8) TAB 2 — CHANNEL PERFORMANCE (Member 2)
+# =========================
+with tab_channel:
+    st.subheader("Analyze total performance per channel")
+
+    if "marketing_channel" not in df_f.columns:
+        st.warning("Column 'marketing_channel' is missing — cannot compute channel performance.")
+    else:
+        # Spend is only computed if 'spend' exists; otherwise stays NaN (no fabrication)
+        spend_col = "spend" if "spend" in df_f.columns else None
+        spend_series = df_f[spend_col] if spend_col else pd.Series(np.nan, index=df_f.index)
+
+        chan = (df_f.assign(_spend=spend_series,
+                            _revenue=df_f["net_revenue"] if "net_revenue" in df_f.columns else df_f.get("final_amount", np.nan),
+                            _conversions=df_f["customer_id"].where(df_f["customer_id"].notna(), np.nan))
+                .groupby("marketing_channel", dropna=False)
+                .agg(
+                    total_spend=("_spend", "sum"),
+                    total_revenue=("_revenue", "sum"),
+                    total_conversions=("_conversions", "nunique"),
+                    avg_roi=("roi" if "roi" in df_f.columns else "_revenue", "mean")
+                )
+                .reset_index()
+                .rename(columns={"marketing_channel": "Channel"})
+        )
+
+        # Derived per-channel metrics (safe)
+        chan["CPC"] = np.where(chan["total_conversions"] > 0, chan["total_spend"] / chan["total_conversions"], np.nan)
+        chan["Conversion Rate"] = np.where(chan["total_conversions"] > 0,
+                                           chan["total_conversions"] / chan["total_conversions"].sum()
+                                           if chan["total_conversions"].sum() > 0 else np.nan,
+                                           np.nan)
+        chan["Avg Order Value"] = np.where(chan["total_conversions"] > 0, chan["total_revenue"] / chan["total_conversions"], np.nan)
+        chan["ROI"] = np.where(chan["total_spend"] > 0, (chan["total_revenue"] - chan["total_spend"]) / chan["total_spend"], np.nan)
+
+        st.markdown("#### Channel table (computed from your dataset)")
+        st.dataframe(chan, use_container_width=True, hide_index=True)
+
+        st.markdown("#### Charts (top channels)")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            fig = px.bar(chan.sort_values("total_revenue", ascending=False).head(10),
+                         x="Channel", y="total_revenue", title="Total Revenue by Channel")
+            st.plotly_chart(fig, use_container_width=True)
+        with col_b:
+            fig = px.bar(chan.sort_values("total_conversions", ascending=False).head(10),
+                         x="Channel", y="total_conversions", title="Total Conversions by Channel")
+            st.plotly_chart(fig, use_container_width=True)
+
+# =========================
+# 9) TAB 3 — TIME TRENDS (Member 3)
+# =========================
+with tab_trends:
+    st.subheader("Time trends analysis (monthly)")
+
+    if "month" not in df_f.columns:
+        st.warning("Column 'month' is missing (or not computable). Add 'date' or 'month' to your dataset.")
+    else:
+        monthly = (df_f.assign(_revenue=df_f["net_revenue"] if "net_revenue" in df_f.columns else df_f.get("final_amount", np.nan),
+                               _conversions=df_f["customer_id"])
+                   .groupby("month", dropna=False)
+                   .agg(revenue=("_revenue", "sum"),
+                        conversions=("_conversions", "nunique"))
+                   .reset_index()
+                   .sort_values("month")
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig = px.line(monthly, x="month", y="revenue", markers=True, title="Revenue by month")
+            st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            fig = px.line(monthly, x="month", y="conversions", markers=True, title="Conversions by month")
+            st.plotly_chart(fig, use_container_width=True)
+
+        if len(monthly) >= 2:
+            peak = monthly.sort_values("revenue", ascending=False).head(1).iloc[0]
+            low = monthly.sort_values("revenue", ascending=True).head(1).iloc[0]
+            st.markdown("### Peaks / Lows (based on revenue)")
+            st.write(f"- Peak month: **{pd.to_datetime(peak['month']).strftime('%b %Y')}** (Revenue = ${peak['revenue']:,.0f})")
+            st.write(f"- Low month: **{pd.to_datetime(low['month']).strftime('%b %Y')}** (Revenue = ${low['revenue']:,.0f})")
+
+# =========================
+# 10) TAB 4 — EFFICIENCY (Member 4)
+# =========================
+with tab_eff:
+    st.subheader("Efficiency (CPC, Conversion Rate) + Spend impact (correlations)")
+
+    if "marketing_channel" not in df_f.columns:
+        st.warning("Missing 'marketing_channel' → cannot compute efficiency.")
+    else:
+        # Efficiency table (only meaningful when spend/clicks/conversions exist)
+        has_spend = "spend" in df_f.columns and df_f["spend"].notna().any()
+        has_clicks = "clicks" in df_f.columns and df_f["clicks"].notna().any()
+        has_conversions = "conversions" in df_f.columns and df_f["conversions"].notna().any()
+
+        eff = (df_f.groupby("marketing_channel", dropna=False)
+               .agg(
+                   avg_cpc=("cpc", "mean"),
+                   avg_conv_rate=("conversion_rate", "mean")
+               )
+               .reset_index()
+               .rename(columns={"marketing_channel": "Channel"})
+        )
+
+        st.markdown("#### Efficiency table (per channel)")
+        st.dataframe(eff, use_container_width=True, hide_index=True)
+
+        # Correlations (spend vs revenue / conversions) if spend exists
+        if has_spend:
+            spend = df_f["spend"]
+            revenue = df_f["net_revenue"] if "net_revenue" in df_f.columns else df_f.get("final_amount", pd.Series(np.nan, index=df_f.index))
+            conv = df_f["conversions"] if has_conversions else pd.Series(np.nan, index=df_f.index)
+
+            corr_rev = spend.corr(revenue) if spend.notna().sum() > 2 and revenue.notna().sum() > 2 else np.nan
+            corr_conv = spend.corr(conv) if has_conversions and spend.notna().sum() > 2 and conv.notna().sum() > 2 else np.nan
+
+            st.markdown("#### Spend impact (correlations)")
+            st.write(f"- Spend vs Revenue correlation: **{corr_rev:.3f}**" if pd.notna(corr_rev) else "- Spend vs Revenue correlation: **—** (insufficient data)")
+            st.write(f"- Spend vs Conversions correlation: **{corr_conv:.3f}**" if pd.notna(corr_conv) else "- Spend vs Conversions correlation: **—** (insufficient data)")
+        else:
+            st.info("No `spend` column found → spend-impact correlations cannot be computed (this is expected with the current dataset).")
+
+# =========================
+# 11) TAB 5 — ABOUT & RECOMMENDATIONS (Member 5)
+# =========================
+with tab_about:
+    st.subheader("About")
+    st.write("""
+    This dashboard is built to deliver:
+    - Data preparation + KPI calculation (Member 1)
+    - Channel performance comparison (Member 2)
+    - Time trends analysis (Member 3)
+    - Efficiency + spend impact (Member 4)
+    - Recommendations (Member 5)
     """)
-    
-    if len(channel_performance) > 0:
-        best_roi_channel = channel_performance['Average ROI'].idxmax()
-        best_roi_value = channel_performance['Average ROI'].max()
-        st.success(f"🏆 **Best ROI:** {best_roi_channel} - {best_roi_value:.2f}%")
 
-st.markdown("---")
-st.markdown('<div style="text-align: center; color: #6b7280; font-size: 14px; padding: 20px;">'
-           '<strong>NexaVerse Analytics Dashboard</strong> | Built with ❤️ using Streamlit & Plotly | © 2024</div>', 
-           unsafe_allow_html=True)
+    st.subheader("Recommendations (from computed results)")
+    recs = []
+
+    # Simple rule-based recommendations (no invented data)
+    if "marketing_channel" in df_f.columns and "net_revenue" in df_f.columns and not df_f.empty:
+        top = (df_f.groupby("marketing_channel")["net_revenue"].sum()
+               .sort_values(ascending=False).head(2).index.tolist())
+        if top:
+            recs.append(f"Increase focus/budget on top channels: {', '.join(top)} (highest net revenue in selected filters).")
+
+    if not np.isnan(roi_avg) and roi_avg < 0:
+        recs.append("Overall ROI is negative in the selected window — revisit spend allocation and campaign/landing alignment.")
+
+    if not np.isnan(conv_rate) and conv_rate < 0.02:
+        recs.append("Conversion rate is low (<2%) — simplify checkout and tighten targeting/offer fit.")
+
+    if not recs:
+        recs.append("No strong recommendation can be derived from the current filters — try widening the month range or including more channels.")
+
+    for i, r in enumerate(recs, 1):
+        st.markdown(f"**{i}.** {r}")
