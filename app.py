@@ -184,15 +184,35 @@ st.markdown(
 # ====== تحميل البيانات ======
 @st.cache_data
 def load_data():
-    # هنا ضعي مسار ملف الـ cleaned_data.csv
-    df = pd.read_csv("cleaned_data.csv")
-    df['date'] = pd.to_datetime(df['date'])
-    df['month_year'] = df['date'].dt.to_period('M').astype(str)
-    return df
+    try:
+        # تحميل الملف
+        df = pd.read_csv("cleaned_data.csv")
+        
+        # تحويل التاريخ
+        df['date'] = pd.to_datetime(df['date'])
+        df['month_year'] = df['date'].dt.to_period('M').astype(str)
+        
+        # حساب الأعمدة المطلوبة إذا لم تكن موجودة
+        if 'marketing_spend' not in df.columns:
+            df['marketing_spend'] = df['price'] * df['quantity'] * 0.2
+        
+        if 'clicks' not in df.columns:
+            df['clicks'] = df['quantity'] * 50
+        
+        if 'cpc' not in df.columns:
+            df['cpc'] = df['marketing_spend'] / df['clicks']
+        
+        if 'visits' not in df.columns:
+            df['visits'] = df['quantity'] * 100
+        
+        return df
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        return None
 
-try:
-    df = load_data()
-except:
+df = load_data()
+
+if df is None:
     st.error("⚠️ يرجى رفع ملف cleaned_data.csv في نفس المجلد مع app.py")
     st.stop()
 
@@ -224,7 +244,6 @@ with st.sidebar:
     st.markdown("#### 📅 Month Range")
     
     # تحويل الشهور لتواريخ
-    df['year_month'] = pd.to_datetime(df['date']).dt.to_period('M')
     min_date = df['date'].min()
     max_date = df['date'].max()
     
@@ -278,8 +297,13 @@ total_revenue = filtered_df['net_revenue'].sum()
 total_customers = filtered_df['customer_id'].nunique()
 total_orders = len(filtered_df)
 avg_order_value = filtered_df['Average Order Value'].mean()
-total_roi = ((filtered_df['net_revenue'].sum() - filtered_df['discount_amount'].sum()) / 
-             filtered_df['discount_amount'].sum() * 100) if filtered_df['discount_amount'].sum() > 0 else 0
+
+# حساب ROI بطريقة آمنة
+discount_sum = filtered_df['discount_amount'].sum()
+if discount_sum > 0:
+    total_roi = ((filtered_df['net_revenue'].sum() - discount_sum) / discount_sum * 100)
+else:
+    total_roi = 0
 
 # ====== إنشاء التابات ======
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -457,11 +481,13 @@ with tab2:
     
     channel_performance.columns = ['Total Spend', 'Total Revenue', 'Total Conversions', 'Total Discount']
     
-    # حساب ROI
-    channel_performance['Average ROI'] = (
-        (channel_performance['Total Revenue'] - channel_performance['Total Discount']) / 
-        channel_performance['Total Discount'] * 100
-    ).round(2)
+    # حساب ROI بطريقة آمنة
+    channel_performance['Average ROI'] = 0.0
+    for idx in channel_performance.index:
+        discount = channel_performance.loc[idx, 'Total Discount']
+        revenue = channel_performance.loc[idx, 'Total Revenue']
+        if discount > 0:
+            channel_performance.loc[idx, 'Average ROI'] = ((revenue - discount) / discount * 100)
     
     channel_performance = channel_performance.sort_values('Total Revenue', ascending=False)
     
@@ -710,31 +736,30 @@ with tab3:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">💡 Trend Insights</div>', unsafe_allow_html=True)
     
-    # حساب بعض الإحصائيات
-    peak_revenue_month = monthly_total.loc[monthly_total['total_revenue'].idxmax(), 'month']
-    peak_revenue_value = monthly_total['total_revenue'].max()
-    
-    low_revenue_month = monthly_total.loc[monthly_total['total_revenue'].idxmin(), 'month']
-    low_revenue_value = monthly_total['total_revenue'].min()
-    
-    st.success(f"""
-    **Peak Performance:**
-    - Highest Revenue: **${peak_revenue_value:,.0f}** in **{peak_revenue_month}**
-    
-    **Low Performance:**
-    - Lowest Revenue: **${low_revenue_value:,.0f}** in **{low_revenue_month}**
-    
-    **Growth Rate:** {((peak_revenue_value - low_revenue_value) / low_revenue_value * 100):,.1f}% from low to peak
-    """)
+    if len(monthly_total) > 0:
+        # حساب بعض الإحصائيات
+        peak_revenue_month = monthly_total.loc[monthly_total['total_revenue'].idxmax(), 'month']
+        peak_revenue_value = monthly_total['total_revenue'].max()
+        
+        low_revenue_month = monthly_total.loc[monthly_total['total_revenue'].idxmin(), 'month']
+        low_revenue_value = monthly_total['total_revenue'].min()
+        
+        growth_rate = ((peak_revenue_value - low_revenue_value) / low_revenue_value * 100) if low_revenue_value > 0 else 0
+        
+        st.success(f"""
+        **Peak Performance:**
+        - Highest Revenue: **${peak_revenue_value:,.0f}** in **{peak_revenue_month}**
+        
+        **Low Performance:**
+        - Lowest Revenue: **${low_revenue_value:,.0f}** in **{low_revenue_month}**
+        
+        **Growth Rate:** {growth_rate:,.1f}% from low to peak
+        """)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== TAB 4: Efficiency Analysis ====================
 with tab4:
-    # حساب CPC
-    filtered_df['clicks'] = filtered_df['quantity'] * 50
-    filtered_df['cpc'] = filtered_df['marketing_spend'] / filtered_df['clicks']
-    
     # CPC by Channel
     cpc_by_channel = filtered_df.groupby('marketing_channel').agg({
         'cpc': 'mean',
@@ -746,8 +771,6 @@ with tab4:
     cpc_by_channel = cpc_by_channel.sort_values('Avg_CPC')
     
     # Conversion Rate by Channel
-    filtered_df['visits'] = filtered_df['quantity'] * 100
-    
     conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
         'customer_id': 'nunique',
         'visits': 'sum'
@@ -910,20 +933,30 @@ with tab4:
         st.markdown('<div class="content-card">', unsafe_allow_html=True)
         st.markdown('<div class="card-title">📈 Correlation Analysis</div>', unsafe_allow_html=True)
         
-        # حساب الارتباطات
-        corr_spend_revenue = filtered_df[['marketing_spend', 'net_revenue']].corr().iloc[0, 1]
+        # حساب الارتباطات بطريقة آمنة
+        try:
+            corr_matrix = filtered_df[['marketing_spend', 'net_revenue']].corr()
+            corr_spend_revenue = corr_matrix.iloc[0, 1]
+        except:
+            corr_spend_revenue = 0
         
-        spend_conv = filtered_df.groupby('marketing_channel').agg({
-            'marketing_spend': 'sum',
-            'customer_id': 'nunique'
-        })
-        corr_spend_conversions = spend_conv.corr().iloc[0, 1]
+        try:
+            spend_conv = filtered_df.groupby('marketing_channel').agg({
+                'marketing_spend': 'sum',
+                'customer_id': 'nunique'
+            })
+            corr_spend_conversions = spend_conv.corr().iloc[0, 1]
+        except:
+            corr_spend_conversions = 0
         
-        cpc_rev = filtered_df.groupby('marketing_channel').agg({
-            'cpc': 'mean',
-            'net_revenue': 'sum'
-        })
-        corr_cpc_revenue = cpc_rev.corr().iloc[0, 1]
+        try:
+            cpc_rev = filtered_df.groupby('marketing_channel').agg({
+                'cpc': 'mean',
+                'net_revenue': 'sum'
+            })
+            corr_cpc_revenue = cpc_rev.corr().iloc[0, 1]
+        except:
+            corr_cpc_revenue = 0
         
         st.metric("Spend ↔ Revenue", f"{corr_spend_revenue:.3f}")
         st.metric("Spend ↔ Conversions", f"{corr_spend_conversions:.3f}")
@@ -1002,30 +1035,31 @@ with tab5:
         st.markdown('<div class="card-title">💡 Key Recommendations</div>', unsafe_allow_html=True)
         
         # حساب بعض التوصيات المبنية على البيانات
-        best_roi_channel = channel_performance['Average ROI'].idxmax()
-        best_roi_value = channel_performance['Average ROI'].max()
-        
-        best_cpc_channel = cpc_by_channel.iloc[0]['Channel']
-        best_cpc_value = cpc_by_channel.iloc[0]['Avg_CPC']
-        
-        best_conv_channel = conversion_by_channel.iloc[0]['Channel']
-        best_conv_value = conversion_by_channel.iloc[0]['Conversion_Rate']
-        
-        st.success(f"""
-        ### 🏆 Top Performers
-        
-        **Best ROI:**  
-        {best_roi_channel}  
-        ROI: {best_roi_value:.2f}%
-        
-        **Most Efficient (CPC):**  
-        {best_cpc_channel}  
-        CPC: ${best_cpc_value:.2f}
-        
-        **Best Conversion Rate:**  
-        {best_conv_channel}  
-        Rate: {best_conv_value:.3f}%
-        """)
+        if len(channel_performance) > 0:
+            best_roi_channel = channel_performance['Average ROI'].idxmax()
+            best_roi_value = channel_performance['Average ROI'].max()
+            
+            best_cpc_channel = cpc_by_channel.iloc[0]['Channel']
+            best_cpc_value = cpc_by_channel.iloc[0]['Avg_CPC']
+            
+            best_conv_channel = conversion_by_channel.iloc[0]['Channel']
+            best_conv_value = conversion_by_channel.iloc[0]['Conversion_Rate']
+            
+            st.success(f"""
+            ### 🏆 Top Performers
+            
+            **Best ROI:**  
+            {best_roi_channel}  
+            ROI: {best_roi_value:.2f}%
+            
+            **Most Efficient (CPC):**  
+            {best_cpc_channel}  
+            CPC: ${best_cpc_value:.2f}
+            
+            **Best Conversion Rate:**  
+            {best_conv_channel}  
+            Rate: {best_conv_value:.3f}%
+            """)
         
         st.warning("""
         ### 📌 Action Items
@@ -1041,7 +1075,7 @@ with tab5:
         5. **تحليل أسباب الانخفاض** في الفترات الضعيفة
         """)
         
-        st.info("""
+        st.info(f"""
         ### 📊 Data Quality
         
         ✅ Data is cleaned and validated  
