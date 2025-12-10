@@ -45,7 +45,7 @@ st.markdown("""
 def load_data():
     try:
         # قراءة البيانات من CSV
-        df = pd.read_csv('ecommerce_data.csv')
+        df = pd.read_csv('cleaned_data.csv')
 
         # تحويل التواريخ
         df['date'] = pd.to_datetime(df['date'])
@@ -320,4 +320,4 @@ if df is not None:
     st.caption("📊 E-commerce Analytics Dashboard | Built with Streamlit")
 
 else:
-    st.error("⚠️ لم يتم العثور على ملف البيانات. تأكد من وجود 'ecommerce_data.csv' في نفس المجلد.")
+    st.error("⚠️ لم يتم العثور على ملف البيانات. تأكد من وجود 'cleaned_data.csv' في نفس المجلد.")
