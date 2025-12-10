@@ -4,7 +4,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
-from pathlib import Path
 
 # =============================================================================
 # E-COMMERCE THEME (Professional Blue/Green)
@@ -29,13 +28,11 @@ st.markdown(
       --warning-orange: #ff9800;
     }
 
-    /* App background */
     html, body, .stApp {
       background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%) !important;
       color: var(--text-light) !important;
     }
 
-    /* Headers */
     h1, h2, h3, h4, h5, h6,
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
       color: var(--accent-cyan) !important;
@@ -43,7 +40,6 @@ st.markdown(
       font-weight: 700 !important;
     }
 
-    /* Sidebar */
     section[data-testid="stSidebar"] {
       background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%) !important;
       border-right: 2px solid var(--primary-blue);
@@ -59,7 +55,6 @@ st.markdown(
       font-weight: 600 !important;
     }
 
-    /* Buttons */
     div.stButton > button {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
       color: white !important;
@@ -76,7 +71,6 @@ st.markdown(
       box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
     }
 
-    /* Metrics */
     [data-testid="stMetricValue"] {
       color: var(--secondary-green) !important;
       font-size: 2rem !important;
@@ -88,19 +82,16 @@ st.markdown(
       font-weight: 600 !important;
     }
 
-    /* Cards/Containers */
     div[data-testid="stExpander"] {
       background-color: var(--panel-dark) !important;
       border: 1px solid var(--primary-blue) !important;
       border-radius: 10px !important;
     }
 
-    /* DataFrames */
     .stDataFrame {
       background-color: var(--panel-dark) !important;
     }
 
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
       gap: 8px;
       background-color: transparent;
@@ -119,13 +110,11 @@ st.markdown(
       color: white;
     }
 
-    /* Info boxes */
     .stAlert {
       background-color: var(--panel-dark) !important;
       border-left: 4px solid var(--accent-cyan) !important;
     }
 
-    /* Links */
     a {
       color: var(--accent-cyan) !important;
       text-decoration: none !important;
@@ -135,19 +124,16 @@ st.markdown(
       color: var(--secondary-green) !important;
     }
 
-    /* Divider */
     hr {
       border-color: var(--primary-blue) !important;
       opacity: 0.3 !important;
     }
 
-    /* Download button */
     .stDownloadButton > button {
       background-color: var(--secondary-green) !important;
       color: white !important;
     }
 
-    /* Custom metric card */
     .metric-card {
       background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.1) 100%);
       padding: 1.5rem;
@@ -171,7 +157,6 @@ st.markdown(
       font-weight: 600;
     }
 
-    /* Footer */
     .footer {
       text-align: center;
       padding: 2rem;
@@ -232,7 +217,6 @@ df = load_data()
 # HOME PAGE
 # =============================================================================
 if page == "🏠 Home":
-    # Hero Section
     st.markdown("""
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 style='font-size: 3.5rem; margin-bottom: 0;'>🛒 E-commerce Analytics Pro</h1>
@@ -297,7 +281,7 @@ if page == "🏠 Home":
         with col1:
             st.markdown("""
                 ### 📊 Analytics Dashboard
-                - 13 Interactive charts
+                - 15+ Interactive charts
                 - 8 Key Performance Indicators
                 - Real-time filtering
                 - Multi-dimensional analysis
@@ -318,7 +302,7 @@ if page == "🏠 Home":
                 - Revenue trends
                 - Customer segmentation
                 - Marketing ROI
-                - Seasonal patterns
+                - Channel performance
             """)
 
         st.markdown("---")
@@ -340,7 +324,6 @@ if page == "🏠 Home":
             if st.button("📋 View Column Names"):
                 st.write(df.columns.tolist())
 
-        # Sample Data
         with st.expander("👁️ Preview Data (First 10 Rows)"):
             st.dataframe(df.head(10), use_container_width=True)
 
@@ -363,10 +346,10 @@ elif page == "📊 Analytics Dashboard":
 
     # Channel filter
     if 'marketing_channel' in df.columns:
-        channels = ['All'] + sorted(df['marketing_channel'].dropna().unique().tolist())
+        channels = ['All Channels'] + sorted(df['marketing_channel'].dropna().unique().tolist())
         selected_channel = st.sidebar.selectbox("Marketing Channel", channels)
     else:
-        selected_channel = 'All'
+        selected_channel = 'All Channels'
 
     # Date filter
     if 'month_date' in df.columns:
@@ -384,7 +367,7 @@ elif page == "📊 Analytics Dashboard":
     # Apply filters
     filtered_df = df.copy()
 
-    if selected_channel != 'All' and 'marketing_channel' in df.columns:
+    if selected_channel != 'All Channels' and 'marketing_channel' in df.columns:
         filtered_df = filtered_df[filtered_df['marketing_channel'] == selected_channel]
 
     if len(date_range) == 2 and 'month_date' in df.columns:
@@ -396,148 +379,571 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-    # ========== KPIs ==========
+    # ========== KPIs FROM NOTEBOOK ==========
     st.header("📈 Key Performance Indicators")
 
+    # Calculate KPIs exactly as in notebook
+    total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
+    total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
+    total_orders = len(filtered_df)
+    avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
+
+    # Conversion Rate (same as notebook)
+    conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
+
+    # Return Rate
+    return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
+
+    # Satisfaction
+    avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
+
+    # ROI (same as notebook calculation)
+    if 'roi' in filtered_df.columns:
+        avg_roi = filtered_df['roi'].mean()
+    else:
+        avg_roi = 0
+
+    # Display KPIs
     col1, col2, col3, col4 = st.columns(4)
 
-    revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
-    customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
-    orders = len(filtered_df)
-    aov = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
-
     with col1:
-        st.metric("💰 Revenue", f"${revenue:,.2f}")
-        st.metric("📦 Orders", f"{orders:,}")
+        st.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
+        st.metric("📦 Total Orders", f"{total_orders:,}")
 
     with col2:
-        st.metric("👥 Customers", f"{customers:,}")
-        st.metric("🛍️ AOV", f"${aov:,.2f}")
+        st.metric("👥 Total Customers", f"{total_customers:,}")
+        st.metric("🛍️ Avg Order Value", f"${avg_order_value:,.2f}")
 
     with col3:
-        conv_rate = (customers / orders * 100) if orders > 0 else 0
-        return_rate = (filtered_df['returned'].sum() / orders * 100) if orders > 0 and 'returned' in filtered_df.columns else 0
-        st.metric("📊 Conversion", f"{conv_rate:.2f}%")
-        st.metric("↩️ Returns", f"{return_rate:.2f}%")
+        st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
+        st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
 
     with col4:
-        satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
-        roi = filtered_df['roi'].mean() if 'roi' in filtered_df.columns else 0
-        st.metric("⭐ Satisfaction", f"{satisfaction:.2f}/5")
-        st.metric("💹 ROI", f"{roi:.2f}%")
+        st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
+        st.metric("💹 Avg ROI", f"{avg_roi:.2f}%")
 
     st.markdown("---")
 
-    # ========== CHARTS ==========
-    st.header("📊 Visualizations")
+    # ========== CHARTS FROM NOTEBOOK ==========
+    st.header("📊 Data Visualizations")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Revenue", "👥 Customers", "🎯 Marketing", "📦 Operations"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📈 Trends", "🎯 Marketing", "👥 Customers", "📦 Performance"])
 
+    # ========== TAB 1: TRENDS ==========
     with tab1:
-        # Monthly trend
+        # Chart 1: Monthly Revenue Trend (من الـ Notebook)
         if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Monthly Revenue Trend")
-            monthly = filtered_df.groupby('month_date')['net_revenue'].sum().reset_index()
-            fig = px.line(monthly, x='month_date', y='net_revenue', markers=True)
-            fig.update_traces(line_color='#2ecc71', line_width=3)
+            st.subheader("Overall Monthly Revenue Trend")
+
+            monthly_revenue = filtered_df.groupby('month_date').agg({
+                'net_revenue': 'sum'
+            }).reset_index()
+            monthly_revenue.columns = ['month', 'totalrevenue']
+            monthly_revenue = monthly_revenue.sort_values('month')
+
+            fig = px.line(
+                monthly_revenue,
+                x='month',
+                y='totalrevenue',
+                markers=True,
+                title='Overall Monthly Revenue'
+            )
+
+            # Same styling as notebook
+            fig.update_traces(
+                line=dict(color='#3647F5', width=3),
+                marker=dict(size=8, color='#FF9F0D')
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Revenue"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 2: Monthly Conversions Trend (من الـ Notebook)
+        if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Overall Monthly Conversions Trend")
+
+            monthly_conversions = filtered_df.groupby('month_date').agg({
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_conversions.columns = ['month', 'totalconversions']
+            monthly_conversions = monthly_conversions.sort_values('month')
+
+            fig = px.line(
+                monthly_conversions,
+                x='month',
+                y='totalconversions',
+                markers=True,
+                title='Overall Monthly Conversions Trend'
+            )
+
+            # Same styling as notebook
+            fig.update_traces(
+                line=dict(color='#FF9F0D', width=3),
+                marker=dict(size=8, color='#3647F5')
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Conversions"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 3: Monthly Revenue by Channel (من الـ Notebook)
+        if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Monthly Revenue by Channel")
+
+            monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+                'net_revenue': 'sum'
+            }).reset_index()
+            monthly_channel.columns = ['month', 'channel', 'revenue']
+
+            fig = px.line(
+                monthly_channel,
+                x='month',
+                y='revenue',
+                color='channel',
+                markers=True,
+                title='Monthly Revenue by Channel'
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+    # ========== TAB 2: MARKETING ==========
+    with tab2:
+        # Chart 4: ROI by Marketing Channel (من الـ Notebook)
+        if 'marketing_channel' in filtered_df.columns and 'roi' in filtered_df.columns:
+            st.subheader("ROI by Marketing Channel")
+
+            roi_channel = filtered_df.groupby('marketing_channel').agg({
+                'roi': 'mean'
+            }).reset_index()
+            roi_channel = roi_channel.sort_values('roi', ascending=False)
+
+            fig = px.bar(
+                roi_channel,
+                x='marketing_channel',
+                y='roi',
+                color='roi',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                title='ROI by Marketing Channel'
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 5: Conversion Rate by Channel (من الـ Notebook)
+        if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns and 'quantity' in filtered_df.columns:
+            st.subheader("Conversion Rate by Channel")
+
+            # Calculate conversion rate same as notebook
+            filtered_df['visits'] = filtered_df['quantity'] * 100
+
+            conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
+                'customer_id': 'nunique',
+                'visits': 'sum'
+            }).reset_index()
+
+            conversion_by_channel['conversion_rate'] = (
+                conversion_by_channel['customer_id'] / conversion_by_channel['visits'] * 100
+            ).round(3)
+
+            conversion_by_channel = conversion_by_channel.sort_values('conversion_rate', ascending=False)
+
+            fig = px.bar(
+                conversion_by_channel,
+                x='marketing_channel',
+                y='conversion_rate',
+                color='conversion_rate',
+                color_continuous_scale=['#FF9F0D', '#D9D9D9'],
+                title='Conversion Rate by Channel'
+            )
+
+            fig.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Marketing Channel",
+                yaxis_title="Conversion Rate (%)"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 6: Channel Efficiency Ranking (من الـ Notebook)
+        if 'marketing_channel' in filtered_df.columns and 'cpc' in filtered_df.columns:
+            st.subheader("Channel Efficiency Ranking")
+
+            # CPC by channel
+            cpc_by_channel = filtered_df.groupby('marketing_channel').agg({
+                'cpc': 'mean'
+            }).reset_index()
+            cpc_by_channel.columns = ['Channel', 'AvgCPC']
+
+            # Merge with conversion rate
+            if 'conversion_rate' in conversion_by_channel.columns:
+                cpc_by_channel = cpc_by_channel.merge(
+                    conversion_by_channel[['marketing_channel', 'conversion_rate']],
+                    left_on='Channel',
+                    right_on='marketing_channel',
+                    how='left'
+                )
+
+                # Calculate efficiency score same as notebook
+                cpc_by_channel['EfficiencyScore'] = (
+                    (1 / cpc_by_channel['AvgCPC'] * 100) + 
+                    (cpc_by_channel['conversion_rate'] * 10)
+                ).round(2)
+
+                cpc_by_channel = cpc_by_channel.sort_values('EfficiencyScore', ascending=True)
+
+                fig = px.bar(
+                    cpc_by_channel,
+                    x='EfficiencyScore',
+                    y='Channel',
+                    orientation='h',
+                    color='EfficiencyScore',
+                    color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                    title='Channel Efficiency Ranking'
+                )
+
+                fig.update_traces(
+                    marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+                )
+
+                fig.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
+                    height=450
+                )
+
+                st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 7: Spend vs Revenue Analysis (من الـ Notebook)
+        if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("ROI Analysis: Spend vs Revenue by Channel")
+
+            spend_revenue = filtered_df.groupby('marketing_channel').agg({
+                'marketing_spend': 'sum',
+                'net_revenue': 'sum'
+            }).reset_index()
+
+            spend_revenue.columns = ['Channel', 'TotalSpend', 'TotalRevenue']
+            spend_revenue['RevenuetoSpendRatio'] = (
+                spend_revenue['TotalRevenue'] / spend_revenue['TotalSpend']
+            ).round(2)
+
+            fig = px.scatter(
+                spend_revenue,
+                x='TotalSpend',
+                y='TotalRevenue',
+                size='RevenuetoSpendRatio',
+                color='RevenuetoSpendRatio',
+                hover_name='Channel',
+                text='Channel',
+                title='ROI Analysis: Spend vs Revenue by Channel',
+                size_max=60,
+                color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
+            )
+
+            fig.update_traces(
+                textposition='top center',
+                textfont=dict(size=12, color='#D9D9D9'),
+                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                showlegend=False
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 8: Cost Per Conversion (من الـ Notebook)
+        if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Cost Per Conversion by Channel")
+
+            spend_conversions = filtered_df.groupby('marketing_channel').agg({
+                'marketing_spend': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+
+            spend_conversions.columns = ['Channel', 'TotalSpend', 'TotalConversions']
+            spend_conversions['SpendPerConversion'] = (
+                spend_conversions['TotalSpend'] / spend_conversions['TotalConversions']
+            ).round(2)
+
+            spend_conversions = spend_conversions.sort_values('SpendPerConversion')
+
+            fig = px.bar(
+                spend_conversions,
+                x='Channel',
+                y='SpendPerConversion',
+                color='SpendPerConversion',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                title='Cost Per Conversion by Channel'
+            )
+
+            fig.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+    # ========== TAB 3: CUSTOMERS ==========
+    with tab3:
+        # Chart 9: Revenue by Customer Segment (من الـ Notebook)
+        if 'customer_segment' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Revenue Distribution by Customer Segment")
+
+            segment_revenue = filtered_df.groupby('customer_segment').agg({
+                'net_revenue': 'sum'
+            }).reset_index()
+
+            fig = px.pie(
+                segment_revenue,
+                values='net_revenue',
+                names='customer_segment',
+                title='Revenue by Customer Segment'
+            )
+
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5'
             )
+
             st.plotly_chart(fig, use_container_width=True)
 
-        # Revenue by category
-        col1, col2 = st.columns(2)
+        # Chart 10: CLV & Retention by Segment (من الـ Notebook)
+        if 'customer_segment' in filtered_df.columns and 'customer_lifetime_value' in filtered_df.columns and 'retention_score' in filtered_df.columns:
+            st.subheader("Customer Lifetime Value & Retention by Segment")
 
-        with col1:
-            if 'category' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Revenue by Category")
-                cat_rev = filtered_df.groupby('category')['net_revenue'].sum().reset_index()
-                cat_rev = cat_rev.sort_values('net_revenue', ascending=False)
-                fig = px.bar(cat_rev, x='category', y='net_revenue', color='net_revenue',
-                           color_continuous_scale='Greens')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            clv_data = filtered_df.groupby('customer_segment').agg({
+                'customer_lifetime_value': 'mean',
+                'retention_score': 'mean'
+            }).reset_index()
 
-        with col2:
-            if 'region' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Revenue by Region")
-                region_rev = filtered_df.groupby('region')['net_revenue'].sum().reset_index()
-                fig = px.pie(region_rev, values='net_revenue', names='region', hole=0.4)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            fig = go.Figure(data=[
+                go.Bar(
+                    name='CLV ($)',
+                    x=clv_data['customer_segment'],
+                    y=clv_data['customer_lifetime_value'],
+                    marker_color='#3647F5'
+                ),
+                go.Bar(
+                    name='Retention Score',
+                    x=clv_data['customer_segment'],
+                    y=clv_data['retention_score'],
+                    marker_color='#FF9F0D'
+                )
+            ])
 
-    with tab2:
-        col1, col2 = st.columns(2)
+            fig.update_layout(
+                barmode='group',
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                title='CLV & Retention by Segment'
+            )
 
-        with col1:
-            if 'customer_segment' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Revenue by Segment")
-                seg_rev = filtered_df.groupby('customer_segment')['net_revenue'].sum().reset_index()
-                fig = px.pie(seg_rev, values='net_revenue', names='customer_segment')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
-
-        with col2:
-            if 'customer_segment' in filtered_df.columns and 'customer_lifetime_value' in filtered_df.columns:
-                st.subheader("CLV by Segment")
-                clv = filtered_df.groupby('customer_segment')['customer_lifetime_value'].mean().reset_index()
-                fig = px.bar(clv, x='customer_segment', y='customer_lifetime_value',
-                           color='customer_lifetime_value', color_continuous_scale='Blues')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
-
-    with tab3:
-        if 'marketing_channel' in filtered_df.columns and 'roi' in filtered_df.columns:
-            st.subheader("ROI by Marketing Channel")
-            roi_ch = filtered_df.groupby('marketing_channel')['roi'].mean().reset_index()
-            roi_ch = roi_ch.sort_values('roi', ascending=False)
-            fig = px.bar(roi_ch, x='marketing_channel', y='roi', color='roi',
-                       color_continuous_scale='RdYlGn')
-            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
 
-        col1, col2 = st.columns(2)
+        # Chart 11: Revenue by Region (من الـ Notebook)
+        if 'region' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Revenue by Region")
 
-        with col1:
-            if 'device_type' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Revenue by Device")
-                device = filtered_df.groupby('device_type')['net_revenue'].sum().reset_index()
-                fig = px.pie(device, values='net_revenue', names='device_type', hole=0.4)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            region_revenue = filtered_df.groupby('region').agg({
+                'net_revenue': 'sum'
+            }).reset_index()
 
-        with col2:
-            if 'marketing_campaign' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Campaign Performance")
-                camp = filtered_df.groupby('marketing_campaign')['net_revenue'].sum().reset_index()
-                camp = camp.sort_values('net_revenue', ascending=False).head(10)
-                fig = px.bar(camp, x='marketing_campaign', y='net_revenue',
-                           color='net_revenue', color_continuous_scale='Viridis')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            fig = px.pie(
+                region_revenue,
+                values='net_revenue',
+                names='region',
+                title='Revenue Distribution by Region',
+                hole=0.4
+            )
 
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5'
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+    # ========== TAB 4: PERFORMANCE ==========
     with tab4:
-        col1, col2 = st.columns(2)
+        # Chart 12: Revenue by Category (من الـ Notebook)
+        if 'category' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Net Revenue by Product Category")
 
-        with col1:
-            if 'payment_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Payment Methods")
-                payment = filtered_df.groupby('payment_method')['net_revenue'].sum().reset_index()
-                fig = px.bar(payment, x='payment_method', y='net_revenue',
-                           color='net_revenue', color_continuous_scale='Purples')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            category_revenue = filtered_df.groupby('category').agg({
+                'net_revenue': 'sum'
+            }).reset_index()
+            category_revenue = category_revenue.sort_values('net_revenue', ascending=False)
 
-        with col2:
-            if 'shipping_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-                st.subheader("Shipping Performance")
-                shipping = filtered_df.groupby('shipping_method')['net_revenue'].sum().reset_index()
-                fig = px.bar(shipping, x='shipping_method', y='net_revenue',
-                           color='net_revenue', color_continuous_scale='Oranges')
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                st.plotly_chart(fig, use_container_width=True)
+            fig = px.bar(
+                category_revenue,
+                x='category',
+                y='net_revenue',
+                color='net_revenue',
+                color_continuous_scale='Greens',
+                title='Net Revenue by Product Category'
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 13: Payment Method Performance (من الـ Notebook)
+        if 'payment_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Payment Method Performance")
+
+            payment_data = filtered_df.groupby('payment_method').agg({
+                'net_revenue': 'sum',
+                'order_id': 'count'
+            }).reset_index()
+            payment_data.columns = ['payment_method', 'Revenue', 'Orders']
+
+            fig = go.Figure(data=[
+                go.Bar(
+                    name='Revenue ($)',
+                    x=payment_data['payment_method'],
+                    y=payment_data['Revenue'],
+                    marker_color='#3647F5'
+                ),
+                go.Bar(
+                    name='Orders',
+                    x=payment_data['payment_method'],
+                    y=payment_data['Orders'],
+                    marker_color='#FF9F0D'
+                )
+            ])
+
+            fig.update_layout(
+                barmode='group',
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 14: Shipping Method Performance (من الـ Notebook)
+        if 'shipping_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'satisfaction_rating' in filtered_df.columns:
+            st.subheader("Shipping Method Performance")
+
+            shipping_data = filtered_df.groupby('shipping_method').agg({
+                'net_revenue': 'sum',
+                'satisfaction_rating': 'mean'
+            }).reset_index()
+
+            fig = go.Figure(data=[
+                go.Bar(
+                    name='Revenue ($)',
+                    x=shipping_data['shipping_method'],
+                    y=shipping_data['net_revenue'],
+                    marker_color='#3647F5'
+                ),
+                go.Bar(
+                    name='Satisfaction',
+                    x=shipping_data['shipping_method'],
+                    y=shipping_data['satisfaction_rating'] * 1000,
+                    marker_color='#FF9F0D'
+                )
+            ])
+
+            fig.update_layout(
+                barmode='group',
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Chart 15: Satisfaction Impact on Revenue & Returns (من الـ Notebook)
+        if 'satisfaction_rating' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'returned' in filtered_df.columns:
+            st.subheader("Satisfaction Rating Impact on Revenue & Returns")
+
+            satisfaction_data = filtered_df.groupby('satisfaction_rating').agg({
+                'net_revenue': 'mean',
+                'returned': 'sum'
+            }).reset_index()
+
+            fig = px.scatter(
+                satisfaction_data,
+                x='satisfaction_rating',
+                y='net_revenue',
+                size='returned',
+                color='returned',
+                labels={
+                    'net_revenue': 'Avg Revenue ($)',
+                    'satisfaction_rating': 'Rating',
+                    'returned': 'Returns'
+                },
+                color_continuous_scale='Reds',
+                title='Satisfaction Impact on Revenue & Returns'
+            )
+
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
 
 # =============================================================================
 # DATA EXPLORER
@@ -614,7 +1020,7 @@ elif page == "ℹ️ About":
     ### 🎯 Features
 
     - **Real-time Analytics**: Interactive KPIs and metrics
-    - **13 Visualization Types**: Charts covering all business aspects
+    - **15+ Visualization Types**: Charts covering all business aspects
     - **Advanced Filtering**: Multi-dimensional data exploration
     - **Export Capabilities**: Download filtered data as CSV
     - **Responsive Design**: Works on all screen sizes
@@ -656,13 +1062,6 @@ elif page == "ℹ️ About":
     streamlit run app.py
     ```
 
-    ### 📧 Support
-
-    For issues or suggestions, check that:
-    - `cleaned_data.csv` exists in the app directory
-    - All required columns are present in the CSV
-    - Libraries are installed correctly
-
     ---
 
     **Version**: 1.0.0  
@@ -672,7 +1071,6 @@ elif page == "ℹ️ About":
 
     st.markdown("---")
 
-    # System info
     with st.expander("🔍 System Information"):
         if df is not None:
             st.write("**Dataset Info:**")
