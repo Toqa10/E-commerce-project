@@ -564,25 +564,13 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========    # ========== TAB 2: MARKETING ==========
-           # ========== TAB 2: MARKETING ==========
+              # ========== TAB 2: MARKETING ==========
     with tab2:
-        st.write(f"**Debug:** Records = {len(filtered_df)}")
-        
-        # نشوف الأعمدة الموجودة
-        required_cols = ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']
-        available_cols = [col for col in required_cols if col in filtered_df.columns]
-        missing_cols = [col for col in required_cols if col not in filtered_df.columns]
-        
-        st.write(f"**Available columns:** {available_cols}")
-        st.write(f"**Missing columns:** {missing_cols}")
-        
-        # لو في أعمدة ناقصة، استخدم البدائل
+        # تحضير البيانات الأساسية
         if 'marketing_channel' in filtered_df.columns:
-            # استخدم final_amount بدل net_revenue لو مش موجود
             revenue_col = 'net_revenue' if 'net_revenue' in filtered_df.columns else 'final_amount'
             
             if revenue_col in filtered_df.columns and 'customer_id' in filtered_df.columns:
-                # حضر البيانات بدون marketing_spend و roi لو مش موجودين
                 agg_dict = {
                     revenue_col: 'sum',
                     'customer_id': 'nunique'
@@ -596,7 +584,6 @@ elif page == "📊 Analytics Dashboard":
                 
                 channel_perf = filtered_df.groupby('marketing_channel').agg(agg_dict).reset_index()
                 
-                # تسمية الأعمدة
                 new_cols = ['channel', 'total_revenue', 'total_conversions']
                 if 'marketing_spend' in filtered_df.columns:
                     new_cols.append('total_spend')
@@ -672,7 +659,7 @@ elif page == "📊 Analytics Dashboard":
                 
                 st.plotly_chart(fig_conv, use_container_width=True)
                 
-                # Chart 3: Total Spend per Channel (لو موجود)
+                # Chart 3: Total Spend per Channel
                 if 'total_spend' in channel_perf.columns:
                     st.subheader("Total Spend per Channel")
                     
@@ -700,7 +687,7 @@ elif page == "📊 Analytics Dashboard":
                     
                     st.plotly_chart(fig_spend, use_container_width=True)
                 
-                # Chart 4: Average ROI per Channel (لو موجود)
+                # Chart 4: Average ROI per Channel
                 if 'avg_roi' in channel_perf.columns:
                     st.subheader("Average ROI per Channel")
                     
@@ -730,6 +717,7 @@ elif page == "📊 Analytics Dashboard":
                 st.error("❌ Required columns not found!")
         else:
             st.error("❌ Column 'marketing_channel' not found!")
+
 
     # ========== TAB 3: CUSTOMERS ==========
     with tab3:
