@@ -563,31 +563,31 @@ elif page == "📊 Analytics Dashboard":
             
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
-    # ========== TAB 2: MARKETING ==========    # ========== TAB 2: MARKETING ==========
-              # ========== TAB 2: MARKETING ==========
+    # ========== TAB 2: MARKETING ==========   
+        # ========== TAB 2: MARKETING ==========
     with tab2:
-        # تحضير البيانات الأساسية
-        if 'marketing_channel' in filtered_df.columns:
-            revenue_col = 'net_revenue' if 'net_revenue' in filtered_df.columns else 'final_amount'
+        # تحضير البيانات الأساسية من الداتا الكاملة (بدون فلتر)
+        if 'marketing_channel' in df.columns:
+            revenue_col = 'net_revenue' if 'net_revenue' in df.columns else 'final_amount'
             
-            if revenue_col in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            if revenue_col in df.columns and 'customer_id' in df.columns:
                 agg_dict = {
                     revenue_col: 'sum',
                     'customer_id': 'nunique'
                 }
                 
-                if 'marketing_spend' in filtered_df.columns:
+                if 'marketing_spend' in df.columns:
                     agg_dict['marketing_spend'] = 'sum'
                     
-                if 'roi' in filtered_df.columns:
+                if 'roi' in df.columns:
                     agg_dict['roi'] = 'mean'
                 
-                channel_perf = filtered_df.groupby('marketing_channel').agg(agg_dict).reset_index()
+                channel_perf = df.groupby('marketing_channel').agg(agg_dict).reset_index()
                 
                 new_cols = ['channel', 'total_revenue', 'total_conversions']
-                if 'marketing_spend' in filtered_df.columns:
+                if 'marketing_spend' in df.columns:
                     new_cols.append('total_spend')
-                if 'roi' in filtered_df.columns:
+                if 'roi' in df.columns:
                     new_cols.append('avg_roi')
                     
                 channel_perf.columns = new_cols
@@ -686,6 +686,8 @@ elif page == "📊 Analytics Dashboard":
                     )
                     
                     st.plotly_chart(fig_spend, use_container_width=True)
+                else:
+                    st.info("ℹ️ Marketing Spend data not available")
                 
                 # Chart 4: Average ROI per Channel
                 if 'avg_roi' in channel_perf.columns:
@@ -713,6 +715,8 @@ elif page == "📊 Analytics Dashboard":
                     )
                     
                     st.plotly_chart(fig_roi, use_container_width=True)
+                else:
+                    st.info("ℹ️ ROI data not available")
             else:
                 st.error("❌ Required columns not found!")
         else:
