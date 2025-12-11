@@ -933,7 +933,7 @@ elif page == "📊 Analytics Dashboard":
             st.error("❌ Column 'marketing_channel' not found!")
 
    
-       # ========== TAB 3: PERFORMANCE (NEW) ==========
+           # ========== TAB 3: PERFORMANCE (NEW) ==========
     with tab3:
         st.subheader("📊 Marketing Channel Performance Analysis")
         
@@ -1125,6 +1125,72 @@ elif page == "📊 Analytics Dashboard":
                 xaxis=dict(tickangle=45)
             )
             st.plotly_chart(fig_revenue_customer, use_container_width=True)
+            
+            # Chart 6: Performance Quadrant Analysis
+            st.subheader("🏆 Performance Quadrant Analysis")
+            
+            quadrant_analysis = filtered_df.groupby('marketing_channel').agg({
+                'customer_id': 'nunique',
+                'final_amount': 'sum',
+                'order_id': 'count'
+            }).reset_index()
+            quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
+            quadrant_analysis['Revenue_Per_Customer'] = (
+                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
+            ).round(2)
+            
+            avg_customers = quadrant_analysis['Unique_Customers'].mean()
+            avg_revenue = quadrant_analysis['Total_Revenue'].mean()
+            
+            fig_quadrant = px.scatter(
+                quadrant_analysis,
+                x='Unique_Customers',
+                y='Total_Revenue',
+                size='Revenue_Per_Customer',
+                color='Revenue_Per_Customer',
+                hover_name='Channel',
+                hover_data=['Revenue_Per_Customer', 'Total_Orders'],
+                title='Performance Quadrant Analysis: High Revenue/High Reach = Top Right 🏆',
+                size_max=50,
+                color_continuous_scale=['#FF9F0D', '#3647F5']
+            )
+            
+            fig_quadrant.update_traces(
+                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.9)
+            )
+            
+            fig_quadrant.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                xaxis_title="Unique Customers Acquired",
+                yaxis_title="Total Revenue ($)",
+                showlegend=False
+            )
+            
+            # Quadrant lines
+            fig_quadrant.add_hline(
+                y=avg_revenue,
+                line_dash="dash",
+                line_color="#FF9F0D",
+                annotation_text=f"Avg Revenue: ${avg_revenue:,.0f}",
+                annotation_position="right"
+            )
+            
+            fig_quadrant.add_vline(
+                x=avg_customers,
+                line_dash="dash",
+                line_color="#FF9F0D",
+                annotation_text=f"Avg Customers: {avg_customers:,.0f}",
+                annotation_position="top"
+            )
+            
+            st.plotly_chart(fig_quadrant, use_container_width=True)
+            
+            # Best performer info
+            best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
+            st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
 
 
 # =============================================================================
