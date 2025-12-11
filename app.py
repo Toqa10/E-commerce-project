@@ -430,146 +430,140 @@ elif page == "📊 Analytics Dashboard":
     tab1, tab2, tab3, tab4 = st.tabs(["📈 Trends", "🎯 Marketing", "👥 Customers", "📦 Performance"])
 
     # ========== TAB 1: TRENDS ==========
-    with tab1:
-       # AHMED
-# -------------------------------
-# STREAMLIT VERSION - LINE CHARTS
-# -------------------------------
+   :
+      with tab1:
+    # Chart 1: Monthly Revenue Trends by Marketing Channel
+    if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+        st.subheader("Monthly Revenue Trends by Marketing Channel")
+        
+        monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+            'net_revenue': 'sum',
+            'customer_id': 'nunique'
+        }).reset_index()
+        monthly_channel.columns = ['month', 'channel', 'revenue', 'conversions']
+        
+        fig_revenue_trend = px.line(
+            monthly_channel,
+            x='month',
+            y='revenue',
+            color='channel',
+            markers=True,
+            title='Monthly Revenue Trends by Marketing Channel'
+        )
+        
+        fig_revenue_trend.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='#f5f5f5',
+            height=500,
+            xaxis_title="Month",
+            yaxis_title="Revenue",
+            legend_title="Channel",
+            xaxis=dict(tickangle=45)
+        )
+        
+        st.plotly_chart(fig_revenue_trend, use_container_width=True)
 
-# Chart 1: Monthly Revenue Trends by Marketing Channel
-if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-    st.subheader("Monthly Revenue Trends by Marketing Channel")
-    
-    monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
-        'net_revenue': 'sum',
-        'customer_id': 'nunique'
-    }).reset_index()
-    monthly_channel.columns = ['month', 'channel', 'revenue', 'conversions']
-    
-    fig_revenue_trend = px.line(
-        monthly_channel,
-        x='month',
-        y='revenue',
-        color='channel',
-        markers=True,
-        title='Monthly Revenue Trends by Marketing Channel'
-    )
-    
-    fig_revenue_trend.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#f5f5f5',
-        height=500,
-        xaxis_title="Month",
-        yaxis_title="Revenue",
-        legend_title="Channel",
-        xaxis=dict(tickangle=45)
-    )
-    
-    st.plotly_chart(fig_revenue_trend, use_container_width=True)
+    # Chart 2: Monthly Conversions Trends by Marketing Channel
+    if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+        st.subheader("Monthly Conversions Trends by Marketing Channel")
+        
+        monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+            'customer_id': 'nunique'
+        }).reset_index()
+        monthly_channel.columns = ['month', 'channel', 'conversions']
+        
+        fig_conv_trend = px.line(
+            monthly_channel,
+            x='month',
+            y='conversions',
+            color='channel',
+            markers=True,
+            title='Monthly Conversions Trends by Marketing Channel'
+        )
+        
+        fig_conv_trend.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='#f5f5f5',
+            height=500,
+            xaxis_title="Month",
+            yaxis_title="Conversions (Unique Customers)",
+            legend_title="Channel",
+            xaxis=dict(tickangle=45)
+        )
+        
+        st.plotly_chart(fig_conv_trend, use_container_width=True)
 
+    # Chart 3: Overall Monthly Revenue Trend
+    if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+        st.subheader("Overall Monthly Revenue Trend")
+        
+        monthly_total = filtered_df.groupby('month_date').agg({
+            'net_revenue': 'sum',
+            'customer_id': 'nunique'
+        }).reset_index()
+        monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
+        
+        fig_total_rev = px.line(
+            monthly_total,
+            x='month',
+            y='total_revenue',
+            markers=True,
+            title='Overall Monthly Revenue Trend'
+        )
+        
+        fig_total_rev.update_traces(
+            line=dict(color='#FF9F0D', width=3),
+            marker=dict(size=10, color='#3647F5')
+        )
+        
+        fig_total_rev.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='#f5f5f5',
+            height=450,
+            xaxis_title="Month",
+            yaxis_title="Total Revenue",
+            xaxis=dict(tickangle=45)
+        )
+        
+        st.plotly_chart(fig_total_rev, use_container_width=True)
 
-# Chart 2: Monthly Conversions Trends by Marketing Channel
-if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-    st.subheader("Monthly Conversions Trends by Marketing Channel")
-    
-    monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
-        'customer_id': 'nunique'
-    }).reset_index()
-    monthly_channel.columns = ['month', 'channel', 'conversions']
-    
-    fig_conv_trend = px.line(
-        monthly_channel,
-        x='month',
-        y='conversions',
-        color='channel',
-        markers=True,
-        title='Monthly Conversions Trends by Marketing Channel'
-    )
-    
-    fig_conv_trend.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#f5f5f5',
-        height=500,
-        xaxis_title="Month",
-        yaxis_title="Conversions (Unique Customers)",
-        legend_title="Channel",
-        xaxis=dict(tickangle=45)
-    )
-    
-    st.plotly_chart(fig_conv_trend, use_container_width=True)
+    # Chart 4: Overall Monthly Conversions Trend
+    if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+        st.subheader("Overall Monthly Conversions Trend")
+        
+        monthly_total = filtered_df.groupby('month_date').agg({
+            'customer_id': 'nunique'
+        }).reset_index()
+        monthly_total.columns = ['month', 'total_conversions']
+        
+        fig_total_conv = px.line(
+            monthly_total,
+            x='month',
+            y='total_conversions',
+            markers=True,
+            title='Overall Monthly Conversions Trend'
+        )
+        
+        fig_total_conv.update_traces(
+            line=dict(color='#3647F5', width=3),
+            marker=dict(size=10, color='#FF9F0D')
+        )
+        
+        fig_total_conv.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='#f5f5f5',
+            height=450,
+            xaxis_title="Month",
+            yaxis_title="Total Conversions",
+            xaxis=dict(tickangle=45)
+        )
+        
+        st.plotly_chart(fig_total_conv, use_container_width=True)
 
-
-# Chart 3: Overall Monthly Revenue Trend
-if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-    st.subheader("Overall Monthly Revenue Trend")
-    
-    monthly_total = filtered_df.groupby('month_date').agg({
-        'net_revenue': 'sum',
-        'customer_id': 'nunique'
-    }).reset_index()
-    monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
-    
-    fig_total_rev = px.line(
-        monthly_total,
-        x='month',
-        y='total_revenue',
-        markers=True,
-        title='Overall Monthly Revenue Trend'
-    )
-    
-    fig_total_rev.update_traces(
-        line=dict(color='#FF9F0D', width=3),
-        marker=dict(size=10, color='#3647F5')
-    )
-    
-    fig_total_rev.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#f5f5f5',
-        height=450,
-        xaxis_title="Month",
-        yaxis_title="Total Revenue",
-        xaxis=dict(tickangle=45)
-    )
-    
-    st.plotly_chart(fig_total_rev, use_container_width=True)
-
-
-# Chart 4: Overall Monthly Conversions Trend
-if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-    st.subheader("Overall Monthly Conversions Trend")
-    
-    monthly_total = filtered_df.groupby('month_date').agg({
-        'customer_id': 'nunique'
-    }).reset_index()
-    monthly_total.columns = ['month', 'total_conversions']
-    
-    fig_total_conv = px.line(
-        monthly_total,
-        x='month',
-        y='total_conversions',
-        markers=True,
-        title='Overall Monthly Conversions Trend'
-    )
-    
-    fig_total_conv.update_traces(
-        line=dict(color='#3647F5', width=3),
-        marker=dict(size=10, color='#FF9F0D')
-    )
-    
-    fig_total_conv.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#f5f5f5',
-        height=450,
-        xaxis_title="Month",
-        yaxis_title="Total Conversions",
-        xaxis=dict(tickangle=45)
-    )
-    
-    st.plotly_chart(fig_total_conv, use_container_width=True)
 
 
     # ========== TAB 2: MARKETING ==========
