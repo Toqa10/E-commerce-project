@@ -461,22 +461,7 @@ fig_revenue_trend.update_layout(
 )
 
 fig_revenue_trend.show()
-            # Same styling as notebook
-            fig.update_traces(
-                line=dict(color='#3647F5', width=3),
-                marker=dict(size=8, color='#FF9F0D')
-            )
-
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Month",
-                yaxis_title="Total Revenue"
-            )
-
-            st.plotly_chart(fig, use_container_width=True)
+            
 
         # Chart 2: Monthly Conversions Trend (من الـ Notebook)
         if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
