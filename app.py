@@ -567,9 +567,9 @@ elif page == "📊 Analytics Dashboard":
 
 
     # ========== TAB 2: MARKETING ==========
-   
-    with tab2:
-      if 'marketing_channel' in filtered_df.columns:
+   with tab2:
+    # تحضير البيانات - بس لو الأعمدة موجودة
+    if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
         channel_perf = filtered_df.groupby('marketing_channel').agg({
             'net_revenue': 'sum',
             'customer_id': 'nunique',
@@ -577,8 +577,8 @@ elif page == "📊 Analytics Dashboard":
             'roi': 'mean'
         }).reset_index()
         channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
-    
-    if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+        
+        # Chart 1: Total Revenue per Marketing Channel
         st.subheader("Total Revenue per Marketing Channel")
         bar_width = 25
         fig_rev = px.scatter(
@@ -610,8 +610,8 @@ elif page == "📊 Analytics Dashboard":
             margin=dict(t=60)
         )
         st.plotly_chart(fig_rev, use_container_width=True)
-    
-    if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+        
+        # Chart 2: Total Conversions per Channel
         st.subheader("Total Conversions per Channel")
         fig_conv = px.scatter(
             channel_perf,
@@ -634,8 +634,8 @@ elif page == "📊 Analytics Dashboard":
             xaxis_title="Marketing Channel"
         )
         st.plotly_chart(fig_conv, use_container_width=True)
-    
-    if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns:
+        
+        # Chart 3: Total Spend per Channel
         st.subheader("Total Spend per Channel")
         fig_spend = px.line(
             channel_perf,
@@ -657,8 +657,8 @@ elif page == "📊 Analytics Dashboard":
             xaxis_title="Marketing Channel"
         )
         st.plotly_chart(fig_spend, use_container_width=True)
-    
-    if 'marketing_channel' in filtered_df.columns and 'roi' in filtered_df.columns:
+        
+        # Chart 4: Average ROI per Channel
         st.subheader("Average ROI per Channel")
         channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
         fig_roi = px.bar(
@@ -679,6 +679,7 @@ elif page == "📊 Analytics Dashboard":
             yaxis_title="Marketing Channel"
         )
         st.plotly_chart(fig_roi, use_container_width=True)
+
 
 
 
