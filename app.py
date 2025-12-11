@@ -1,10 +1,9 @@
-
-import streamlit as st 
-import pandas as pd 
+طيب دي النوت بوك هديك كود الستريم ليت مش عايزاك تغيرلي في الديزاين حاجة انا عايزاك بس تحطلي الرسومات اللي عندك في الوت بوك جوا  الستريم ليت بدزن تغيير اي حاجة تانيةimport streamlit as st
+import pandas as pd
 import numpy as np
-import plotly.express as px 
+import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime 
+from datetime import datetime
 
 # =============================================================================
 # E-COMMERCE THEME (Professional Blue/Green)
@@ -433,11 +432,7 @@ elif page == "📊 Analytics Dashboard":
     # ========== TAB 1: TRENDS ==========
     with tab1:
         # Chart 1: Monthly Revenue Trend (من الـ Notebook)
-        # AHMED
-# -------------------------------
-# LINE CHART: Monthly Revenue by Channel
-# -------------------------------
-if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+        if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Overall Monthly Revenue Trend")
 
             monthly_revenue = filtered_df.groupby('month_date').agg({
@@ -452,7 +447,9 @@ if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
                 y='totalrevenue',
                 markers=True,
                 title='Overall Monthly Revenue'
-            ) # Same styling as notebook
+            )
+
+            # Same styling as notebook
             fig.update_traces(
                 line=dict(color='#3647F5', width=3),
                 marker=dict(size=8, color='#FF9F0D')
