@@ -933,116 +933,199 @@ elif page == "📊 Analytics Dashboard":
             st.error("❌ Column 'marketing_channel' not found!")
 
    
-    # ========== TAB 4: PERFORMANCE ==========
+       # ========== TAB 3: PERFORMANCE (NEW) ==========
     with tab3:
-        if 'category' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Net Revenue by Product Category")
-            category_revenue = filtered_df.groupby('category').agg({
-                'net_revenue': 'sum'
+        st.subheader("📊 Marketing Channel Performance Analysis")
+        
+        if 'marketing_channel' in filtered_df.columns:
+            # تحضير البيانات الأساسية
+            performance_by_channel = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': ['sum', 'mean'],
+                'order_id': 'count',
+                'customer_id': 'nunique'
             }).reset_index()
-            category_revenue = category_revenue.sort_values('net_revenue', ascending=False)
-            fig = px.bar(
-                category_revenue,
-                x='category',
-                y='net_revenue',
-                color='net_revenue',
-                color_continuous_scale='Greens',
-                title='Net Revenue by Product Category'
+            performance_by_channel.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
+            performance_by_channel['Revenue_Per_Order'] = (performance_by_channel['Total_Revenue'] / performance_by_channel['Total_Orders']).round(2)
+            
+            # Chart 1: Revenue Per Order
+            st.subheader("💵 Revenue Per Order by Channel")
+            performance_sorted = performance_by_channel.sort_values('Revenue_Per_Order')
+            
+            fig_revenue_order = px.bar(
+                performance_sorted,
+                x='Revenue_Per_Order',
+                y='Channel',
+                orientation='h',
+                title='Revenue Per Order by Channel',
+                color='Revenue_Per_Order',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            fig.update_layout(
+            fig_revenue_order.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            fig_revenue_order.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
-                height=450
+                height=450,
+                xaxis_title="Revenue Per Order ($)",
+                yaxis_title="Marketing Channel"
             )
-            st.plotly_chart(fig, use_container_width=True)
-
-        if 'payment_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Payment Method Performance")
-            payment_data = filtered_df.groupby('payment_method').agg({
-                'net_revenue': 'sum',
+            st.plotly_chart(fig_revenue_order, use_container_width=True)
+            
+            # Chart 2: Customer Acquisition Rate
+            st.subheader("📈 Customer Acquisition Rate by Channel")
+            conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
+                'customer_id': 'nunique',
                 'order_id': 'count'
             }).reset_index()
-            payment_data.columns = ['payment_method', 'Revenue', 'Orders']
-            fig = go.Figure(data=[
-                go.Bar(
-                    name='Revenue ($)',
-                    x=payment_data['payment_method'],
-                    y=payment_data['Revenue'],
-                    marker_color='#3647F5'
-                ),
-                go.Bar(
-                    name='Orders',
-                    x=payment_data['payment_method'],
-                    y=payment_data['Orders'],
-                    marker_color='#FF9F0D'
-                )
-            ])
-            fig.update_layout(
-                barmode='group',
+            conversion_by_channel.columns = ['Channel', 'Unique_Customers', 'Total_Orders']
+            conversion_by_channel['Customer_Acquisition_Rate_%'] = (
+                (conversion_by_channel['Unique_Customers'] / conversion_by_channel['Total_Orders']) * 100
+            ).round(2)
+            conversion_by_channel = conversion_by_channel.sort_values('Customer_Acquisition_Rate_%', ascending=False)
+            
+            fig_acquisition = px.bar(
+                conversion_by_channel,
+                x='Channel',
+                y='Customer_Acquisition_Rate_%',
+                title='Customer Acquisition Rate by Channel',
+                color='Customer_Acquisition_Rate_%',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            fig_acquisition.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            fig_acquisition.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
-                height=450
+                height=450,
+                xaxis_title="Marketing Channel",
+                yaxis_title="Customer Acquisition Rate (%)",
+                xaxis=dict(tickangle=45)
             )
-            st.plotly_chart(fig, use_container_width=True)
-
-        if 'shipping_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'satisfaction_rating' in filtered_df.columns:
-            st.subheader("Shipping Method Performance")
-            shipping_data = filtered_df.groupby('shipping_method').agg({
-                'net_revenue': 'sum',
-                'satisfaction_rating': 'mean'
+            st.plotly_chart(fig_acquisition, use_container_width=True)
+            
+            # Chart 3: Channel Efficiency Ranking
+            st.subheader("🏆 Channel Efficiency Ranking")
+            efficiency = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': ['sum', 'mean'],
+                'order_id': 'count',
+                'customer_id': 'nunique'
             }).reset_index()
-            fig = go.Figure(data=[
-                go.Bar(
-                    name='Revenue ($)',
-                    x=shipping_data['shipping_method'],
-                    y=shipping_data['net_revenue'],
-                    marker_color='#3647F5'
-                ),
-                go.Bar(
-                    name='Satisfaction',
-                    x=shipping_data['shipping_method'],
-                    y=shipping_data['satisfaction_rating'] * 1000,
-                    marker_color='#FF9F0D'
-                )
-            ])
-            fig.update_layout(
-                barmode='group',
+            efficiency.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
+            efficiency['Revenue_Per_Order'] = (efficiency['Total_Revenue'] / efficiency['Total_Orders']).round(2)
+            efficiency['Customer_Acq_Rate_%'] = ((efficiency['Unique_Customers'] / efficiency['Total_Orders']) * 100).round(2)
+            
+            max_rev = efficiency['Revenue_Per_Order'].max()
+            max_cust = efficiency['Customer_Acq_Rate_%'].max()
+            max_order = efficiency['Avg_Order_Value'].max()
+            
+            efficiency['Efficiency_Score'] = (
+                (efficiency['Revenue_Per_Order'] / max_rev) * 40 +
+                (efficiency['Customer_Acq_Rate_%'] / max_cust) * 30 +
+                (efficiency['Avg_Order_Value'] / max_order) * 30
+            ).round(2)
+            efficiency = efficiency.sort_values('Efficiency_Score')
+            
+            fig_efficiency = px.bar(
+                efficiency,
+                x='Efficiency_Score',
+                y='Channel',
+                orientation='h',
+                title='Channel Efficiency Ranking',
+                color='Efficiency_Score',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            fig_efficiency.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            fig_efficiency.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
-                height=450
+                height=450,
+                xaxis_title="Efficiency Score",
+                yaxis_title="Marketing Channel"
             )
-            st.plotly_chart(fig, use_container_width=True)
-
-        if 'satisfaction_rating' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'returned' in filtered_df.columns:
-            st.subheader("Satisfaction Rating Impact on Revenue & Returns")
-            satisfaction_data = filtered_df.groupby('satisfaction_rating').agg({
-                'net_revenue': 'mean',
-                'returned': 'sum'
+            st.plotly_chart(fig_efficiency, use_container_width=True)
+            
+            # Chart 4: Revenue vs Customer Acquisition
+            st.subheader("🎯 Revenue vs Customer Acquisition")
+            revenue_analysis = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': 'sum',
+                'customer_id': 'nunique',
+                'order_id': 'count'
             }).reset_index()
-            fig = px.scatter(
-                satisfaction_data,
-                x='satisfaction_rating',
-                y='net_revenue',
-                size='returned',
-                color='returned',
-                labels={
-                    'net_revenue': 'Avg Revenue ($)',
-                    'satisfaction_rating': 'Rating',
-                    'returned': 'Returns'
-                },
-                color_continuous_scale='Reds',
-                title='Satisfaction Impact on Revenue & Returns'
+            revenue_analysis.columns = ['Channel', 'Total_Revenue', 'Unique_Customers', 'Total_Orders']
+            revenue_analysis['Revenue_Per_Customer'] = (
+                revenue_analysis['Total_Revenue'] / revenue_analysis['Unique_Customers']
+            ).round(2)
+            
+            fig_revenue_customers = px.scatter(
+                revenue_analysis,
+                x='Unique_Customers',
+                y='Total_Revenue',
+                size='Revenue_Per_Customer',
+                color='Revenue_Per_Customer',
+                hover_name='Channel',
+                text='Channel',
+                title='Revenue vs Customer Acquisition',
+                size_max=60,
+                color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
             )
-            fig.update_layout(
+            fig_revenue_customers.update_traces(
+                textposition='top center',
+                textfont=dict(size=12, color='#f5f5f5'),
+                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
+            )
+            fig_revenue_customers.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
-                height=450
+                height=500,
+                showlegend=False,
+                xaxis_title="Unique Customers Acquired",
+                yaxis_title="Total Revenue ($)"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig_revenue_customers, use_container_width=True)
+            
+            # Chart 5: Revenue Per Customer
+            st.subheader("💰 Revenue Per Customer by Channel")
+            customer_value = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': 'sum',
+                'customer_id': 'nunique',
+                'order_id': 'count'
+            }).reset_index()
+            customer_value.columns = ['Channel', 'Total_Revenue', 'Total_Customers', 'Total_Orders']
+            customer_value['Revenue_Per_Customer'] = (
+                customer_value['Total_Revenue'] / customer_value['Total_Customers']
+            ).round(2)
+            customer_value = customer_value.sort_values('Revenue_Per_Customer')
+            
+            fig_revenue_customer = px.bar(
+                customer_value,
+                x='Channel',
+                y='Revenue_Per_Customer',
+                title='Revenue Per Customer by Channel',
+                color='Revenue_Per_Customer',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            fig_revenue_customer.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            fig_revenue_customer.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Marketing Channel",
+                yaxis_title="Revenue Per Customer ($)",
+                xaxis=dict(tickangle=45)
+            )
+            st.plotly_chart(fig_revenue_customer, use_container_width=True)
+
 
 # =============================================================================
 # DATA EXPLORER
