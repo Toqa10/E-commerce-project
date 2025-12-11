@@ -569,7 +569,7 @@ elif page == "📊 Analytics Dashboard":
     # ========== TAB 2: MARKETING ==========
    
     with tab2:
-    if 'marketing_channel' in filtered_df.columns:
+      if 'marketing_channel' in filtered_df.columns:
         channel_perf = filtered_df.groupby('marketing_channel').agg({
             'net_revenue': 'sum',
             'customer_id': 'nunique',
