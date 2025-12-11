@@ -433,23 +433,34 @@ elif page == "📊 Analytics Dashboard":
     # ========== TAB 1: TRENDS ==========
     with tab1:
         # Chart 1: Monthly Revenue Trend (من الـ Notebook)
-        if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Overall Monthly Revenue Trend")
+        # AHMED
+# -------------------------------
+# LINE CHART: Monthly Revenue by Channel
+# -------------------------------
 
-            monthly_revenue = filtered_df.groupby('month_date').agg({
-                'net_revenue': 'sum'
-            }).reset_index()
-            monthly_revenue.columns = ['month', 'totalrevenue']
-            monthly_revenue = monthly_revenue.sort_values('month')
+fig_revenue_trend = px.line(
+    monthly_channel,
+    x='month',
+    y='revenue',
+    color='channel',
+    markers=True,
+    title='Monthly Revenue Trends by Marketing Channel'
+)
 
-            fig = px.line(
-                monthly_revenue,
-                x='month',
-                y='totalrevenue',
-                markers=True,
-                title='Overall Monthly Revenue'
-            )
+fig_revenue_trend.update_layout(
+    plot_bgcolor="#040D2F",
+    paper_bgcolor="#040D2F",
+    font_color="#D9D9D9",
+    title_font_size=22,
+    title_x=0.5,
+    height=500,
+    xaxis_title="Month",
+    yaxis_title="Revenue",
+    legend_title="Channel",
+    xaxis=dict(tickangle=45)
+)
 
+fig_revenue_trend.show()
             # Same styling as notebook
             fig.update_traces(
                 line=dict(color='#3647F5', width=3),
