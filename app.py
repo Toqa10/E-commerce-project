@@ -567,11 +567,10 @@ elif page == "📊 Analytics Dashboard":
 
 
     # ========== TAB 2: MARKETING ==========
-    with tab2:
-    # Chart 1: Total Revenue per Marketing Channel
-     if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-        st.subheader("Total Revenue per Marketing Channel")
-        
+   
+   with tab2:
+    # تحضير البيانات الأساسية
+    if 'marketing_channel' in filtered_df.columns:
         channel_perf = filtered_df.groupby('marketing_channel').agg({
             'net_revenue': 'sum',
             'customer_id': 'nunique',
@@ -579,6 +578,10 @@ elif page == "📊 Analytics Dashboard":
             'roi': 'mean'
         }).reset_index()
         channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
+
+    # Chart 1: Total Revenue per Marketing Channel
+    if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+        st.subheader("Total Revenue per Marketing Channel")
         
         bar_width = 25
         
@@ -700,172 +703,6 @@ elif page == "📊 Analytics Dashboard":
         
         st.plotly_chart(fig_roi, use_container_width=True)
 
-    # Chart 5: Conversion Rate by Channel
-    if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns and 'quantity' in filtered_df.columns:
-        st.subheader("Conversion Rate by Channel")
-        
-        filtered_df['visits'] = filtered_df['quantity'] * 100
-        
-        conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
-            'customer_id': 'nunique',
-            'visits': 'sum'
-        }).reset_index()
-        
-        conversion_by_channel['conversion_rate'] = (
-            conversion_by_channel['customer_id'] / conversion_by_channel['visits'] * 100
-        ).round(3)
-        
-        conversion_by_channel = conversion_by_channel.sort_values('conversion_rate', ascending=False)
-        
-        fig = px.bar(
-            conversion_by_channel,
-            x='marketing_channel',
-            y='conversion_rate',
-            color='conversion_rate',
-            color_continuous_scale=['#FF9F0D', '#D9D9D9'],
-            title='Conversion Rate by Channel'
-        )
-        
-        fig.update_traces(
-            marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-        )
-        
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            xaxis_title="Marketing Channel",
-            yaxis_title="Conversion Rate (%)"
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Chart 6: Channel Efficiency Ranking
-    if 'marketing_channel' in filtered_df.columns and 'cpc' in filtered_df.columns:
-        st.subheader("Channel Efficiency Ranking")
-        
-        cpc_by_channel = filtered_df.groupby('marketing_channel').agg({
-            'cpc': 'mean'
-        }).reset_index()
-        cpc_by_channel.columns = ['Channel', 'AvgCPC']
-        
-        if 'conversion_rate' in conversion_by_channel.columns:
-            cpc_by_channel = cpc_by_channel.merge(
-                conversion_by_channel[['marketing_channel', 'conversion_rate']],
-                left_on='Channel',
-                right_on='marketing_channel',
-                how='left'
-            )
-            
-            cpc_by_channel['EfficiencyScore'] = (
-                (1 / cpc_by_channel['AvgCPC'] * 100) + 
-                (cpc_by_channel['conversion_rate'] * 10)
-            ).round(2)
-            
-            cpc_by_channel = cpc_by_channel.sort_values('EfficiencyScore', ascending=True)
-            
-            fig = px.bar(
-                cpc_by_channel,
-                x='EfficiencyScore',
-                y='Channel',
-                orientation='h',
-                color='EfficiencyScore',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
-                title='Channel Efficiency Ranking'
-            )
-            
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-
-    # Chart 7: Spend vs Revenue Analysis
-    if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-        st.subheader("ROI Analysis: Spend vs Revenue by Channel")
-        
-        spend_revenue = filtered_df.groupby('marketing_channel').agg({
-            'marketing_spend': 'sum',
-            'net_revenue': 'sum'
-        }).reset_index()
-        
-        spend_revenue.columns = ['Channel', 'TotalSpend', 'TotalRevenue']
-        spend_revenue['RevenuetoSpendRatio'] = (
-            spend_revenue['TotalRevenue'] / spend_revenue['TotalSpend']
-        ).round(2)
-        
-        fig = px.scatter(
-            spend_revenue,
-            x='TotalSpend',
-            y='TotalRevenue',
-            size='RevenuetoSpendRatio',
-            color='RevenuetoSpendRatio',
-            hover_name='Channel',
-            text='Channel',
-            title='ROI Analysis: Spend vs Revenue by Channel',
-            size_max=60,
-            color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
-        )
-        
-        fig.update_traces(
-            textposition='top center',
-            textfont=dict(size=12, color='#D9D9D9'),
-            marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
-        )
-        
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=500,
-            showlegend=False
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Chart 8: Cost Per Conversion
-    if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-        st.subheader("Cost Per Conversion by Channel")
-        
-        spend_conversions = filtered_df.groupby('marketing_channel').agg({
-            'marketing_spend': 'sum',
-            'customer_id': 'nunique'
-        }).reset_index()
-        
-        spend_conversions.columns = ['Channel', 'TotalSpend', 'TotalConversions']
-        spend_conversions['SpendPerConversion'] = (
-            spend_conversions['TotalSpend'] / spend_conversions['TotalConversions']
-        ).round(2)
-        
-        spend_conversions = spend_conversions.sort_values('SpendPerConversion')
-        
-        fig = px.bar(
-            spend_conversions,
-            x='Channel',
-            y='SpendPerConversion',
-            color='SpendPerConversion',
-            color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
-            title='Cost Per Conversion by Channel'
-        )
-        
-        fig.update_traces(
-            marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-        )
-        
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450
-        )
         
         st.plotly_chart(fig, use_container_width=True)
 
