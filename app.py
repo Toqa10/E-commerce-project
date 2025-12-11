@@ -569,7 +569,6 @@ elif page == "📊 Analytics Dashboard":
     # ========== TAB 2: MARKETING ==========
    
     with tab2:
-    # تحضير البيانات الأساسية (لاحظ الـ 4 مسافات هنا)
     if 'marketing_channel' in filtered_df.columns:
         channel_perf = filtered_df.groupby('marketing_channel').agg({
             'net_revenue': 'sum',
@@ -578,13 +577,10 @@ elif page == "📊 Analytics Dashboard":
             'roi': 'mean'
         }).reset_index()
         channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
-
-    # Chart 1: Total Revenue per Marketing Channel
+    
     if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
         st.subheader("Total Revenue per Marketing Channel")
-        
         bar_width = 25
-        
         fig_rev = px.scatter(
             channel_perf,
             x='channel',
@@ -593,13 +589,11 @@ elif page == "📊 Analytics Dashboard":
             color_discrete_sequence=["#3647F5"],
             text="total_revenue"
         )
-        
         fig_rev.update_traces(
             marker=dict(size=bar_width),
             textposition='top center',
             texttemplate='%{text:.2s}'
         )
-        
         for x_val, y_val in zip(channel_perf['channel'], channel_perf['total_revenue']):
             fig_rev.add_shape(
                 type="line",
@@ -608,7 +602,6 @@ elif page == "📊 Analytics Dashboard":
                 line=dict(color="#3647F5", width=bar_width),
                 layer="below"
             )
-        
         fig_rev.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
@@ -616,13 +609,10 @@ elif page == "📊 Analytics Dashboard":
             height=450,
             margin=dict(t=60)
         )
-        
         st.plotly_chart(fig_rev, use_container_width=True)
-
-    # Chart 2: Total Conversions per Channel
+    
     if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
         st.subheader("Total Conversions per Channel")
-        
         fig_conv = px.scatter(
             channel_perf,
             x='channel',
@@ -632,11 +622,9 @@ elif page == "📊 Analytics Dashboard":
             color_continuous_scale=["#FF9F0D", "#D9D9D9"],
             title="Total Conversions per Channel"
         )
-        
         fig_conv.update_traces(
             marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
         )
-        
         fig_conv.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
@@ -645,13 +633,10 @@ elif page == "📊 Analytics Dashboard":
             yaxis_title="Total Conversions",
             xaxis_title="Marketing Channel"
         )
-        
         st.plotly_chart(fig_conv, use_container_width=True)
-
-    # Chart 3: Total Spend per Channel
+    
     if 'marketing_channel' in filtered_df.columns and 'marketing_spend' in filtered_df.columns:
         st.subheader("Total Spend per Channel")
-        
         fig_spend = px.line(
             channel_perf,
             x='channel',
@@ -659,12 +644,10 @@ elif page == "📊 Analytics Dashboard":
             markers=True,
             title="Total Spend per Channel"
         )
-        
         fig_spend.update_traces(
             line=dict(color="#FF9F0D", width=4),
             marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
         )
-        
         fig_spend.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
@@ -673,15 +656,11 @@ elif page == "📊 Analytics Dashboard":
             yaxis_title="Total Spend",
             xaxis_title="Marketing Channel"
         )
-        
         st.plotly_chart(fig_spend, use_container_width=True)
-
-    # Chart 4: Average ROI per Channel
+    
     if 'marketing_channel' in filtered_df.columns and 'roi' in filtered_df.columns:
         st.subheader("Average ROI per Channel")
-        
         channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
-        
         fig_roi = px.bar(
             channel_perf_sorted,
             x='avg_roi',
@@ -691,7 +670,6 @@ elif page == "📊 Analytics Dashboard":
             color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
             title="Average ROI per Channel"
         )
-        
         fig_roi.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
@@ -700,8 +678,8 @@ elif page == "📊 Analytics Dashboard":
             xaxis_title="Average ROI",
             yaxis_title="Marketing Channel"
         )
-        
         st.plotly_chart(fig_roi, use_container_width=True)
+
 
 
     # ========== TAB 3: CUSTOMERS ==========
