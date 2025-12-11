@@ -564,6 +564,7 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========    # ========== TAB 2: MARKETING ==========
+       # ========== TAB 2: MARKETING ==========
     with tab2:
         # تحضير البيانات الأساسية
         if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
@@ -574,24 +575,28 @@ elif page == "📊 Analytics Dashboard":
                 'roi': 'mean'
             }).reset_index()
             channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
+            channel_perf = channel_perf.set_index('channel')
             
             # Chart 1: Total Revenue per Marketing Channel
             st.subheader("Total Revenue per Marketing Channel")
             bar_width = 25
+            
             fig_rev = px.scatter(
                 channel_perf,
-                x='channel',
-                y='total_revenue',
+                x=channel_perf.index,
+                y="total_revenue",
                 title="Total Revenue per Marketing Channel",
                 color_discrete_sequence=["#3647F5"],
                 text="total_revenue"
             )
+            
             fig_rev.update_traces(
                 marker=dict(size=bar_width),
                 textposition='top center',
                 texttemplate='%{text:.2s}'
             )
-            for x_val, y_val in zip(channel_perf['channel'], channel_perf['total_revenue']):
+            
+            for x_val, y_val in zip(channel_perf.index, channel_perf["total_revenue"]):
                 fig_rev.add_shape(
                     type="line",
                     x0=x_val, y0=0,
@@ -599,6 +604,7 @@ elif page == "📊 Analytics Dashboard":
                     line=dict(color="#3647F5", width=bar_width),
                     layer="below"
                 )
+            
             fig_rev.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -606,22 +612,26 @@ elif page == "📊 Analytics Dashboard":
                 height=450,
                 margin=dict(t=60)
             )
+            
             st.plotly_chart(fig_rev, use_container_width=True)
             
             # Chart 2: Total Conversions per Channel
             st.subheader("Total Conversions per Channel")
+            
             fig_conv = px.scatter(
                 channel_perf,
-                x='channel',
-                y='total_conversions',
-                size='total_conversions',
-                color='total_conversions',
+                x=channel_perf.index,
+                y="total_conversions",
+                size="total_conversions",
+                color="total_conversions",
                 color_continuous_scale=["#FF9F0D", "#D9D9D9"],
                 title="Total Conversions per Channel"
             )
+            
             fig_conv.update_traces(
                 marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
             )
+            
             fig_conv.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -630,21 +640,25 @@ elif page == "📊 Analytics Dashboard":
                 yaxis_title="Total Conversions",
                 xaxis_title="Marketing Channel"
             )
+            
             st.plotly_chart(fig_conv, use_container_width=True)
             
             # Chart 3: Total Spend per Channel
             st.subheader("Total Spend per Channel")
+            
             fig_spend = px.line(
                 channel_perf,
-                x='channel',
-                y='total_spend',
+                x=channel_perf.index,
+                y="total_spend",
                 markers=True,
                 title="Total Spend per Channel"
             )
+            
             fig_spend.update_traces(
                 line=dict(color="#FF9F0D", width=4),
                 marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
             )
+            
             fig_spend.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -653,20 +667,24 @@ elif page == "📊 Analytics Dashboard":
                 yaxis_title="Total Spend",
                 xaxis_title="Marketing Channel"
             )
+            
             st.plotly_chart(fig_spend, use_container_width=True)
             
             # Chart 4: Average ROI per Channel
             st.subheader("Average ROI per Channel")
+            
             channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
+            
             fig_roi = px.bar(
                 channel_perf_sorted,
                 x='avg_roi',
-                y='channel',
+                y=channel_perf_sorted.index,
                 orientation='h',
                 color='avg_roi',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
                 title="Average ROI per Channel"
             )
+            
             fig_roi.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -675,302 +693,8 @@ elif page == "📊 Analytics Dashboard":
                 xaxis_title="Average ROI",
                 yaxis_title="Marketing Channel"
             )
+            
             st.plotly_chart(fig_roi, use_container_width=True)
-
-        # Chart 5: Customer Acquisition Rate by Channel
-        if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns and 'order_id' in filtered_df.columns:
-            st.subheader("Customer Acquisition Rate by Channel")
-            
-            conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            conversion_by_channel.columns = ['Channel', 'Unique_Customers', 'Total_Orders']
-            conversion_by_channel['Customer_Acquisition_Rate_%'] = (
-                (conversion_by_channel['Unique_Customers'] / conversion_by_channel['Total_Orders']) * 100
-            ).round(2)
-            conversion_by_channel = conversion_by_channel.sort_values('Customer_Acquisition_Rate_%', ascending=False)
-            
-            fig = px.bar(
-                conversion_by_channel,
-                x='Channel',
-                y='Customer_Acquisition_Rate_%',
-                title='Customer Acquisition Rate by Channel',
-                color='Customer_Acquisition_Rate_%',
-                color_continuous_scale=['#FF9F0D', '#D9D9D9']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Customer Acquisition Rate (%)",
-                xaxis=dict(tickangle=45)
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 6: Channel Efficiency Ranking
-        if 'marketing_channel' in filtered_df.columns and 'final_amount' in filtered_df.columns:
-            st.subheader("Channel Efficiency Ranking")
-            
-            efficiency = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': ['sum', 'mean'],
-                'order_id': 'count',
-                'customer_id': 'nunique'
-            }).reset_index()
-            efficiency.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
-            efficiency['Revenue_Per_Order'] = (efficiency['Total_Revenue'] / efficiency['Total_Orders']).round(2)
-            efficiency['Customer_Acq_Rate_%'] = ((efficiency['Unique_Customers'] / efficiency['Total_Orders']) * 100).round(2)
-            
-            max_rev = efficiency['Revenue_Per_Order'].max()
-            max_cust = efficiency['Customer_Acq_Rate_%'].max()
-            max_order = efficiency['Avg_Order_Value'].max()
-            
-            efficiency['Efficiency_Score'] = (
-                (efficiency['Revenue_Per_Order'] / max_rev) * 40 +
-                (efficiency['Customer_Acq_Rate_%'] / max_cust) * 30 +
-                (efficiency['Avg_Order_Value'] / max_order) * 30
-            ).round(2)
-            efficiency = efficiency.sort_values('Efficiency_Score')
-            
-            fig = px.bar(
-                efficiency,
-                x='Efficiency_Score',
-                y='Channel',
-                orientation='h',
-                title='Channel Efficiency Ranking',
-                color='Efficiency_Score',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Efficiency Score",
-                yaxis_title="Marketing Channel"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 7: Channel Performance - Customers vs Revenue
-        if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns and 'final_amount' in filtered_df.columns:
-            st.subheader("Channel Performance: Customers vs Revenue")
-            
-            revenue_analysis = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': 'sum',
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            revenue_analysis.columns = ['Channel', 'Total_Revenue', 'Unique_Customers', 'Total_Orders']
-            revenue_analysis['Revenue_Per_Customer'] = (
-                revenue_analysis['Total_Revenue'] / revenue_analysis['Unique_Customers']
-            ).round(2)
-            
-            max_rev = revenue_analysis['Total_Revenue'].max()
-            max_customers = revenue_analysis['Unique_Customers'].max()
-            revenue_analysis['Value_Score'] = (
-                (revenue_analysis['Total_Revenue'] / max_rev) * 60 +
-                (revenue_analysis['Unique_Customers'] / max_customers) * 40
-            ).round(2)
-            
-            fig = px.scatter(
-                revenue_analysis,
-                x='Unique_Customers',
-                y='Total_Revenue',
-                size='Revenue_Per_Customer',
-                color='Value_Score',
-                hover_name='Channel',
-                text='Channel',
-                title='Channel Performance: Customers vs Revenue',
-                size_max=60,
-                color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
-            )
-            fig.update_traces(
-                textposition='top center',
-                textfont=dict(size=12, color='#f5f5f5'),
-                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                showlegend=False,
-                xaxis_title="Unique Customers Acquired",
-                yaxis_title="Total Revenue ($)"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 8: Average Order Value by Channel
-        if 'marketing_channel' in filtered_df.columns and 'final_amount' in filtered_df.columns:
-            st.subheader("Average Order Value by Channel")
-            
-            order_value_analysis = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': ['sum', 'mean'],
-                'order_id': 'count'
-            }).reset_index()
-            order_value_analysis.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders']
-            order_value_analysis = order_value_analysis.sort_values('Avg_Order_Value')
-            
-            fig = px.bar(
-                order_value_analysis,
-                x='Channel',
-                y='Avg_Order_Value',
-                title='Average Order Value by Channel',
-                color='Avg_Order_Value',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Average Order Value ($)",
-                xaxis=dict(tickangle=45)
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 9: Revenue Per Order by Channel
-        if 'marketing_channel' in filtered_df.columns and 'final_amount' in filtered_df.columns:
-            st.subheader("Revenue Per Order by Channel")
-            
-            performance_by_channel = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': ['sum', 'mean'],
-                'order_id': 'count',
-                'customer_id': 'nunique'
-            }).reset_index()
-            performance_by_channel.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
-            performance_by_channel['Revenue_Per_Order'] = (
-                performance_by_channel['Total_Revenue'] / performance_by_channel['Total_Orders']
-            ).round(2)
-            performance_by_channel = performance_by_channel.sort_values('Revenue_Per_Order')
-            
-            fig = px.bar(
-                performance_by_channel,
-                x='Revenue_Per_Order',
-                y='Channel',
-                orientation='h',
-                title='Revenue Per Order by Channel',
-                color='Revenue_Per_Order',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Revenue Per Order ($)",
-                yaxis_title="Marketing Channel"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 10: Performance Quadrant Analysis
-        if 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns and 'final_amount' in filtered_df.columns:
-            st.subheader("Performance Quadrant Analysis")
-            
-            quadrant_analysis = filtered_df.groupby('marketing_channel').agg({
-                'customer_id': 'nunique',
-                'final_amount': 'sum',
-                'order_id': 'count'
-            }).reset_index()
-            quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
-            quadrant_analysis['Revenue_Per_Customer'] = (
-                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
-            ).round(2)
-            
-            avg_customers = quadrant_analysis['Unique_Customers'].mean()
-            avg_revenue = quadrant_analysis['Total_Revenue'].mean()
-            
-            fig = px.scatter(
-                quadrant_analysis,
-                x='Unique_Customers',
-                y='Total_Revenue',
-                size='Revenue_Per_Customer',
-                color='Revenue_Per_Customer',
-                hover_name='Channel',
-                title='Performance Quadrant Analysis',
-                size_max=50,
-                color_continuous_scale=['#FF9F0D', '#3647F5']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.9)
-            )
-            fig.add_hline(
-                y=avg_revenue,
-                line_dash="dash",
-                line_color="#FF9F0D",
-                annotation_text=f"Avg Revenue: ${avg_revenue:,.0f}",
-                annotation_position="right"
-            )
-            fig.add_vline(
-                x=avg_customers,
-                line_dash="dash",
-                line_color="#FF9F0D",
-                annotation_text=f"Avg Customers: {avg_customers:,.0f}",
-                annotation_position="top"
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                xaxis_title="Unique Customers Acquired",
-                yaxis_title="Total Revenue ($)",
-                showlegend=False
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Chart 11: Revenue Per Customer by Channel
-        if 'marketing_channel' in filtered_df.columns and 'final_amount' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-            st.subheader("Revenue Per Customer by Channel")
-            
-            customer_value = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': 'sum',
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            customer_value.columns = ['Channel', 'Total_Revenue', 'Total_Customers', 'Total_Orders']
-            customer_value['Revenue_Per_Customer'] = (
-                customer_value['Total_Revenue'] / customer_value['Total_Customers']
-            ).round(2)
-            customer_value = customer_value.sort_values('Revenue_Per_Customer')
-            
-            fig = px.bar(
-                customer_value,
-                x='Channel',
-                y='Revenue_Per_Customer',
-                title='Revenue Per Customer by Channel',
-                color='Revenue_Per_Customer',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Revenue Per Customer ($)",
-                xaxis=dict(tickangle=45)
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
 
     # ========== TAB 3: CUSTOMERS ==========
     with tab3:
