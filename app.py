@@ -564,137 +564,172 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========    # ========== TAB 2: MARKETING ==========
-       # ========== TAB 2: MARKETING ==========
+           # ========== TAB 2: MARKETING ==========
     with tab2:
-        # تحضير البيانات الأساسية
-        if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
-            channel_perf = filtered_df.groupby('marketing_channel').agg({
-                'net_revenue': 'sum',
-                'customer_id': 'nunique',
-                'marketing_spend': 'sum',
-                'roi': 'mean'
-            }).reset_index()
-            channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
-            channel_perf = channel_perf.set_index('channel')
+        st.write(f"**Debug:** Records = {len(filtered_df)}")
+        
+        # نشوف الأعمدة الموجودة
+        required_cols = ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']
+        available_cols = [col for col in required_cols if col in filtered_df.columns]
+        missing_cols = [col for col in required_cols if col not in filtered_df.columns]
+        
+        st.write(f"**Available columns:** {available_cols}")
+        st.write(f"**Missing columns:** {missing_cols}")
+        
+        # لو في أعمدة ناقصة، استخدم البدائل
+        if 'marketing_channel' in filtered_df.columns:
+            # استخدم final_amount بدل net_revenue لو مش موجود
+            revenue_col = 'net_revenue' if 'net_revenue' in filtered_df.columns else 'final_amount'
             
-            # Chart 1: Total Revenue per Marketing Channel
-            st.subheader("Total Revenue per Marketing Channel")
-            bar_width = 25
-            
-            fig_rev = px.scatter(
-                channel_perf,
-                x=channel_perf.index,
-                y="total_revenue",
-                title="Total Revenue per Marketing Channel",
-                color_discrete_sequence=["#3647F5"],
-                text="total_revenue"
-            )
-            
-            fig_rev.update_traces(
-                marker=dict(size=bar_width),
-                textposition='top center',
-                texttemplate='%{text:.2s}'
-            )
-            
-            for x_val, y_val in zip(channel_perf.index, channel_perf["total_revenue"]):
-                fig_rev.add_shape(
-                    type="line",
-                    x0=x_val, y0=0,
-                    x1=x_val, y1=y_val,
-                    line=dict(color="#3647F5", width=bar_width),
-                    layer="below"
+            if revenue_col in filtered_df.columns and 'customer_id' in filtered_df.columns:
+                # حضر البيانات بدون marketing_spend و roi لو مش موجودين
+                agg_dict = {
+                    revenue_col: 'sum',
+                    'customer_id': 'nunique'
+                }
+                
+                if 'marketing_spend' in filtered_df.columns:
+                    agg_dict['marketing_spend'] = 'sum'
+                    
+                if 'roi' in filtered_df.columns:
+                    agg_dict['roi'] = 'mean'
+                
+                channel_perf = filtered_df.groupby('marketing_channel').agg(agg_dict).reset_index()
+                
+                # تسمية الأعمدة
+                new_cols = ['channel', 'total_revenue', 'total_conversions']
+                if 'marketing_spend' in filtered_df.columns:
+                    new_cols.append('total_spend')
+                if 'roi' in filtered_df.columns:
+                    new_cols.append('avg_roi')
+                    
+                channel_perf.columns = new_cols
+                channel_perf = channel_perf.set_index('channel')
+                
+                # Chart 1: Total Revenue per Marketing Channel
+                st.subheader("Total Revenue per Marketing Channel")
+                bar_width = 25
+                
+                fig_rev = px.scatter(
+                    channel_perf,
+                    x=channel_perf.index,
+                    y="total_revenue",
+                    title="Total Revenue per Marketing Channel",
+                    color_discrete_sequence=["#3647F5"],
+                    text="total_revenue"
                 )
-            
-            fig_rev.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                margin=dict(t=60)
-            )
-            
-            st.plotly_chart(fig_rev, use_container_width=True)
-            
-            # Chart 2: Total Conversions per Channel
-            st.subheader("Total Conversions per Channel")
-            
-            fig_conv = px.scatter(
-                channel_perf,
-                x=channel_perf.index,
-                y="total_conversions",
-                size="total_conversions",
-                color="total_conversions",
-                color_continuous_scale=["#FF9F0D", "#D9D9D9"],
-                title="Total Conversions per Channel"
-            )
-            
-            fig_conv.update_traces(
-                marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
-            )
-            
-            fig_conv.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                yaxis_title="Total Conversions",
-                xaxis_title="Marketing Channel"
-            )
-            
-            st.plotly_chart(fig_conv, use_container_width=True)
-            
-            # Chart 3: Total Spend per Channel
-            st.subheader("Total Spend per Channel")
-            
-            fig_spend = px.line(
-                channel_perf,
-                x=channel_perf.index,
-                y="total_spend",
-                markers=True,
-                title="Total Spend per Channel"
-            )
-            
-            fig_spend.update_traces(
-                line=dict(color="#FF9F0D", width=4),
-                marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
-            )
-            
-            fig_spend.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                yaxis_title="Total Spend",
-                xaxis_title="Marketing Channel"
-            )
-            
-            st.plotly_chart(fig_spend, use_container_width=True)
-            
-            # Chart 4: Average ROI per Channel
-            st.subheader("Average ROI per Channel")
-            
-            channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
-            
-            fig_roi = px.bar(
-                channel_perf_sorted,
-                x='avg_roi',
-                y=channel_perf_sorted.index,
-                orientation='h',
-                color='avg_roi',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
-                title="Average ROI per Channel"
-            )
-            
-            fig_roi.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Average ROI",
-                yaxis_title="Marketing Channel"
-            )
-            
-            st.plotly_chart(fig_roi, use_container_width=True)
+                
+                fig_rev.update_traces(
+                    marker=dict(size=bar_width),
+                    textposition='top center',
+                    texttemplate='%{text:.2s}'
+                )
+                
+                for x_val, y_val in zip(channel_perf.index, channel_perf["total_revenue"]):
+                    fig_rev.add_shape(
+                        type="line",
+                        x0=x_val, y0=0,
+                        x1=x_val, y1=y_val,
+                        line=dict(color="#3647F5", width=bar_width),
+                        layer="below"
+                    )
+                
+                fig_rev.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
+                    height=450,
+                    margin=dict(t=60)
+                )
+                
+                st.plotly_chart(fig_rev, use_container_width=True)
+                
+                # Chart 2: Total Conversions per Channel
+                st.subheader("Total Conversions per Channel")
+                
+                fig_conv = px.scatter(
+                    channel_perf,
+                    x=channel_perf.index,
+                    y="total_conversions",
+                    size="total_conversions",
+                    color="total_conversions",
+                    color_continuous_scale=["#FF9F0D", "#D9D9D9"],
+                    title="Total Conversions per Channel"
+                )
+                
+                fig_conv.update_traces(
+                    marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
+                )
+                
+                fig_conv.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
+                    height=450,
+                    yaxis_title="Total Conversions",
+                    xaxis_title="Marketing Channel"
+                )
+                
+                st.plotly_chart(fig_conv, use_container_width=True)
+                
+                # Chart 3: Total Spend per Channel (لو موجود)
+                if 'total_spend' in channel_perf.columns:
+                    st.subheader("Total Spend per Channel")
+                    
+                    fig_spend = px.line(
+                        channel_perf,
+                        x=channel_perf.index,
+                        y="total_spend",
+                        markers=True,
+                        title="Total Spend per Channel"
+                    )
+                    
+                    fig_spend.update_traces(
+                        line=dict(color="#FF9F0D", width=4),
+                        marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
+                    )
+                    
+                    fig_spend.update_layout(
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font_color='#f5f5f5',
+                        height=500,
+                        yaxis_title="Total Spend",
+                        xaxis_title="Marketing Channel"
+                    )
+                    
+                    st.plotly_chart(fig_spend, use_container_width=True)
+                
+                # Chart 4: Average ROI per Channel (لو موجود)
+                if 'avg_roi' in channel_perf.columns:
+                    st.subheader("Average ROI per Channel")
+                    
+                    channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
+                    
+                    fig_roi = px.bar(
+                        channel_perf_sorted,
+                        x='avg_roi',
+                        y=channel_perf_sorted.index,
+                        orientation='h',
+                        color='avg_roi',
+                        color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                        title="Average ROI per Channel"
+                    )
+                    
+                    fig_roi.update_layout(
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font_color='#f5f5f5',
+                        height=450,
+                        xaxis_title="Average ROI",
+                        yaxis_title="Marketing Channel"
+                    )
+                    
+                    st.plotly_chart(fig_roi, use_container_width=True)
+            else:
+                st.error("❌ Required columns not found!")
+        else:
+            st.error("❌ Column 'marketing_channel' not found!")
 
     # ========== TAB 3: CUSTOMERS ==========
     with tab3:
