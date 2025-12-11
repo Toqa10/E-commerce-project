@@ -646,7 +646,7 @@ elif page == "📊 Analytics Dashboard":
     # ========== CHARTS FROM NOTEBOOK ==========
     st.header("📊 Data Visualizations")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Trends", "🎯 Marketing", "👥 Customers", "📦 Performance"])
+    tab1, tab2, tab3 = st.tabs(["📈 Trends", "🎯 Marketing", "📦 Performance"])
 
     # ========== TAB 1: TRENDS ==========
     with tab1:
