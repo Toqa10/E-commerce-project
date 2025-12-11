@@ -379,48 +379,267 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-    # ========== KPIs FROM NOTEBOOK ==========
+     # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
-
-    # Calculate KPIs exactly as in notebook
-    total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
-    total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
-    total_orders = len(filtered_df)
-    avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
-
-    # Conversion Rate (same as notebook)
-    conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
-
-    # Return Rate
-    return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
-
-    # Satisfaction
-    avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
-
-    # ROI (same as notebook calculation)
-    if 'roi' in filtered_df.columns:
-        avg_roi = filtered_df['roi'].mean()
-    else:
-        avg_roi = 0
-
-    # Display KPIs
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
-        st.metric("📦 Total Orders", f"{total_orders:,}")
-
-    with col2:
-        st.metric("👥 Total Customers", f"{total_customers:,}")
-        st.metric("🛍️ Avg Order Value", f"${avg_order_value:,.2f}")
-
-    with col3:
-        st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
-        st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
-
-    with col4:
-        st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
-        st.metric("💹 Avg ROI", f"{avg_roi:.2f}%")
+    
+    # إنشاء tabs للـ KPIs المختلفة
+    kpi_tabs = st.tabs([
+        "📊 Overall", 
+        "📦 By Category", 
+        "📢 By Campaign", 
+        "📡 By Channel", 
+        "👥 By Segment", 
+        "🗺️ By Region", 
+        "📅 By Time"
+    ])
+    
+    # ========== TAB 1: OVERALL KPIs ==========
+    with kpi_tabs[0]:
+        col1, col2, col3, col4 = st.columns(4)
+        
+        total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
+        total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
+        total_orders = len(filtered_df)
+        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
+        
+        with col1:
+            st.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
+            st.metric("📦 Total Orders", f"{total_orders:,}")
+        
+        with col2:
+            st.metric("👥 Total Customers", f"{total_customers:,}")
+            st.metric("🛍️ Avg Order Value", f"${avg_order_value:,.2f}")
+        
+        with col3:
+            conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
+            return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
+            st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
+            st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
+        
+        with col4:
+            avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
+            if 'net_revenue' in filtered_df.columns and 'discount_amount' in filtered_df.columns:
+                total_net = filtered_df['net_revenue'].sum()
+                total_discount = filtered_df['discount_amount'].sum()
+                avg_roi = ((total_net - total_discount) / total_discount * 100) if total_discount > 0 else 0
+            else:
+                avg_roi = 0
+            st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
+            st.metric("💹 Avg ROI", f"{avg_roi:.2f}%")
+    
+    # ========== TAB 2: BY CATEGORY ==========
+    with kpi_tabs[1]:
+        if 'category' in filtered_df.columns:
+            kpi_category = filtered_df.groupby('category').agg({
+                'gross_revenue': 'sum',
+                'net_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_category['avg_order_value'] = (kpi_category['net_revenue'] / kpi_category['quantity']).round(2)
+            kpi_category['roi'] = ((kpi_category['net_revenue'] - kpi_category['discount_amount']) / kpi_category['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_category.style.format({
+                    'gross_revenue': '${:,.2f}',
+                    'net_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 3: BY CAMPAIGN ==========
+    with kpi_tabs[2]:
+        if 'marketing_campaign' in filtered_df.columns:
+            kpi_campaign = filtered_df.groupby('marketing_campaign').agg({
+                'net_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_campaign['revenue_per_customer'] = (kpi_campaign['net_revenue'] / kpi_campaign['customer_id']).round(2)
+            kpi_campaign['roi'] = ((kpi_campaign['net_revenue'] - kpi_campaign['discount_amount']) / kpi_campaign['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_campaign.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 4: BY CHANNEL ==========
+    with kpi_tabs[3]:
+        if 'marketing_channel' in filtered_df.columns:
+            kpi_channel = filtered_df.groupby('marketing_channel').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_channel['avg_order_value'] = (kpi_channel['net_revenue'] / kpi_channel['quantity']).round(2)
+            kpi_channel['revenue_per_customer'] = (kpi_channel['net_revenue'] / kpi_channel['customer_id']).round(2)
+            kpi_channel['roi'] = ((kpi_channel['net_revenue'] - kpi_channel['discount_amount']) / kpi_channel['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_channel.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 5: BY SEGMENT ==========
+    with kpi_tabs[4]:
+        if 'customer_segment' in filtered_df.columns:
+            kpi_segment = filtered_df.groupby('customer_segment').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique',
+                'customer_lifetime_value': 'mean',
+                'retention_score': 'mean'
+            }).reset_index()
+            
+            kpi_segment['avg_order_value'] = (kpi_segment['net_revenue'] / kpi_segment['quantity']).round(2)
+            kpi_segment['revenue_per_customer'] = (kpi_segment['net_revenue'] / kpi_segment['customer_id']).round(2)
+            kpi_segment['roi'] = ((kpi_segment['net_revenue'] - kpi_segment['discount_amount']) / kpi_segment['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_segment.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'customer_lifetime_value': '${:,.2f}',
+                    'retention_score': '{:.2f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 6: BY REGION ==========
+    with kpi_tabs[5]:
+        if 'region' in filtered_df.columns:
+            kpi_region = filtered_df.groupby('region').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_region['avg_order_value'] = (kpi_region['net_revenue'] / kpi_region['quantity']).round(2)
+            kpi_region['revenue_per_customer'] = (kpi_region['net_revenue'] / kpi_region['customer_id']).round(2)
+            kpi_region['roi'] = ((kpi_region['net_revenue'] - kpi_region['discount_amount']) / kpi_region['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_region.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 7: BY TIME ==========
+    with kpi_tabs[6]:
+        time_view = st.radio("Select Time Period", ["Month", "Quarter", "Season"], horizontal=True)
+        
+        if time_view == "Month" and 'month' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('month').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+        
+        elif time_view == "Quarter" and 'quarter' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('quarter').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+        
+        elif time_view == "Season" and 'season' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('season').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
 
     st.markdown("---")
 
