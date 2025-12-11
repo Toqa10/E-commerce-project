@@ -425,298 +425,284 @@ elif page == "📊 Analytics Dashboard":
     st.markdown("---")
 
     # ========== CHARTS FROM NOTEBOOK ==========
+       # ========== CHARTS FROM NOTEBOOK ==========
     st.header("📊 Data Visualizations")
 
     tab1, tab2, tab3, tab4 = st.tabs(["📈 Trends", "🎯 Marketing", "👥 Customers", "📦 Performance"])
 
     # ========== TAB 1: TRENDS ==========
-   
     with tab1:
-    # Chart 1: Monthly Revenue Trends by Marketing Channel
-     if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-        st.subheader("Monthly Revenue Trends by Marketing Channel")
-        
-        monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
-            'net_revenue': 'sum',
-            'customer_id': 'nunique'
-        }).reset_index()
-        monthly_channel.columns = ['month', 'channel', 'revenue', 'conversions']
-        
-        fig_revenue_trend = px.line(
-            monthly_channel,
-            x='month',
-            y='revenue',
-            color='channel',
-            markers=True,
-            title='Monthly Revenue Trends by Marketing Channel'
-        )
-        
-        fig_revenue_trend.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=500,
-            xaxis_title="Month",
-            yaxis_title="Revenue",
-            legend_title="Channel",
-            xaxis=dict(tickangle=45)
-        )
-        
-        st.plotly_chart(fig_revenue_trend, use_container_width=True)
-
-    # Chart 2: Monthly Conversions Trends by Marketing Channel
-    if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-        st.subheader("Monthly Conversions Trends by Marketing Channel")
-        
-        monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
-            'customer_id': 'nunique'
-        }).reset_index()
-        monthly_channel.columns = ['month', 'channel', 'conversions']
-        
-        fig_conv_trend = px.line(
-            monthly_channel,
-            x='month',
-            y='conversions',
-            color='channel',
-            markers=True,
-            title='Monthly Conversions Trends by Marketing Channel'
-        )
-        
-        fig_conv_trend.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=500,
-            xaxis_title="Month",
-            yaxis_title="Conversions (Unique Customers)",
-            legend_title="Channel",
-            xaxis=dict(tickangle=45)
-        )
-        
-        st.plotly_chart(fig_conv_trend, use_container_width=True)
-
-    # Chart 3: Overall Monthly Revenue Trend
-    if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-        st.subheader("Overall Monthly Revenue Trend")
-        
-        monthly_total = filtered_df.groupby('month_date').agg({
-            'net_revenue': 'sum',
-            'customer_id': 'nunique'
-        }).reset_index()
-        monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
-        
-        fig_total_rev = px.line(
-            monthly_total,
-            x='month',
-            y='total_revenue',
-            markers=True,
-            title='Overall Monthly Revenue Trend'
-        )
-        
-        fig_total_rev.update_traces(
-            line=dict(color='#FF9F0D', width=3),
-            marker=dict(size=10, color='#3647F5')
-        )
-        
-        fig_total_rev.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            xaxis_title="Month",
-            yaxis_title="Total Revenue",
-            xaxis=dict(tickangle=45)
-        )
-        
-        st.plotly_chart(fig_total_rev, use_container_width=True)
-
-    # Chart 4: Overall Monthly Conversions Trend
-    if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-        st.subheader("Overall Monthly Conversions Trend")
-        
-        monthly_total = filtered_df.groupby('month_date').agg({
-            'customer_id': 'nunique'
-        }).reset_index()
-        monthly_total.columns = ['month', 'total_conversions']
-        
-        fig_total_conv = px.line(
-            monthly_total,
-            x='month',
-            y='total_conversions',
-            markers=True,
-            title='Overall Monthly Conversions Trend'
-        )
-        
-        fig_total_conv.update_traces(
-            line=dict(color='#3647F5', width=3),
-            marker=dict(size=10, color='#FF9F0D')
-        )
-        
-        fig_total_conv.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            xaxis_title="Month",
-            yaxis_title="Total Conversions",
-            xaxis=dict(tickangle=45)
-        )
-        
-        st.plotly_chart(fig_total_conv, use_container_width=True)
-
-
-# ========== TAB 2: MARKETING ==========
-with tab2:
-    # تحضير البيانات - بس لو الأعمدة موجودة
-    if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
-        channel_perf = filtered_df.groupby('marketing_channel').agg({
-            'net_revenue': 'sum',
-            'customer_id': 'nunique',
-            'marketing_spend': 'sum',
-            'roi': 'mean'
-        }).reset_index()
-        channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
-        
-        # Chart 1: Total Revenue per Marketing Channel
-        st.subheader("Total Revenue per Marketing Channel")
-        bar_width = 25
-        fig_rev = px.scatter(
-            channel_perf,
-            x='channel',
-            y='total_revenue',
-            title="Total Revenue per Marketing Channel",
-            color_discrete_sequence=["#3647F5"],
-            text="total_revenue"
-        )
-        fig_rev.update_traces(
-            marker=dict(size=bar_width),
-            textposition='top center',
-            texttemplate='%{text:.2s}'
-        )
-        for x_val, y_val in zip(channel_perf['channel'], channel_perf['total_revenue']):
-            fig_rev.add_shape(
-                type="line",
-                x0=x_val, y0=0,
-                x1=x_val, y1=y_val,
-                line=dict(color="#3647F5", width=bar_width),
-                layer="below"
+        # Chart 1: Monthly Revenue Trends by Marketing Channel
+        if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Monthly Revenue Trends by Marketing Channel")
+            
+            monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+                'net_revenue': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_channel.columns = ['month', 'channel', 'revenue', 'conversions']
+            
+            fig_revenue_trend = px.line(
+                monthly_channel,
+                x='month',
+                y='revenue',
+                color='channel',
+                markers=True,
+                title='Monthly Revenue Trends by Marketing Channel'
             )
-        fig_rev.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            margin=dict(t=60)
-        )
-        st.plotly_chart(fig_rev, use_container_width=True)
-        
-        # Chart 2: Total Conversions per Channel
-        st.subheader("Total Conversions per Channel")
-        fig_conv = px.scatter(
-            channel_perf,
-            x='channel',
-            y='total_conversions',
-            size='total_conversions',
-            color='total_conversions',
-            color_continuous_scale=["#FF9F0D", "#D9D9D9"],
-            title="Total Conversions per Channel"
-        )
-        fig_conv.update_traces(
-            marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
-        )
-        fig_conv.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            yaxis_title="Total Conversions",
-            xaxis_title="Marketing Channel"
-        )
-        st.plotly_chart(fig_conv, use_container_width=True)
-        
-        # Chart 3: Total Spend per Channel
-        st.subheader("Total Spend per Channel")
-        fig_spend = px.line(
-            channel_perf,
-            x='channel',
-            y='total_spend',
-            markers=True,
-            title="Total Spend per Channel"
-        )
-        fig_spend.update_traces(
-            line=dict(color="#FF9F0D", width=4),
-            marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
-        )
-        fig_spend.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=500,
-            yaxis_title="Total Spend",
-            xaxis_title="Marketing Channel"
-        )
-        st.plotly_chart(fig_spend, use_container_width=True)
-        
-        # Chart 4: Average ROI per Channel
-        st.subheader("Average ROI per Channel")
-        channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
-        fig_roi = px.bar(
-            channel_perf_sorted,
-            x='avg_roi',
-            y='channel',
-            orientation='h',
-            color='avg_roi',
-            color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
-            title="Average ROI per Channel"
-        )
-        fig_roi.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#f5f5f5',
-            height=450,
-            xaxis_title="Average ROI",
-            yaxis_title="Marketing Channel"
-        )
-        st.plotly_chart(fig_roi, use_container_width=True)
+            
+            fig_revenue_trend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                xaxis_title="Month",
+                yaxis_title="Revenue",
+                legend_title="Channel",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_revenue_trend, use_container_width=True)
 
+        # Chart 2: Monthly Conversions Trends by Marketing Channel
+        if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Monthly Conversions Trends by Marketing Channel")
+            
+            monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_channel.columns = ['month', 'channel', 'conversions']
+            
+            fig_conv_trend = px.line(
+                monthly_channel,
+                x='month',
+                y='conversions',
+                color='channel',
+                markers=True,
+                title='Monthly Conversions Trends by Marketing Channel'
+            )
+            
+            fig_conv_trend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                xaxis_title="Month",
+                yaxis_title="Conversions (Unique Customers)",
+                legend_title="Channel",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_conv_trend, use_container_width=True)
 
+        # Chart 3: Overall Monthly Revenue Trend
+        if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Overall Monthly Revenue Trend")
+            
+            monthly_total = filtered_df.groupby('month_date').agg({
+                'net_revenue': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
+            
+            fig_total_rev = px.line(
+                monthly_total,
+                x='month',
+                y='total_revenue',
+                markers=True,
+                title='Overall Monthly Revenue Trend'
+            )
+            
+            fig_total_rev.update_traces(
+                line=dict(color='#FF9F0D', width=3),
+                marker=dict(size=10, color='#3647F5')
+            )
+            
+            fig_total_rev.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Revenue",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_total_rev, use_container_width=True)
 
+        # Chart 4: Overall Monthly Conversions Trend
+        if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Overall Monthly Conversions Trend")
+            
+            monthly_total = filtered_df.groupby('month_date').agg({
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_total.columns = ['month', 'total_conversions']
+            
+            fig_total_conv = px.line(
+                monthly_total,
+                x='month',
+                y='total_conversions',
+                markers=True,
+                title='Overall Monthly Conversions Trend'
+            )
+            
+            fig_total_conv.update_traces(
+                line=dict(color='#3647F5', width=3),
+                marker=dict(size=10, color='#FF9F0D')
+            )
+            
+            fig_total_conv.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Conversions",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_total_conv, use_container_width=True)
 
+    # ========== TAB 2: MARKETING ==========
+    with tab2:
+        if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
+            channel_perf = filtered_df.groupby('marketing_channel').agg({
+                'net_revenue': 'sum',
+                'customer_id': 'nunique',
+                'marketing_spend': 'sum',
+                'roi': 'mean'
+            }).reset_index()
+            channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
+            
+            # Chart 1: Total Revenue per Marketing Channel
+            st.subheader("Total Revenue per Marketing Channel")
+            bar_width = 25
+            fig_rev = px.scatter(
+                channel_perf,
+                x='channel',
+                y='total_revenue',
+                title="Total Revenue per Marketing Channel",
+                color_discrete_sequence=["#3647F5"],
+                text="total_revenue"
+            )
+            fig_rev.update_traces(
+                marker=dict(size=bar_width),
+                textposition='top center',
+                texttemplate='%{text:.2s}'
+            )
+            for x_val, y_val in zip(channel_perf['channel'], channel_perf['total_revenue']):
+                fig_rev.add_shape(
+                    type="line",
+                    x0=x_val, y0=0,
+                    x1=x_val, y1=y_val,
+                    line=dict(color="#3647F5", width=bar_width),
+                    layer="below"
+                )
+            fig_rev.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                margin=dict(t=60)
+            )
+            st.plotly_chart(fig_rev, use_container_width=True)
+            
+            # Chart 2: Total Conversions per Channel
+            st.subheader("Total Conversions per Channel")
+            fig_conv = px.scatter(
+                channel_perf,
+                x='channel',
+                y='total_conversions',
+                size='total_conversions',
+                color='total_conversions',
+                color_continuous_scale=["#FF9F0D", "#D9D9D9"],
+                title="Total Conversions per Channel"
+            )
+            fig_conv.update_traces(
+                marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
+            )
+            fig_conv.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                yaxis_title="Total Conversions",
+                xaxis_title="Marketing Channel"
+            )
+            st.plotly_chart(fig_conv, use_container_width=True)
+            
+            # Chart 3: Total Spend per Channel
+            st.subheader("Total Spend per Channel")
+            fig_spend = px.line(
+                channel_perf,
+                x='channel',
+                y='total_spend',
+                markers=True,
+                title="Total Spend per Channel"
+            )
+            fig_spend.update_traces(
+                line=dict(color="#FF9F0D", width=4),
+                marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
+            )
+            fig_spend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                yaxis_title="Total Spend",
+                xaxis_title="Marketing Channel"
+            )
+            st.plotly_chart(fig_spend, use_container_width=True)
+            
+            # Chart 4: Average ROI per Channel
+            st.subheader("Average ROI per Channel")
+            channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
+            fig_roi = px.bar(
+                channel_perf_sorted,
+                x='avg_roi',
+                y='channel',
+                orientation='h',
+                color='avg_roi',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                title="Average ROI per Channel"
+            )
+            fig_roi.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=450,
+                xaxis_title="Average ROI",
+                yaxis_title="Marketing Channel"
+            )
+            st.plotly_chart(fig_roi, use_container_width=True)
 
     # ========== TAB 3: CUSTOMERS ==========
     with tab3:
-        # Chart 9: Revenue by Customer Segment (من الـ Notebook)
         if 'customer_segment' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Revenue Distribution by Customer Segment")
-
             segment_revenue = filtered_df.groupby('customer_segment').agg({
                 'net_revenue': 'sum'
             }).reset_index()
-
             fig = px.pie(
                 segment_revenue,
                 values='net_revenue',
                 names='customer_segment',
                 title='Revenue by Customer Segment'
             )
-
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5'
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-        # Chart 10: CLV & Retention by Segment (من الـ Notebook)
         if 'customer_segment' in filtered_df.columns and 'customer_lifetime_value' in filtered_df.columns and 'retention_score' in filtered_df.columns:
             st.subheader("Customer Lifetime Value & Retention by Segment")
-
             clv_data = filtered_df.groupby('customer_segment').agg({
                 'customer_lifetime_value': 'mean',
                 'retention_score': 'mean'
             }).reset_index()
-
             fig = go.Figure(data=[
                 go.Bar(
                     name='CLV ($)',
@@ -731,7 +717,6 @@ with tab2:
                     marker_color='#FF9F0D'
                 )
             ])
-
             fig.update_layout(
                 barmode='group',
                 plot_bgcolor='rgba(0,0,0,0)',
@@ -740,17 +725,13 @@ with tab2:
                 height=450,
                 title='CLV & Retention by Segment'
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-        # Chart 11: Revenue by Region (من الـ Notebook)
         if 'region' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Revenue by Region")
-
             region_revenue = filtered_df.groupby('region').agg({
                 'net_revenue': 'sum'
             }).reset_index()
-
             fig = px.pie(
                 region_revenue,
                 values='net_revenue',
@@ -758,26 +739,21 @@ with tab2:
                 title='Revenue Distribution by Region',
                 hole=0.4
             )
-
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5'
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
     # ========== TAB 4: PERFORMANCE ==========
     with tab4:
-        # Chart 12: Revenue by Category (من الـ Notebook)
         if 'category' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Net Revenue by Product Category")
-
             category_revenue = filtered_df.groupby('category').agg({
                 'net_revenue': 'sum'
             }).reset_index()
             category_revenue = category_revenue.sort_values('net_revenue', ascending=False)
-
             fig = px.bar(
                 category_revenue,
                 x='category',
@@ -786,26 +762,21 @@ with tab2:
                 color_continuous_scale='Greens',
                 title='Net Revenue by Product Category'
             )
-
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
                 height=450
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-        # Chart 13: Payment Method Performance (من الـ Notebook)
         if 'payment_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Payment Method Performance")
-
             payment_data = filtered_df.groupby('payment_method').agg({
                 'net_revenue': 'sum',
                 'order_id': 'count'
             }).reset_index()
             payment_data.columns = ['payment_method', 'Revenue', 'Orders']
-
             fig = go.Figure(data=[
                 go.Bar(
                     name='Revenue ($)',
@@ -820,7 +791,6 @@ with tab2:
                     marker_color='#FF9F0D'
                 )
             ])
-
             fig.update_layout(
                 barmode='group',
                 plot_bgcolor='rgba(0,0,0,0)',
@@ -828,18 +798,14 @@ with tab2:
                 font_color='#f5f5f5',
                 height=450
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-        # Chart 14: Shipping Method Performance (من الـ Notebook)
         if 'shipping_method' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'satisfaction_rating' in filtered_df.columns:
             st.subheader("Shipping Method Performance")
-
             shipping_data = filtered_df.groupby('shipping_method').agg({
                 'net_revenue': 'sum',
                 'satisfaction_rating': 'mean'
             }).reset_index()
-
             fig = go.Figure(data=[
                 go.Bar(
                     name='Revenue ($)',
@@ -854,7 +820,6 @@ with tab2:
                     marker_color='#FF9F0D'
                 )
             ])
-
             fig.update_layout(
                 barmode='group',
                 plot_bgcolor='rgba(0,0,0,0)',
@@ -862,18 +827,14 @@ with tab2:
                 font_color='#f5f5f5',
                 height=450
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-        # Chart 15: Satisfaction Impact on Revenue & Returns (من الـ Notebook)
         if 'satisfaction_rating' in filtered_df.columns and 'net_revenue' in filtered_df.columns and 'returned' in filtered_df.columns:
             st.subheader("Satisfaction Rating Impact on Revenue & Returns")
-
             satisfaction_data = filtered_df.groupby('satisfaction_rating').agg({
                 'net_revenue': 'mean',
                 'returned': 'sum'
             }).reset_index()
-
             fig = px.scatter(
                 satisfaction_data,
                 x='satisfaction_rating',
@@ -888,16 +849,13 @@ with tab2:
                 color_continuous_scale='Reds',
                 title='Satisfaction Impact on Revenue & Returns'
             )
-
             fig.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#f5f5f5',
                 height=450
             )
-
             st.plotly_chart(fig, use_container_width=True)
-
 # =============================================================================
 # DATA EXPLORER
 # =============================================================================
