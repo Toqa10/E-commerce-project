@@ -932,77 +932,9 @@ elif page == "📊 Analytics Dashboard":
         else:
             st.error("❌ Column 'marketing_channel' not found!")
 
-    # ========== TAB 3: CUSTOMERS ==========
-    with tab3:
-        if 'customer_segment' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Revenue Distribution by Customer Segment")
-            segment_revenue = filtered_df.groupby('customer_segment').agg({
-                'net_revenue': 'sum'
-            }).reset_index()
-            fig = px.pie(
-                segment_revenue,
-                values='net_revenue',
-                names='customer_segment',
-                title='Revenue by Customer Segment'
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        if 'customer_segment' in filtered_df.columns and 'customer_lifetime_value' in filtered_df.columns and 'retention_score' in filtered_df.columns:
-            st.subheader("Customer Lifetime Value & Retention by Segment")
-            clv_data = filtered_df.groupby('customer_segment').agg({
-                'customer_lifetime_value': 'mean',
-                'retention_score': 'mean'
-            }).reset_index()
-            fig = go.Figure(data=[
-                go.Bar(
-                    name='CLV ($)',
-                    x=clv_data['customer_segment'],
-                    y=clv_data['customer_lifetime_value'],
-                    marker_color='#3647F5'
-                ),
-                go.Bar(
-                    name='Retention Score',
-                    x=clv_data['customer_segment'],
-                    y=clv_data['retention_score'],
-                    marker_color='#FF9F0D'
-                )
-            ])
-            fig.update_layout(
-                barmode='group',
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                title='CLV & Retention by Segment'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-        if 'region' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Revenue by Region")
-            region_revenue = filtered_df.groupby('region').agg({
-                'net_revenue': 'sum'
-            }).reset_index()
-            fig = px.pie(
-                region_revenue,
-                values='net_revenue',
-                names='region',
-                title='Revenue Distribution by Region',
-                hole=0.4
-            )
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
+   
     # ========== TAB 4: PERFORMANCE ==========
-    with tab4:
+    with tab3:
         if 'category' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
             st.subheader("Net Revenue by Product Category")
             category_revenue = filtered_df.groupby('category').agg({
