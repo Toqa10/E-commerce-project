@@ -433,7 +433,7 @@ elif page == "📊 Analytics Dashboard":
    
     with tab1:
     # Chart 1: Monthly Revenue Trends by Marketing Channel
-     if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+    if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
         st.subheader("Monthly Revenue Trends by Marketing Channel")
         
         monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
@@ -565,9 +565,8 @@ elif page == "📊 Analytics Dashboard":
         st.plotly_chart(fig_total_conv, use_container_width=True)
 
 
-
-    # ========== TAB 2: MARKETING ==========
-   with tab2:
+# ========== TAB 2: MARKETING ==========
+with tab2:
     # تحضير البيانات - بس لو الأعمدة موجودة
     if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
         channel_perf = filtered_df.groupby('marketing_channel').agg({
@@ -679,6 +678,7 @@ elif page == "📊 Analytics Dashboard":
             yaxis_title="Marketing Channel"
         )
         st.plotly_chart(fig_roi, use_container_width=True)
+
 
 
 
