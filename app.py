@@ -565,16 +565,18 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========
-    with tab2:
-        if all(col in filtered_df.columns for col in ['marketing_channel', 'net_revenue', 'customer_id', 'marketing_spend', 'roi']):
-            channel_perf = filtered_df.groupby('marketing_channel').agg({
-                'net_revenue': 'sum',
-                'customer_id': 'nunique',
-                'marketing_spend': 'sum',
-                'roi': 'mean'
-            }).reset_index()
-            channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'total_spend', 'avg_roi']
-            
+     with tab2:
+        st.write(f"Records: {len(filtered_df)}")
+        
+        # جرب chart بسيط جداً
+        if 'marketing_channel' in filtered_df.columns:
+            st.subheader("Test Chart")
+            test_data = filtered_df['marketing_channel'].value_counts().reset_index()
+            test_data.columns = ['Channel', 'Count']
+            st.bar_chart(test_data.set_index('Channel'))
+        else:
+            st.error("❌ Column 'marketing_channel' not found!")
+
             # Chart 1: Total Revenue per Marketing Channel
             st.subheader("Total Revenue per Marketing Channel")
             bar_width = 25
