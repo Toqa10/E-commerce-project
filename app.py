@@ -569,7 +569,7 @@ elif page == "📊 Analytics Dashboard":
     # ========== TAB 2: MARKETING ==========
    
     with tab2:
-    # تحضير البيانات الأساسية
+    # تحضير البيانات الأساسية (لاحظ الـ 4 مسافات هنا)
     if 'marketing_channel' in filtered_df.columns:
         channel_perf = filtered_df.groupby('marketing_channel').agg({
             'net_revenue': 'sum',
@@ -702,9 +702,6 @@ elif page == "📊 Analytics Dashboard":
         )
         
         st.plotly_chart(fig_roi, use_container_width=True)
-
-        
-        st.plotly_chart(fig, use_container_width=True)
 
 
     # ========== TAB 3: CUSTOMERS ==========
