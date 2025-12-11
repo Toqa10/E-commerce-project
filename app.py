@@ -564,33 +564,23 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========   
-        # ========== TAB 2: MARKETING ==========
+           # ========== TAB 2: MARKETING ==========
     with tab2:
-        # تحضير البيانات الأساسية من الداتا الكاملة (بدون فلتر)
         if 'marketing_channel' in df.columns:
             revenue_col = 'net_revenue' if 'net_revenue' in df.columns else 'final_amount'
             
-            if revenue_col in df.columns and 'customer_id' in df.columns:
-                agg_dict = {
+            if revenue_col in df.columns and 'customer_id' in df.columns and 'roi' in df.columns:
+                # تحضير البيانات
+                channel_perf = df.groupby('marketing_channel').agg({
                     revenue_col: 'sum',
-                    'customer_id': 'nunique'
-                }
+                    'customer_id': 'nunique',
+                    'roi': 'mean'
+                }).reset_index()
+                channel_perf.columns = ['channel', 'total_revenue', 'total_conversions', 'avg_roi']
                 
-                if 'marketing_spend' in df.columns:
-                    agg_dict['marketing_spend'] = 'sum'
-                    
-                if 'roi' in df.columns:
-                    agg_dict['roi'] = 'mean'
+                # تنظيف قيم ROI (حذف inf و -inf)
+                channel_perf['avg_roi'] = channel_perf['avg_roi'].replace([float('inf'), float('-inf')], float('nan'))
                 
-                channel_perf = df.groupby('marketing_channel').agg(agg_dict).reset_index()
-                
-                new_cols = ['channel', 'total_revenue', 'total_conversions']
-                if 'marketing_spend' in df.columns:
-                    new_cols.append('total_spend')
-                if 'roi' in df.columns:
-                    new_cols.append('avg_roi')
-                    
-                channel_perf.columns = new_cols
                 channel_perf = channel_perf.set_index('channel')
                 
                 # Chart 1: Total Revenue per Marketing Channel
@@ -659,42 +649,48 @@ elif page == "📊 Analytics Dashboard":
                 
                 st.plotly_chart(fig_conv, use_container_width=True)
                 
-                # Chart 3: Total Spend per Channel
-                if 'total_spend' in channel_perf.columns:
-                    st.subheader("Total Spend per Channel")
-                    
-                    fig_spend = px.line(
-                        channel_perf,
-                        x=channel_perf.index,
-                        y="total_spend",
-                        markers=True,
-                        title="Total Spend per Channel"
-                    )
-                    
-                    fig_spend.update_traces(
-                        line=dict(color="#FF9F0D", width=4),
-                        marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
-                    )
-                    
-                    fig_spend.update_layout(
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        font_color='#f5f5f5',
-                        height=500,
-                        yaxis_title="Total Spend",
-                        xaxis_title="Marketing Channel"
-                    )
-                    
-                    st.plotly_chart(fig_spend, use_container_width=True)
-                else:
-                    st.info("ℹ️ Marketing Spend data not available")
+                # Chart 3: Average Order Value per Channel (بدل marketing_spend)
+                st.subheader("Average Order Value per Channel")
+                
+                # حساب average order value
+                order_data = df.groupby('marketing_channel').agg({
+                    'final_amount': 'mean'
+                }).reset_index()
+                order_data.columns = ['channel', 'avg_order_value']
+                order_data = order_data.set_index('channel')
+                
+                fig_spend = px.line(
+                    order_data,
+                    x=order_data.index,
+                    y="avg_order_value",
+                    markers=True,
+                    title="Average Order Value per Channel"
+                )
+                
+                fig_spend.update_traces(
+                    line=dict(color="#FF9F0D", width=4),
+                    marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
+                )
+                
+                fig_spend.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
+                    height=500,
+                    yaxis_title="Average Order Value ($)",
+                    xaxis_title="Marketing Channel"
+                )
+                
+                st.plotly_chart(fig_spend, use_container_width=True)
                 
                 # Chart 4: Average ROI per Channel
-                if 'avg_roi' in channel_perf.columns:
-                    st.subheader("Average ROI per Channel")
-                    
-                    channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
-                    
+                st.subheader("Average ROI per Channel")
+                
+                # حذف القنوات اللي فيها NaN
+                channel_perf_clean = channel_perf.dropna(subset=['avg_roi'])
+                channel_perf_sorted = channel_perf_clean.sort_values(by='avg_roi', ascending=True)
+                
+                if len(channel_perf_sorted) > 0:
                     fig_roi = px.bar(
                         channel_perf_sorted,
                         x='avg_roi',
@@ -716,11 +712,12 @@ elif page == "📊 Analytics Dashboard":
                     
                     st.plotly_chart(fig_roi, use_container_width=True)
                 else:
-                    st.info("ℹ️ ROI data not available")
+                    st.warning("⚠️ No valid ROI data available")
             else:
                 st.error("❌ Required columns not found!")
         else:
             st.error("❌ Column 'marketing_channel' not found!")
+
 
 
     # ========== TAB 3: CUSTOMERS ==========
