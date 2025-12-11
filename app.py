@@ -567,9 +567,9 @@ elif page == "📊 Analytics Dashboard":
 
 
     # ========== TAB 2: MARKETING ==========
-   with tab2:
+    with tab2:
     # Chart 1: Total Revenue per Marketing Channel
-    if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+     if 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
         st.subheader("Total Revenue per Marketing Channel")
         
         channel_perf = filtered_df.groupby('marketing_channel').agg({
