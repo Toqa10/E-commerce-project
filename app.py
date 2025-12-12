@@ -200,66 +200,6 @@ def load_data():
 # =============================================================================
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
-# بعد السطر:
-st.sidebar.markdown("---")
-
-# ضيفي الكود ده:
-
-# ========== THEME TOGGLE ==========
-if 'theme' not in st.session_state:
-    st.session_state.theme = 'dark'
-
-theme_mode = st.sidebar.radio(
-    "🎨 Theme Mode",
-    options=['🌙 Dark Mode', '☀️ Light Mode'],
-    index=0 if st.session_state.theme == 'dark' else 1,
-    horizontal=True
-)
-
-if '☀️' in theme_mode:
-    st.session_state.theme = 'light'
-else:
-    st.session_state.theme = 'dark'
-
-# Custom CSS for Light Mode
-if st.session_state.theme == 'light':
-    st.markdown("""
-    <style>
-        .stApp {
-            background-color: #ffffff;
-            color: #262730;
-        }
-        .stMarkdown, .stText, p, span, div {
-            color: #262730 !important;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            color: #262730 !important;
-        }
-        .stMetric label {
-            color: #262730 !important;
-        }
-        .stMetric .metric-value {
-            color: #0066CC !important;
-        }
-        [data-testid="stSidebar"] {
-            background-color: #f0f2f6;
-        }
-        [data-testid="stSidebar"] * {
-            color: #262730 !important;
-        }
-        .stDataFrame {
-            background-color: #ffffff;
-        }
-        .stTabs [data-baseweb="tab-list"] {
-            background-color: #f0f2f6;
-        }
-        .stTabs [data-baseweb="tab"] {
-            color: #262730 !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Select Page",
