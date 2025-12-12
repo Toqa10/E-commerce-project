@@ -426,7 +426,7 @@ if page == "🏠 Home":
                     'Revenue': '${:,.2f}',
                     'Conversions': '{:,}',
                     'ROI (%)': '{:.2f}%'
-                }).background_gradient(subset=['ROI (%)'], cmap='Greens'),
+                }),
                 use_container_width=True
             )
 
