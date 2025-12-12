@@ -585,7 +585,8 @@ if 'marketing_channel' in df.columns:
 if 'month_date' in df.columns:
     min_date = df['month_date'].min()
     max_date = df['month_date'].max()
-    date_range = st.sidebar.date_input('Date Range', value=(min_date, maxdate))
+    date_range = st.sidebar.date_input('Date Range', value=(min_date, max_date))
+
 
     # Apply Filters
 filtered_df = df.copy()
