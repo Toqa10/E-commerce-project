@@ -594,7 +594,7 @@ if selected_channel != 'All Channels':
 if len(date_range) == 2:
     filtered_df = filtered_df[(filtered_df['month_date'] >= start) & (filtered_df['month_date'] <= end)]
 
- st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
+st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
 
 
      # ========== KPIs ==========
