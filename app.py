@@ -395,89 +395,30 @@ elif page == "📊 Analytics Dashboard":
     
     # ========== TAB 1: OVERALL KPIs ==========
        # ========== TAB 1: OVERALL KPIs ==========
-# ========== TAB 1: OVERALL KPIs WITH GROWTH RATES ==========
-with kpi_tabs[0]:
-    col1, col2, col3 = st.columns(3)
-    
-    # Current Period Metrics
-    total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
-    total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
-    total_orders = len(filtered_df)
-    avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
-    conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
-    return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
-    avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
-    
-    # Calculate Growth Rates (First Month vs Last Month - from Notebook Cell 86)
-    if 'month_date' in df.columns:
-        monthly_total_sorted = df.groupby('month_date').agg({
-            'net_revenue': 'sum',
-            'customer_id': 'nunique'
-        }).reset_index().sort_values('month_date')
+    with kpi_tabs[0]:
+        col1, col2, col3 = st.columns(3)  # ⬅️ غيرت من 4 لـ 3
         
-        # Revenue Growth
-        first_month_rev = monthly_total_sorted.iloc[0]['net_revenue']
-        last_month_rev = monthly_total_sorted.iloc[-1]['net_revenue']
-        revenue_growth = ((last_month_rev - first_month_rev) / first_month_rev * 100) if first_month_rev > 0 else 0
+        total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
+        total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
+        total_orders = len(filtered_df)
+        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
         
-        # Conversions Growth
-        first_month_conv = monthly_total_sorted.iloc[0]['customer_id']
-        last_month_conv = monthly_total_sorted.iloc[-1]['customer_id']
-        conv_growth = ((last_month_conv - first_month_conv) / first_month_conv * 100) if first_month_conv > 0 else 0
-    else:
-        revenue_growth = 0
-        conv_growth = 0
-    
-    # Use real growth values from notebook: Revenue Growth = 8,414% | Conversions Growth = 5,046%
-    revenue_delta = revenue_growth
-    customers_delta = conv_growth
-    orders_delta = 2.5  # Approximate
-    order_value_delta = 1.8  # Approximate
-    conversion_delta = 0.3
-    return_delta = -0.5
-    satisfaction_delta = 0.1
-    
-    with col1:
-        st.metric(
-            "💰 Total Revenue", 
-            f"${total_revenue:,.2f}",
-            delta=f"{revenue_delta:+.1f}%" if revenue_delta != 0 else "0%"
-        )
-        st.metric(
-            "📦 Total Orders", 
-            f"{total_orders:,}",
-            delta=f"{orders_delta:+.1f}%" if orders_delta != 0 else "0%"
-        )
-    
-    with col2:
-        st.metric(
-            "👥 Total Customers", 
-            f"{total_customers:,}",
-            delta=f"{customers_delta:+.1f}%" if customers_delta != 0 else "0%"
-        )
-        st.metric(
-            "🛍️ Avg Order Value", 
-            f"${avg_order_value:,.2f}",
-            delta=f"{order_value_delta:+.1f}%" if order_value_delta != 0 else "0%"
-        )
-    
-    with col3:
-        st.metric(
-            "📊 Conversion Rate", 
-            f"{conversion_rate:.2f}%",
-            delta=f"{conversion_delta:+.1f}%" if conversion_delta != 0 else "0%"
-        )
-        st.metric(
-            "↩️ Return Rate", 
-            f"{return_rate:.2f}%",
-            delta=f"{return_delta:+.1f}%",
-            delta_color="inverse"
-        )
-        st.metric(
-            "⭐ Satisfaction", 
-            f"{avg_satisfaction:.2f}/5",
-            delta=f"{satisfaction_delta:+.2f}" if satisfaction_delta != 0 else "0"
-        )
+        with col1:
+            st.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
+            st.metric("📦 Total Orders", f"{total_orders:,}")
+        
+        with col2:
+            st.metric("👥 Total Customers", f"{total_customers:,}")
+            st.metric("🛍️ Avg Order Value", f"${avg_order_value:,.2f}")
+        
+        with col3:
+            conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
+            return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
+            avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
+            
+            st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
+            st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
+            st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
 
     
     # ========== TAB 2: BY CATEGORY ==========
@@ -1189,9 +1130,8 @@ with kpi_tabs[0]:
             }).reset_index()
             quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
             quadrant_analysis['Revenue_Per_Customer'] = (
-               quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
-             ).round(2)
- 
+                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
+            ).round(2)
             
             avg_customers = quadrant_analysis['Unique_Customers'].mean()
             avg_revenue = quadrant_analysis['Total_Revenue'].mean()
