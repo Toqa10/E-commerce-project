@@ -327,6 +327,238 @@ if page == "🏠 Home":
         with st.expander("👁️ Preview Data (First 10 Rows)"):
             st.dataframe(df.head(10), use_container_width=True)
 
+        st.markdown("---")
+
+        # ========== INSIGHTS SECTION ==========
+        st.header("💡 Key Business Insights")
+
+        # Row 1: Channel Performance Overview
+        st.subheader("📌 Channel Performance Highlights")
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>🏆 Highest Revenue</div>
+                    <div class='metric-value' style='font-size: 1.5rem;'>Email</div>
+                    <p style='color: #2ecc71; margin: 0;'>$2,664,421</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>⚡ Best ROI</div>
+                    <div class='metric-value' style='font-size: 1.5rem;'>Email</div>
+                    <p style='color: #2ecc71; margin: 0;'>140.65%</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with col3:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>👥 Most Conversions</div>
+                    <div class='metric-value' style='font-size: 1.5rem;'>Direct</div>
+                    <p style='color: #2ecc71; margin: 0;'>1,066 customers</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with col4:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>📈 Revenue Growth</div>
+                    <div class='metric-value' style='font-size: 1.5rem;'>+8,414%</div>
+                    <p style='color: #2ecc71; margin: 0;'>Jan 2021 - 2024</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # Row 2: Customer Value & Efficiency
+        st.subheader("💰 Customer Value Analysis")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown("""
+                ### 💵 Revenue per Customer
+                - **Highest:** Email ($2,501.80)
+                - **Lowest:** Search Engine ($2,126.74)
+                - **Average:** ~$2,300
+            """)
+
+        with col2:
+            st.markdown("""
+                ### ⚡ Efficiency Ranking
+                1. **Email** - Score: 99.19 🥇
+                2. **Radio** - Score: 95.46 🥈
+                3. **Direct** - Score: 95.39 🥉
+            """)
+
+        with col3:
+            st.markdown("""
+                ### 🎯 Best Acquisition
+                - **Radio:** 84.98% rate
+                - **Email:** 82.7% rate
+                - **Social Media:** High engagement
+            """)
+
+        st.markdown("---")
+
+        # Row 3: Detailed Channel Analysis
+        st.subheader("🔍 Channel Performance Breakdown")
+
+        with st.expander("📊 View All Channels Performance"):
+            channels_data = {
+                'Channel': ['Email', 'Direct', 'Social Media', 'Outdoor', 'Print', 'Affiliate', 'Influencer', 'Mobile App', 'Referral', 'Radio', 'TV', 'Search Engine'],
+                'Spend': [18810, 19704, 20029, 20320, 18910, 18454, 19064, 18494, 18739, 18661, 18980, 19280],
+                'Revenue': [2664421.06, 2558265.78, 2542261.76, 2464162.33, 2424964.46, 2269248.63, 2355706.59, 2314844.33, 2346574.16, 2331049.15, 2381122.24, 2192672.20],
+                'Conversions': [1065, 1066, 1066, 1019, 1031, 1005, 1030, 1008, 1015, 1024, 998, 1031],
+                'ROI (%)': [140.65, 128.83, 125.93, 120.27, 127.24, 121.97, 122.57, 124.17, 124.22, 123.92, 124.45, 112.73],
+                'Performance': ['🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent', '🚀 Excellent']
+            }
+
+            channels_df = pd.DataFrame(channels_data)
+            channels_df = channels_df.sort_values('ROI (%)', ascending=False)
+
+            st.dataframe(
+                channels_df.style.format({
+                    'Spend': '${:,.0f}',
+                    'Revenue': '${:,.2f}',
+                    'Conversions': '{:,}',
+                    'ROI (%)': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+
+        st.markdown("---")
+
+        # Row 4: Growth Metrics & Trends
+        st.subheader("📈 Growth Metrics & Trends")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("""
+                ### 📊 Monthly Revenue Trend
+                - **Starting Point:** $16,734 (Jan 2021)
+                - **Peak Performance:** $1,563,867 (July 2023)
+                - **Current Level:** $1M+ per month
+                - **Growth Rate:** +8,414% 🚀
+
+                **Pattern:**
+                - Rapid growth phase: Mid 2021 - 2022
+                - Stabilization: 2023-2024 at high levels
+                - All channels show upward trends
+            """)
+
+        with col2:
+            st.markdown("""
+                ### 👥 Monthly Conversions Trend
+                - **Starting Point:** 13 customers (Jan 2021)
+                - **Peak Performance:** 696 customers (July 2023)
+                - **Current Level:** 500+ customers/month
+                - **Growth Rate:** +5,046% 🚀
+
+                **Key Observation:**
+                - Customer acquisition mirrors revenue growth
+                - Strong seasonality across all channels
+                - Direct channel leads in total conversions
+            """)
+
+        st.markdown("---")
+
+        # Row 5: Key Correlations
+        st.subheader("🔗 Key Business Correlations")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>Customers → Revenue</div>
+                    <div class='metric-value' style='font-size: 2rem; color: #2ecc71;'>0.740</div>
+                    <p style='color: #00d9ff; margin: 0;'>✅ Strong Correlation</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>Orders → Revenue</div>
+                    <div class='metric-value' style='font-size: 2rem; color: #2ecc71;'>0.784</div>
+                    <p style='color: #00d9ff; margin: 0;'>✅ Strong Correlation</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with col3:
+            st.markdown("""
+                <div class='metric-card'>
+                    <div class='metric-label'>Avg Price → Revenue</div>
+                    <div class='metric-value' style='font-size: 2rem; color: #ff9800;'>0.543</div>
+                    <p style='color: #ff9800; margin: 0;'>⚠️ Moderate Correlation</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # Row 6: Strategic Recommendations
+        st.subheader("💡 Strategic Recommendations")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.success("""
+                ### 🎯 Top Priorities
+
+                **1. Scale Email Marketing**
+                - Highest efficiency score (99.19)
+                - Best revenue per customer ($2,501.80)
+                - Recommendation: Increase budget by 20-30%
+
+                **2. Optimize Radio Campaigns**
+                - Best acquisition rate (84.98%)
+                - High efficiency score (95.46)
+                - Recommendation: A/B test for better conversion
+
+                **3. Strengthen Direct Channel**
+                - Most conversions (1,066 customers)
+                - Strong organic performance
+                - Recommendation: Optimize landing pages & SEO
+            """)
+
+        with col2:
+            st.warning("""
+                ### ⚠️ Areas for Improvement
+
+                **1. Search Engine Optimization**
+                - Lowest ROI (112.73%) among channels
+                - Still profitable but needs attention
+                - Recommendation: Improve ad quality scores
+
+                **2. Cost Efficiency**
+                - Outdoor has highest spend ($20,320)
+                - Recommendation: Optimize cost per acquisition
+
+                **3. Monitoring & Benchmarks**
+                - Track monthly ROI trends
+                - Monitor customer lifetime value by channel
+                - Target: ROI > 130% for all channels
+            """)
+
+        st.markdown("---")
+
+        # Row 7: Key Takeaways
+        st.info("""
+            ### ✅ Key Takeaways
+
+            - **All channels are profitable** - ROI ranges from 112.73% to 140.65%
+            - **Email dominates** in revenue, efficiency, and customer value
+            - **Explosive growth** achieved (+8,414% revenue, +5,046% conversions)
+            - **Strong fundamentals** - High correlation between customers/orders and revenue
+            - **Seasonal patterns** affect all channels equally - plan accordingly
+            - **Direct traffic** shows strong organic brand presence
+            - **Focus on top 3 performers** (Email, Radio, Direct) for maximum ROI
+        """)
+
+
     else:
         st.warning("⚠️ No data available. Please check the CSV file.")
 
@@ -407,14 +639,15 @@ elif page == "📊 Analytics Dashboard":
         avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
         
         # Calculate Growth Rates (First Month vs Last Month - from Notebook Cell 86)
-        if 'month_date' in df.columns:
-            monthly_total_sorted = df.groupby('month_date').agg({
+        if 'month_date' in filtered_df.columns and len(filtered_df) > 0:
+            monthly_total_sorted = filtered_df.groupby('month_date').agg({
                 'net_revenue': 'sum',
                 'customer_id': 'nunique'
             }).reset_index().sort_values('month_date')
             
-            # Revenue Growth
-            first_month_rev = monthly_total_sorted.iloc[0]['net_revenue']
+            if len(monthly_total_sorted) > 1:
+                # Revenue Growth
+                first_month_rev = monthly_total_sorted.iloc[0]['net_revenue']
             last_month_rev = monthly_total_sorted.iloc[-1]['net_revenue']
             revenue_growth = ((last_month_rev - first_month_rev) / first_month_rev * 100) if first_month_rev > 0 else 0
             
@@ -422,6 +655,9 @@ elif page == "📊 Analytics Dashboard":
             first_month_conv = monthly_total_sorted.iloc[0]['customer_id']
             last_month_conv = monthly_total_sorted.iloc[-1]['customer_id']
             conv_growth = ((last_month_conv - first_month_conv) / first_month_conv * 100) if first_month_conv > 0 else 0
+            else:
+                revenue_growth = 0
+                conv_growth = 0
         else:
             revenue_growth = 0
             conv_growth = 0
