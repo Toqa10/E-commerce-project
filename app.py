@@ -593,7 +593,11 @@ filtered_df = df.copy()
 if selected_channel != 'All Channels':
     filtered_df = filtered_df[filtered_df['marketing_channel'] == selected_channel]
 if len(date_range) == 2:
-    filtered_df = filtered_df[(filtered_df['month_date'] >= start) & (filtered_df['month_date'] <= end)]
+    start_date, end_date = date_range
+filtered_df = filtered_df[
+    (filtered_df['month_date'] >= start_date) &
+    (filtered_df['month_date'] <= end_date)
+]
 
     st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
 
