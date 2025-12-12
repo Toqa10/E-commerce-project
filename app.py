@@ -633,7 +633,8 @@ elif page == "📊 Analytics Dashboard":
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
         total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
         total_orders = len(filtered_df)
-        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
+        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns and len(filtered_df) > 0 else 0
+    avg_order_value = 0 if pd.isna(avg_order_value) else avg_order_value
         conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
         return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
         avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
@@ -1473,7 +1474,10 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_quadrant, use_container_width=True)
             
             # Best performer info
-            best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
+            if len(quadrant_analysis) > 0 and not quadrant_analysis['Revenue_Per_Customer'].isna().all():
+                best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
+            else:
+                best_channel = pd.Series({'marketing_channel': 'N/A', 'Revenue_Per_Customer': 0, 'Efficiency_Score': 0})
             st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
 
 
