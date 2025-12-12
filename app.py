@@ -581,23 +581,33 @@ if 'marketing_channel' in df.columns:
     channels = ['All Channels'] + sorted(df['marketing_channel'].dropna().unique().tolist())
     selected_channel = st.sidebar.selectbox('Marketing Channel', channels)
 
-# Date Range Filter  
+# ===== Filters =====
 if 'month_date' in df.columns:
     min_date = df['month_date'].min()
     max_date = df['month_date'].max()
-    date_range = st.sidebar.date_input('Date Range', value=(min_date, max_date))
 
+    date_range = st.sidebar.date_input(
+        'Date Range',
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date
+    )
+else:
+    date_range = None
 
-    # Apply Filters
+# ===== Apply Filters =====
 filtered_df = df.copy()
-if selected_channel != 'All Channels':
+
+if selected_channel != 'All Channels' and 'marketing_channel' in df.columns:
     filtered_df = filtered_df[filtered_df['marketing_channel'] == selected_channel]
-if len(date_range) == 2:
+
+if date_range and len(date_range) == 2 and 'month_date' in df.columns:
     start_date, end_date = date_range
-filtered_df = filtered_df[
-    (filtered_df['month_date'] >= start_date) &
-    (filtered_df['month_date'] <= end_date)
-]
+    filtered_df = filtered_df[
+        (filtered_df['month_date'] >= pd.to_datetime(start_date)) &
+        (filtered_df['month_date'] <= pd.to_datetime(end_date))
+    ]
+
 
     st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
 
