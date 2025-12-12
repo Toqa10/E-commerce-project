@@ -394,8 +394,9 @@ elif page == "📊 Analytics Dashboard":
     ])
     
     # ========== TAB 1: OVERALL KPIs ==========
+       # ========== TAB 1: OVERALL KPIs ==========
     with kpi_tabs[0]:
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)  # ⬅️ غيرت من 4 لـ 3
         
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
         total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
@@ -413,19 +414,12 @@ elif page == "📊 Analytics Dashboard":
         with col3:
             conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
             return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
+            avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
+            
             st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
             st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
-        
-        with col4:
-            avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
-            if 'net_revenue' in filtered_df.columns and 'discount_amount' in filtered_df.columns:
-                total_net = filtered_df['net_revenue'].sum()
-                total_discount = filtered_df['discount_amount'].sum()
-                avg_roi = ((total_net - total_discount) / total_discount * 100) if total_discount > 0 else 0
-            else:
-                avg_roi = 0
             st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
-            st.metric("💹 Avg ROI", f"{avg_roi:.2f}%")
+
     
     # ========== TAB 2: BY CATEGORY ==========
     with kpi_tabs[1]:
