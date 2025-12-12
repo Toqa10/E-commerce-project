@@ -639,15 +639,14 @@ elif page == "📊 Analytics Dashboard":
         avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
         
         # Calculate Growth Rates (First Month vs Last Month - from Notebook Cell 86)
-        if 'month_date' in filtered_df.columns and len(filtered_df) > 0:
-            monthly_total_sorted = filtered_df.groupby('month_date').agg({
+        if 'month_date' in df.columns:
+            monthly_total_sorted = df.groupby('month_date').agg({
                 'net_revenue': 'sum',
                 'customer_id': 'nunique'
             }).reset_index().sort_values('month_date')
             
-            if len(monthly_total_sorted) > 1:
-                # Revenue Growth
-                first_month_rev = monthly_total_sorted.iloc[0]['net_revenue']
+            # Revenue Growth
+            first_month_rev = monthly_total_sorted.iloc[0]['net_revenue']
             last_month_rev = monthly_total_sorted.iloc[-1]['net_revenue']
             revenue_growth = ((last_month_rev - first_month_rev) / first_month_rev * 100) if first_month_rev > 0 else 0
             
@@ -655,9 +654,6 @@ elif page == "📊 Analytics Dashboard":
             first_month_conv = monthly_total_sorted.iloc[0]['customer_id']
             last_month_conv = monthly_total_sorted.iloc[-1]['customer_id']
             conv_growth = ((last_month_conv - first_month_conv) / first_month_conv * 100) if first_month_conv > 0 else 0
-            else:
-                revenue_growth = 0
-                conv_growth = 0
         else:
             revenue_growth = 0
             conv_growth = 0
