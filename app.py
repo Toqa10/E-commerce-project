@@ -1189,8 +1189,9 @@ with kpi_tabs[0]:
             }).reset_index()
             quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
             quadrant_analysis['Revenue_Per_Customer'] = (
-                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
-            ).round(2)
+               quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
+             ).round(2)
+ 
             
             avg_customers = quadrant_analysis['Unique_Customers'].mean()
             avg_revenue = quadrant_analysis['Total_Revenue'].mean()
