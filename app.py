@@ -626,7 +626,7 @@ elif page == "📊 Analytics Dashboard":
     ])
     
         # ========== TAB 1: OVERALL KPIs WITH GROWTH RATES ==========
-  with kpi_tabs[0]:
+     with kpi_tabs[0]:
         col1, col2, col3 = st.columns(3)
         
         # Current Period Metrics
