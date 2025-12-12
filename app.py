@@ -596,8 +596,7 @@ if len(date_range) == 2:
 
 st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
 
-
-     # ========== KPIs ==========
+    # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
     
     # إنشاء tabs للـ KPIs المختلفة
