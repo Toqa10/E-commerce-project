@@ -633,8 +633,7 @@ elif page == "📊 Analytics Dashboard":
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
         total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
         total_orders = len(filtered_df)
-        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns and len(filtered_df) > 0 else 0
-    avg_order_value = 0 if pd.isna(avg_order_value) else avg_order_value
+        avg_order_value = filtered_df['final_amount'].mean() if 'final_amount' in filtered_df.columns else 0
         conversion_rate = (total_customers / total_orders * 100) if total_orders > 0 else 0
         return_rate = (filtered_df['returned'].sum() / total_orders * 100) if total_orders > 0 and 'returned' in filtered_df.columns else 0
         avg_satisfaction = filtered_df['satisfaction_rating'].mean() if 'satisfaction_rating' in filtered_df.columns else 0
