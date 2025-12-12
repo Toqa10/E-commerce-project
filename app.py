@@ -626,8 +626,8 @@ elif page == "📊 Analytics Dashboard":
     ])
     
         # ========== TAB 1: OVERALL KPIs WITH GROWTH RATES ==========
-     with kpi_tabs[0]:
-    col1, col2, col3 = st.columns(3)
+    with kpi_tabs[0]:
+     col1, col2, col3 = st.columns(3)
     
     # Current Period Metrics
     total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
