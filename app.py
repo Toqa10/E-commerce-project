@@ -3,247 +3,10 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime, time
+from datetime import datetime
 
 # =============================================================================
-# THEME MANAGEMENT
-# =============================================================================
-def get_theme_css(theme_mode):
-    """إرجاع CSS حسب وضع السمة"""
-    
-    # إعدادات الألوان للوضع النهاري (لايت مود)
-    light_mode = {
-        "primary_blue": "#1f77b4",
-        "secondary_green": "#2ecc71",
-        "bg_color": "#ffffff",
-        "panel_color": "#f8f9fa",
-        "text_color": "#333333",
-        "accent_cyan": "#00bcd4",
-        "warning_orange": "#ff9800",
-        "border_color": "#e0e0e0",
-        "shadow_color": "rgba(0, 0, 0, 0.1)"
-    }
-    
-    # إعدادات الألوان للوضع الليلي (داكن)
-    dark_mode = {
-        "primary_blue": "#1f77b4",
-        "secondary_green": "#2ecc71",
-        "bg_color": "#0f1419",
-        "panel_color": "#1a1f2e",
-        "text_color": "#f5f5f5",
-        "accent_cyan": "#00d9ff",
-        "warning_orange": "#ff9800",
-        "border_color": "#2a3240",
-        "shadow_color": "rgba(0, 0, 0, 0.3)"
-    }
-    
-    # اختيار السمة بناءً على الوضع
-    colors = light_mode if theme_mode == "light" else dark_mode
-    
-    return f"""
-    <style>
-    :root {{
-      --primary-blue: {colors['primary_blue']};
-      --secondary-green: {colors['secondary_green']};
-      --bg-color: {colors['bg_color']};
-      --panel-color: {colors['panel_color']};
-      --text-color: {colors['text_color']};
-      --accent-cyan: {colors['accent_cyan']};
-      --warning-orange: {colors['warning_orange']};
-      --border-color: {colors['border_color']};
-      --shadow-color: {colors['shadow_color']};
-    }}
-
-    html, body, .stApp {{
-      background: {colors['bg_color']} !important;
-      color: {colors['text_color']} !important;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }}
-
-    h1, h2, h3, h4, h5, h6,
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
-      color: {colors['accent_cyan']} !important;
-      font-weight: 700 !important;
-    }}
-
-    section[data-testid="stSidebar"] {{
-      background: {colors['panel_color']} !important;
-      border-right: 2px solid {colors['primary_blue']};
-    }}
-
-    section[data-testid="stSidebar"] * {{
-      color: {colors['text_color']} !important;
-    }}
-
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stDateInput label {{
-      color: {colors['accent_cyan']} !important;
-      font-weight: 600 !important;
-    }}
-
-    div.stButton > button {{
-      background: linear-gradient(135deg, {colors['primary_blue']} 0%, {colors['secondary_green']} 100%) !important;
-      color: white !important;
-      border: none !important;
-      font-weight: 700 !important;
-      padding: 0.6rem 2rem !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
-      transition: all 0.3s ease !important;
-    }}
-
-    div.stButton > button:hover {{
-      transform: translateY(-2px) !important;
-      box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
-    }}
-
-    [data-testid="stMetricValue"] {{
-      color: {colors['secondary_green']} !important;
-      font-size: 2rem !important;
-      font-weight: 700 !important;
-    }}
-
-    [data-testid="stMetricLabel"] {{
-      color: {colors['accent_cyan']} !important;
-      font-weight: 600 !important;
-    }}
-
-    div[data-testid="stExpander"] {{
-      background-color: {colors['panel_color']} !important;
-      border: 1px solid {colors['border_color']} !important;
-      border-radius: 10px !important;
-    }}
-
-    .stDataFrame {{
-      background-color: {colors['panel_color']} !important;
-      border: 1px solid {colors['border_color']} !important;
-    }}
-
-    .stTabs [data-baseweb="tab-list"] {{
-      gap: 8px;
-      background-color: transparent;
-    }}
-
-    .stTabs [data-baseweb="tab"] {{
-      background-color: {colors['panel_color']};
-      border-radius: 8px 8px 0 0;
-      color: {colors['text_color']};
-      border: 1px solid {colors['border_color']};
-      padding: 10px 20px;
-    }}
-
-    .stTabs [aria-selected="true"] {{
-      background: linear-gradient(135deg, {colors['primary_blue']} 0%, {colors['secondary_green']} 100%);
-      color: white;
-    }}
-
-    .stAlert {{
-      background-color: {colors['panel_color']} !important;
-      border-left: 4px solid {colors['accent_cyan']} !important;
-    }}
-
-    a {{
-      color: {colors['accent_cyan']} !important;
-      text-decoration: none !important;
-    }}
-
-    a:hover {{
-      color: {colors['secondary_green']} !important;
-    }}
-
-    hr {{
-      border-color: {colors['border_color']} !important;
-      opacity: 0.5 !important;
-    }}
-
-    .stDownloadButton > button {{
-      background-color: {colors['secondary_green']} !important;
-      color: white !important;
-    }}
-
-    .metric-card {{
-      background: linear-gradient(135deg, {colors['panel_color']} 0%, rgba(31, 119, 180, 0.1) 100%);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid {colors['border_color']};
-      box-shadow: 0 4px 15px {colors['shadow_color']};
-      text-align: center;
-      margin-bottom: 1rem;
-    }}
-
-    .metric-value {{
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: {colors['secondary_green']};
-      margin: 0.5rem 0;
-    }}
-
-    .metric-label {{
-      font-size: 1rem;
-      color: {colors['accent_cyan']};
-      font-weight: 600;
-    }}
-
-    .footer {{
-      text-align: center;
-      padding: 2rem;
-      color: {colors['text_color']};
-      opacity: 0.7;
-      border-top: 1px solid {colors['border_color']};
-      margin-top: 3rem;
-    }}
-
-    /* Chart styling */
-    .js-plotly-plot .plotly .modebar {{
-      background: {colors['panel_color']} !important;
-    }}
-
-    .theme-status {{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      background: {colors['panel_color']};
-      border-radius: 20px;
-      border: 1px solid {colors['border_color']};
-      margin: 5px 0;
-    }}
-
-    .theme-status-icon {{
-      font-size: 20px;
-    }}
-    </style>
-    """
-
-def get_auto_theme():
-    """تحديد الوضع التلقائي بناءً على الوقت"""
-    current_hour = datetime.now().hour
-    
-    # الوضع النهاري من 6 صباحاً إلى 6 مساءً
-    if 6 <= current_hour < 18:
-        return "light"
-    else:
-        return "dark"
-
-def set_plotly_theme(theme_mode):
-    """تعيين سمة Plotly حسب الوضع"""
-    if theme_mode == "light":
-        return {
-            "paper_bgcolor": "#f8f9fa",
-            "plot_bgcolor": "#ffffff",
-            "font_color": "#333333",
-            "gridcolor": "#e0e0e0"
-        }
-    else:
-        return {
-            "paper_bgcolor": "#1a1f2e",
-            "plot_bgcolor": "#0f1419",
-            "font_color": "#f5f5f5",
-            "gridcolor": "#2a3240"
-        }
-
-# =============================================================================
-# STREAMLIT APP CONFIG
+# E-COMMERCE THEME (Professional Blue/Green)
 # =============================================================================
 st.set_page_config(
     page_title="📊 E-commerce Analytics Pro",
@@ -253,45 +16,381 @@ st.set_page_config(
 )
 
 # =============================================================================
-# THEME SELECTION IN SIDEBAR
+# THEME MANAGEMENT - LIGHT MODE FEATURE
 # =============================================================================
-with st.sidebar:
-    st.title("🎨 Theme Settings")
-    
-    # Theme selection
-    theme_mode = st.radio(
-        "Select Theme Mode",
-        ["🌙 Dark Mode", "☀️ Light Mode", "🔄 Auto Mode"],
-        index=0,
-        key="theme_mode"
-    )
-    
-    # Extract theme from selection
-    if "Light" in theme_mode:
-        current_theme = "light"
-        st.success("☀️ Light Mode Active")
-    elif "Dark" in theme_mode:
-        current_theme = "dark"
-        st.info("🌙 Dark Mode Active")
-    else:  # Auto Mode
-        current_theme = get_auto_theme()
-        if current_theme == "light":
-            st.success("🔆 Auto Mode: Daylight Hours (Light)")
-        else:
-            st.success("🌙 Auto Mode: Night Hours (Dark)")
-    
-    # Display current time
-    current_time = datetime.now().strftime("%I:%M %p")
-    st.caption(f"🕐 Current Time: {current_time}")
-    
-    st.markdown("---")
+# Initialize theme in session state
+if 'theme_mode' not in st.session_state:
+    st.session_state.theme_mode = 'dark'  # Default is dark mode
+
+# Function to toggle theme
+def toggle_theme():
+    if st.session_state.theme_mode == 'dark':
+        st.session_state.theme_mode = 'light'
+    else:
+        st.session_state.theme_mode = 'dark'
+
+# Function to get current theme CSS
+def get_theme_css():
+    if st.session_state.theme_mode == 'light':
+        return """
+        <style>
+        :root {
+          --primary-blue: #1f77b4;
+          --secondary-green: #2ecc71;
+          --bg-dark: #f8f9fa;
+          --panel-dark: #ffffff;
+          --text-light: #333333;
+          --accent-cyan: #007bff;
+          --warning-orange: #ff9800;
+        }
+
+        html, body, .stApp {
+          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+          color: var(--text-light) !important;
+        }
+
+        h1, h2, h3, h4, h5, h6,
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+          color: var(--accent-cyan) !important;
+          text-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+          font-weight: 700 !important;
+        }
+
+        section[data-testid="stSidebar"] {
+          background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+          border-right: 2px solid #e0e0e0;
+        }
+
+        section[data-testid="stSidebar"] * {
+          color: var(--text-light) !important;
+        }
+
+        section[data-testid="stSidebar"] .stSelectbox label,
+        section[data-testid="stSidebar"] .stDateInput label {
+          color: var(--accent-cyan) !important;
+          font-weight: 600 !important;
+        }
+
+        div.stButton > button {
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
+          color: white !important;
+          border: none !important;
+          font-weight: 700 !important;
+          padding: 0.6rem 2rem !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 15px rgba(31, 119, 180, 0.3) !important;
+          transition: all 0.3s ease !important;
+        }
+
+        div.stButton > button:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px rgba(31, 119, 180, 0.4) !important;
+        }
+
+        [data-testid="stMetricValue"] {
+          color: var(--secondary-green) !important;
+          font-size: 2rem !important;
+          font-weight: 700 !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+          color: var(--accent-cyan) !important;
+          font-weight: 600 !important;
+        }
+
+        div[data-testid="stExpander"] {
+          background-color: var(--panel-dark) !important;
+          border: 1px solid #e0e0e0 !important;
+          border-radius: 10px !important;
+        }
+
+        .stDataFrame {
+          background-color: var(--panel-dark) !important;
+          border: 1px solid #e0e0e0 !important;
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+          gap: 8px;
+          background-color: transparent;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+          background-color: var(--panel-dark);
+          border-radius: 8px 8px 0 0;
+          color: var(--text-light);
+          border: 1px solid #e0e0e0;
+          padding: 10px 20px;
+        }
+
+        .stTabs [aria-selected="true"] {
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+          color: white;
+        }
+
+        .stAlert {
+          background-color: var(--panel-dark) !important;
+          border-left: 4px solid var(--accent-cyan) !important;
+        }
+
+        a {
+          color: var(--accent-cyan) !important;
+          text-decoration: none !important;
+        }
+
+        a:hover {
+          color: var(--secondary-green) !important;
+        }
+
+        hr {
+          border-color: #e0e0e0 !important;
+          opacity: 0.5 !important;
+        }
+
+        .stDownloadButton > button {
+          background-color: var(--secondary-green) !important;
+          color: white !important;
+        }
+
+        .metric-card {
+          background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.05) 100%);
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid #e0e0e0;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .metric-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: var(--secondary-green);
+          margin: 0.5rem 0;
+        }
+
+        .metric-label {
+          font-size: 1rem;
+          color: var(--accent-cyan);
+          font-weight: 600;
+        }
+
+        .footer {
+          text-align: center;
+          padding: 2rem;
+          color: var(--text-light);
+          opacity: 0.7;
+          border-top: 1px solid #e0e0e0;
+          margin-top: 3rem;
+        }
+        
+        .theme-indicator {
+          display: inline-block;
+          padding: 5px 15px;
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+          color: white;
+          border-radius: 20px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin: 10px 0;
+        }
+        
+        .plotly .modebar {
+          background-color: var(--panel-dark) !important;
+        }
+        
+        .plotly .modebar-btn path {
+          fill: var(--text-light) !important;
+        }
+        </style>
+        """
+    else:
+        return """
+        <style>
+        :root {
+          --primary-blue: #1f77b4;
+          --secondary-green: #2ecc71;
+          --bg-dark: #0f1419;
+          --panel-dark: #1a1f2e;
+          --text-light: #f5f5f5;
+          --accent-cyan: #00d9ff;
+          --warning-orange: #ff9800;
+        }
+
+        html, body, .stApp {
+          background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%) !important;
+          color: var(--text-light) !important;
+        }
+
+        h1, h2, h3, h4, h5, h6,
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+          color: var(--accent-cyan) !important;
+          text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+          font-weight: 700 !important;
+        }
+
+        section[data-testid="stSidebar"] {
+          background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%) !important;
+          border-right: 2px solid var(--primary-blue);
+        }
+
+        section[data-testid="stSidebar"] * {
+          color: var(--text-light) !important;
+        }
+
+        section[data-testid="stSidebar"] .stSelectbox label,
+        section[data-testid="stSidebar"] .stDateInput label {
+          color: var(--accent-cyan) !important;
+          font-weight: 600 !important;
+        }
+
+        div.stButton > button {
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
+          color: white !important;
+          border: none !important;
+          font-weight: 700 !important;
+          padding: 0.6rem 2rem !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
+          transition: all 0.3s ease !important;
+        }
+
+        div.stButton > button:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
+        }
+
+        [data-testid="stMetricValue"] {
+          color: var(--secondary-green) !important;
+          font-size: 2rem !important;
+          font-weight: 700 !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+          color: var(--accent-cyan) !important;
+          font-weight: 600 !important;
+        }
+
+        div[data-testid="stExpander"] {
+          background-color: var(--panel-dark) !important;
+          border: 1px solid var(--primary-blue) !important;
+          border-radius: 10px !important;
+        }
+
+        .stDataFrame {
+          background-color: var(--panel-dark) !important;
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+          gap: 8px;
+          background-color: transparent;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+          background-color: var(--panel-dark);
+          border-radius: 8px 8px 0 0;
+          color: var(--text-light);
+          border: 1px solid var(--primary-blue);
+          padding: 10px 20px;
+        }
+
+        .stTabs [aria-selected="true"] {
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+          color: white;
+        }
+
+        .stAlert {
+          background-color: var(--panel-dark) !important;
+          border-left: 4px solid var(--accent-cyan) !important;
+        }
+
+        a {
+          color: var(--accent-cyan) !important;
+          text-decoration: none !important;
+        }
+
+        a:hover {
+          color: var(--secondary-green) !important;
+        }
+
+        hr {
+          border-color: var(--primary-blue) !important;
+          opacity: 0.3 !important;
+        }
+
+        .stDownloadButton > button {
+          background-color: var(--secondary-green) !important;
+          color: white !important;
+        }
+
+        .metric-card {
+          background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.1) 100%);
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid var(--primary-blue);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .metric-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: var(--secondary-green);
+          margin: 0.5rem 0;
+        }
+
+        .metric-label {
+          font-size: 1rem;
+          color: var(--accent-cyan);
+          font-weight: 600;
+        }
+
+        .footer {
+          text-align: center;
+          padding: 2rem;
+          color: var(--text-light);
+          opacity: 0.7;
+          border-top: 1px solid var(--primary-blue);
+          margin-top: 3rem;
+        }
+        
+        .theme-indicator {
+          display: inline-block;
+          padding: 5px 15px;
+          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+          color: white;
+          border-radius: 20px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin: 10px 0;
+        }
+        </style>
+        """
 
 # Apply theme CSS
-st.markdown(get_theme_css(current_theme), unsafe_allow_html=True)
+st.markdown(get_theme_css(), unsafe_allow_html=True)
 
 # =============================================================================
-# SIDEBAR NAVIGATION (المتبقي من السايدبار)
+# SIDEBAR NAVIGATION WITH THEME TOGGLE
 # =============================================================================
+st.sidebar.title("🎨 Theme Settings")
+
+# Theme toggle button
+theme_icon = "☀️" if st.session_state.theme_mode == 'dark' else "🌙"
+theme_text = "Switch to Light Mode" if st.session_state.theme_mode == 'dark' else "Switch to Dark Mode"
+
+if st.sidebar.button(f"{theme_icon} {theme_text}", use_container_width=True, type="primary"):
+    toggle_theme()
+    st.rerun()
+
+# Display current theme status
+st.sidebar.markdown(f"""
+<div class='theme-indicator'>
+    Current Theme: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("---")
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 
@@ -302,10 +401,7 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡 **Tip**: Use filters in Analytics Dashboard for detailed insights")
-
-# Get plotly theme settings
-plotly_theme = set_plotly_theme(current_theme)
+st.sidebar.info(f"💡 **Tip**: {'Use Light Mode for daytime viewing' if st.session_state.theme_mode == 'dark' else 'Use Dark Mode for nighttime viewing'}")
 
 # =============================================================================
 # DATA LOADING
@@ -336,44 +432,15 @@ def load_data():
 df = load_data()
 
 # =============================================================================
-# UPDATE ALL CHART FUNCTIONS TO USE DYNAMIC THEME
-# =============================================================================
-def create_chart_with_theme(fig, title=""):
-    """تحديث جميع الرسوم البيانية بالسمة المختارة"""
-    fig.update_layout(
-        title=title,
-        paper_bgcolor=plotly_theme["paper_bgcolor"],
-        plot_bgcolor=plotly_theme["plot_bgcolor"],
-        font_color=plotly_theme["font_color"],
-        xaxis=dict(
-            gridcolor=plotly_theme["gridcolor"],
-            linecolor=plotly_theme["gridcolor"]
-        ),
-        yaxis=dict(
-            gridcolor=plotly_theme["gridcolor"],
-            linecolor=plotly_theme["gridcolor"]
-        ),
-        legend=dict(
-            bgcolor=plotly_theme["paper_bgcolor"],
-            bordercolor=plotly_theme["gridcolor"]
-        )
-    )
-    return fig
-
-# =============================================================================
-# HOME PAGE (مع التحديثات)
+# HOME PAGE
 # =============================================================================
 if page == "🏠 Home":
     st.markdown(f"""
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 style='font-size: 3.5rem; margin-bottom: 0;'>🛒 E-commerce Analytics Pro</h1>
             <p style='font-size: 1.3rem; margin-top: 0.5rem;'>
-                Advanced Business Intelligence Dashboard
+                Advanced Business Intelligence Dashboard • {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
             </p>
-            <div class='theme-status'>
-                <span class='theme-status-icon'>{"☀️" if current_theme == "light" else "🌙"}</span>
-                <span>Current Theme: {"Light Mode" if current_theme == "light" else "Dark Mode"}</span>
-            </div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -448,12 +515,13 @@ if page == "🏠 Home":
             """)
 
         with col3:
-            st.markdown("""
+            theme_feature = "🌙 Dark Mode" if st.session_state.theme_mode == 'dark' else "☀️ Light Mode"
+            st.markdown(f"""
                 ### 🎨 Smart Themes
-                - Light & Dark modes
-                - Auto theme based on time
-                - Eye-friendly design
-                - Customizable colors
+                - {theme_feature} active
+                - Easy toggle switch
+                - Eye comfort optimization
+                - Professional design
             """)
 
         st.markdown("---")
@@ -482,11 +550,11 @@ if page == "🏠 Home":
         st.warning("⚠️ No data available. Please check the CSV file.")
 
 # =============================================================================
-# ANALYTICS DASHBOARD (مع تحديث الرسوم البيانية)
+# ANALYTICS DASHBOARD
 # =============================================================================
 elif page == "📊 Analytics Dashboard":
     st.title("📊 Analytics Dashboard")
-    st.markdown(f"Interactive visualizations • Current Theme: **{'☀️ Light' if current_theme == 'light' else '🌙 Dark'}**")
+    st.markdown(f"Interactive visualizations • Current Theme: **{'🌙 Dark' if st.session_state.theme_mode == 'dark' else '☀️ Light'}**")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -530,9 +598,10 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-    # ========== KPIs ==========
+     # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
     
+    # إنشاء tabs للـ KPIs المختلفة
     kpi_tabs = st.tabs([
         "📊 Overall", 
         "📦 By Category", 
@@ -569,6 +638,221 @@ elif page == "📊 Analytics Dashboard":
             st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
             st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
 
+    
+    # ========== TAB 2: BY CATEGORY ==========
+    with kpi_tabs[1]:
+        if 'category' in filtered_df.columns:
+            kpi_category = filtered_df.groupby('category').agg({
+                'gross_revenue': 'sum',
+                'net_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_category['avg_order_value'] = (kpi_category['net_revenue'] / kpi_category['quantity']).round(2)
+            kpi_category['roi'] = ((kpi_category['net_revenue'] - kpi_category['discount_amount']) / kpi_category['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_category.style.format({
+                    'gross_revenue': '${:,.2f}',
+                    'net_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 3: BY CAMPAIGN ==========
+    with kpi_tabs[2]:
+        if 'marketing_campaign' in filtered_df.columns:
+            kpi_campaign = filtered_df.groupby('marketing_campaign').agg({
+                'net_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_campaign['revenue_per_customer'] = (kpi_campaign['net_revenue'] / kpi_campaign['customer_id']).round(2)
+            kpi_campaign['roi'] = ((kpi_campaign['net_revenue'] - kpi_campaign['discount_amount']) / kpi_campaign['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_campaign.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 4: BY CHANNEL ==========
+    with kpi_tabs[3]:
+        if 'marketing_channel' in filtered_df.columns:
+            kpi_channel = filtered_df.groupby('marketing_channel').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_channel['avg_order_value'] = (kpi_channel['net_revenue'] / kpi_channel['quantity']).round(2)
+            kpi_channel['revenue_per_customer'] = (kpi_channel['net_revenue'] / kpi_channel['customer_id']).round(2)
+            kpi_channel['roi'] = ((kpi_channel['net_revenue'] - kpi_channel['discount_amount']) / kpi_channel['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_channel.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 5: BY SEGMENT ==========
+    with kpi_tabs[4]:
+        if 'customer_segment' in filtered_df.columns:
+            kpi_segment = filtered_df.groupby('customer_segment').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique',
+                'customer_lifetime_value': 'mean',
+                'retention_score': 'mean'
+            }).reset_index()
+            
+            kpi_segment['avg_order_value'] = (kpi_segment['net_revenue'] / kpi_segment['quantity']).round(2)
+            kpi_segment['revenue_per_customer'] = (kpi_segment['net_revenue'] / kpi_segment['customer_id']).round(2)
+            kpi_segment['roi'] = ((kpi_segment['net_revenue'] - kpi_segment['discount_amount']) / kpi_segment['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_segment.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'customer_lifetime_value': '${:,.2f}',
+                    'retention_score': '{:.2f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 6: BY REGION ==========
+    with kpi_tabs[5]:
+        if 'region' in filtered_df.columns:
+            kpi_region = filtered_df.groupby('region').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            
+            kpi_region['avg_order_value'] = (kpi_region['net_revenue'] / kpi_region['quantity']).round(2)
+            kpi_region['revenue_per_customer'] = (kpi_region['net_revenue'] / kpi_region['customer_id']).round(2)
+            kpi_region['roi'] = ((kpi_region['net_revenue'] - kpi_region['discount_amount']) / kpi_region['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_region.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'customer_id': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'revenue_per_customer': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+    
+    # ========== TAB 7: BY TIME ==========
+    with kpi_tabs[6]:
+        time_view = st.radio("Select Time Period", ["Month", "Quarter", "Season"], horizontal=True)
+        
+        if time_view == "Month" and 'month' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('month').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+        
+        elif time_view == "Quarter" and 'quarter' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('quarter').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+        
+        elif time_view == "Season" and 'season' in filtered_df.columns:
+            kpi_time = filtered_df.groupby('season').agg({
+                'net_revenue': 'sum',
+                'gross_revenue': 'sum',
+                'discount_amount': 'sum',
+                'quantity': 'sum'
+            }).reset_index()
+            
+            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
+            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
+            
+            st.dataframe(
+                kpi_time.style.format({
+                    'net_revenue': '${:,.2f}',
+                    'gross_revenue': '${:,.2f}',
+                    'discount_amount': '${:,.2f}',
+                    'quantity': '{:,.0f}',
+                    'avg_order_value': '${:,.2f}',
+                    'roi': '{:.2f}%'
+                }),
+                use_container_width=True
+            )
+
     st.markdown("---")
 
     # ========== CHARTS FROM NOTEBOOK ==========
@@ -576,7 +860,7 @@ elif page == "📊 Analytics Dashboard":
 
     tab1, tab2, tab3 = st.tabs(["📈 Trends", "🎯 Marketing", "📦 Performance"])
 
-    # ========== TAB 1: TRENDS (مع السمة الديناميكية) ==========
+    # ========== TAB 1: TRENDS ==========
     with tab1:
         # Chart 1: Monthly Revenue Trends by Marketing Channel
         if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
@@ -597,18 +881,78 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Revenue Trends by Marketing Channel'
             )
             
-            fig_revenue_trend = create_chart_with_theme(fig_revenue_trend)
+            # تطبيق السمة على الرسوم البيانية
+            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
+            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
+            
             fig_revenue_trend.update_layout(
+                plot_bgcolor=bg_color,
+                paper_bgcolor=paper_color,
+                font_color=text_color,
                 height=500,
                 xaxis_title="Month",
                 yaxis_title="Revenue",
                 legend_title="Channel",
-                xaxis=dict(tickangle=45)
+                xaxis=dict(
+                    tickangle=45,
+                    gridcolor=grid_color,
+                    linecolor=grid_color
+                ),
+                yaxis=dict(
+                    gridcolor=grid_color,
+                    linecolor=grid_color
+                )
             )
             
             st.plotly_chart(fig_revenue_trend, use_container_width=True)
 
-    # ========== TAB 2: MARKETING (مع السمة الديناميكية) ==========
+        # Chart 2: Monthly Conversions Trends by Marketing Channel
+        if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Monthly Conversions Trends by Marketing Channel")
+            
+            monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_channel.columns = ['month', 'channel', 'conversions']
+            
+            fig_conv_trend = px.line(
+                monthly_channel,
+                x='month',
+                y='conversions',
+                color='channel',
+                markers=True,
+                title='Monthly Conversions Trends by Marketing Channel'
+            )
+            
+            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
+            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
+            
+            fig_conv_trend.update_layout(
+                plot_bgcolor=bg_color,
+                paper_bgcolor=paper_color,
+                font_color=text_color,
+                height=500,
+                xaxis_title="Month",
+                yaxis_title="Conversions (Unique Customers)",
+                legend_title="Channel",
+                xaxis=dict(
+                    tickangle=45,
+                    gridcolor=grid_color,
+                    linecolor=grid_color
+                ),
+                yaxis=dict(
+                    gridcolor=grid_color,
+                    linecolor=grid_color
+                )
+            )
+            
+            st.plotly_chart(fig_conv_trend, use_container_width=True)
+
+    # ========== TAB 2: MARKETING ==========   
     with tab2:
         if 'marketing_channel' in df.columns:
             revenue_col = 'net_revenue' if 'net_revenue' in df.columns else 'final_amount'
@@ -629,6 +973,7 @@ elif page == "📊 Analytics Dashboard":
                 
                 # Chart 1: Total Revenue per Marketing Channel
                 st.subheader("Total Revenue per Marketing Channel")
+                bar_width = 25
                 
                 fig_rev = px.scatter(
                     channel_perf,
@@ -640,20 +985,44 @@ elif page == "📊 Analytics Dashboard":
                 )
                 
                 fig_rev.update_traces(
-                    marker=dict(size=25),
+                    marker=dict(size=bar_width),
                     textposition='top center',
                     texttemplate='%{text:.2s}'
                 )
                 
-                fig_rev = create_chart_with_theme(fig_rev)
+                for x_val, y_val in zip(channel_perf.index, channel_perf["total_revenue"]):
+                    fig_rev.add_shape(
+                        type="line",
+                        x0=x_val, y0=0,
+                        x1=x_val, y1=y_val,
+                        line=dict(color="#3647F5", width=bar_width),
+                        layer="below"
+                    )
+                
+                bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+                paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+                text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
+                grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
+                
                 fig_rev.update_layout(
+                    plot_bgcolor=bg_color,
+                    paper_bgcolor=paper_color,
+                    font_color=text_color,
                     height=450,
-                    margin=dict(t=60)
+                    margin=dict(t=60),
+                    xaxis=dict(
+                        gridcolor=grid_color,
+                        linecolor=grid_color
+                    ),
+                    yaxis=dict(
+                        gridcolor=grid_color,
+                        linecolor=grid_color
+                    )
                 )
                 
                 st.plotly_chart(fig_rev, use_container_width=True)
 
-    # ========== TAB 3: PERFORMANCE (مع السمة الديناميكية) ==========
+    # ========== TAB 3: PERFORMANCE ==========
     with tab3:
         st.subheader("📊 Marketing Channel Performance Analysis")
         
@@ -681,13 +1050,26 @@ elif page == "📊 Analytics Dashboard":
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
             
-            fig_revenue_order = create_chart_with_theme(fig_revenue_order)
+            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
+            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
+            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
+            
+            fig_revenue_order.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
             fig_revenue_order.update_layout(
+                plot_bgcolor=bg_color,
+                paper_bgcolor=paper_color,
+                font_color=text_color,
                 height=450,
                 xaxis_title="Revenue Per Order ($)",
-                yaxis_title="Marketing Channel"
+                yaxis_title="Marketing Channel",
+                xaxis=dict(
+                    gridcolor=grid_color,
+                    linecolor=grid_color
+                )
             )
-            
             st.plotly_chart(fig_revenue_order, use_container_width=True)
 
 # =============================================================================
@@ -695,7 +1077,7 @@ elif page == "📊 Analytics Dashboard":
 # =============================================================================
 elif page == "🔍 Data Explorer":
     st.title("🔍 Data Explorer")
-    st.markdown(f"Browse and filter your data • Current Theme: **{'☀️ Light' if current_theme == 'light' else '🌙 Dark'}**")
+    st.markdown(f"Browse and filter your data • Current Theme: **{'🌙 Dark' if st.session_state.theme_mode == 'dark' else '☀️ Light'}**")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -762,12 +1144,12 @@ elif page == "ℹ️ About":
 
     A comprehensive business intelligence dashboard for e-commerce data analysis.
 
-    ### 🎨 Smart Theme Features
+    ### 🎨 Theme Features
 
-    - **Light Mode**: Eye-friendly daytime theme
-    - **Dark Mode**: Comfortable night viewing
-    - **Auto Mode**: Automatically switches based on time
-    - **Dynamic Charts**: All visualizations adapt to theme
+    - **🌙 Dark Mode**: Default professional dark theme
+    - **☀️ Light Mode**: Bright theme for daytime use
+    - **Easy Toggle**: Switch between themes with one click
+    - **Session Persistence**: Theme preferences saved during session
 
     ### 🎯 Features
 
@@ -791,11 +1173,11 @@ elif page == "ℹ️ About":
     - **Framework**: Streamlit
     - **Data Processing**: Pandas, NumPy
     - **Visualizations**: Plotly
-    - **Styling**: Dynamic CSS themes
+    - **Styling**: Custom CSS with dual themes
 
     ### 📝 How to Use
 
-    1. **Select Theme**: Choose from Light/Dark/Auto modes
+    1. **Toggle Theme**: Use the button in sidebar to switch between Dark/Light modes
     2. **Home**: Get quick overview of your business
     3. **Analytics Dashboard**: Dive deep into visualizations
     4. **Data Explorer**: Filter and export specific data
@@ -817,9 +1199,9 @@ elif page == "ℹ️ About":
 
     ---
 
-    **Version**: 2.0.0 (with Theme Support)  
+    **Version**: 1.1.0 (with Theme Support)  
     **Last Updated**: December 2025  
-    **Current Theme**: {'☀️ Light' if current_theme == 'light' else '🌙 Dark'} Mode
+    **Current Theme**: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
     """)
 
     st.markdown("---")
@@ -840,6 +1222,6 @@ elif page == "ℹ️ About":
 st.markdown(f"""
     <div class='footer'>
         <p>📊 E-commerce Analytics Pro | Built with Streamlit</p>
-        <p>© 2025 | Current Theme: {'☀️ Light' if current_theme == 'light' else '🌙 Dark'} Mode</p>
+        <p>© 2025 | Current Theme: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}</p>
     </div>
 """, unsafe_allow_html=True)
