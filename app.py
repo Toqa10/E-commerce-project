@@ -15,451 +15,160 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# =============================================================================
-# THEME MANAGEMENT - LIGHT MODE FEATURE
-# =============================================================================
-# Initialize theme in session state
-if 'theme_mode' not in st.session_state:
-    st.session_state.theme_mode = 'dark'  # Default is dark mode
+st.markdown(
+    """
+    <style>
+    :root {
+      --primary-blue: #1f77b4;
+      --secondary-green: #2ecc71;
+      --bg-dark: #0f1419;
+      --panel-dark: #1a1f2e;
+      --text-light: #f5f5f5;
+      --accent-cyan: #00d9ff;
+      --warning-orange: #ff9800;
+    }
 
-# Function to toggle theme
-def toggle_theme():
-    if st.session_state.theme_mode == 'dark':
-        st.session_state.theme_mode = 'light'
-    else:
-        st.session_state.theme_mode = 'dark'
-    # Force rerun to apply theme changes everywhere
-    st.rerun()
+    html, body, .stApp {
+      background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%) !important;
+      color: var(--text-light) !important;
+    }
 
-# Function to get current theme CSS
-def get_theme_css():
-    if st.session_state.theme_mode == 'light':
-        return """
-        <style>
-        :root {
-          --primary-blue: #1f77b4;
-          --secondary-green: #2ecc71;
-          --bg-dark: #f8f9fa;
-          --panel-dark: #ffffff;
-          --text-light: #333333;
-          --accent-cyan: #007bff;
-          --warning-orange: #ff9800;
-        }
+    h1, h2, h3, h4, h5, h6,
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+      color: var(--accent-cyan) !important;
+      text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+      font-weight: 700 !important;
+    }
 
-        html, body, .stApp {
-          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
-          color: var(--text-light) !important;
-        }
+    section[data-testid="stSidebar"] {
+      background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%) !important;
+      border-right: 2px solid var(--primary-blue);
+    }
 
-        h1, h2, h3, h4, h5, h6,
-        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-          color: var(--accent-cyan) !important;
-          text-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
-          font-weight: 700 !important;
-        }
+    section[data-testid="stSidebar"] * {
+      color: var(--text-light) !important;
+    }
 
-        section[data-testid="stSidebar"] {
-          background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
-          border-right: 2px solid #e0e0e0;
-        }
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stDateInput label {
+      color: var(--accent-cyan) !important;
+      font-weight: 600 !important;
+    }
 
-        section[data-testid="stSidebar"] * {
-          color: var(--text-light) !important;
-        }
+    div.stButton > button {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
+      color: white !important;
+      border: none !important;
+      font-weight: 700 !important;
+      padding: 0.6rem 2rem !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
+      transition: all 0.3s ease !important;
+    }
 
-        section[data-testid="stSidebar"] .stSelectbox label,
-        section[data-testid="stSidebar"] .stDateInput label {
-          color: var(--accent-cyan) !important;
-          font-weight: 600 !important;
-        }
+    div.stButton > button:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
+    }
 
-        div.stButton > button {
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
-          color: white !important;
-          border: none !important;
-          font-weight: 700 !important;
-          padding: 0.6rem 2rem !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 15px rgba(31, 119, 180, 0.3) !important;
-          transition: all 0.3s ease !important;
-        }
+    [data-testid="stMetricValue"] {
+      color: var(--secondary-green) !important;
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+    }
 
-        div.stButton > button:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 6px 20px rgba(31, 119, 180, 0.4) !important;
-        }
+    [data-testid="stMetricLabel"] {
+      color: var(--accent-cyan) !important;
+      font-weight: 600 !important;
+    }
 
-        [data-testid="stMetricValue"] {
-          color: var(--secondary-green) !important;
-          font-size: 2rem !important;
-          font-weight: 700 !important;
-        }
+    div[data-testid="stExpander"] {
+      background-color: var(--panel-dark) !important;
+      border: 1px solid var(--primary-blue) !important;
+      border-radius: 10px !important;
+    }
 
-        [data-testid="stMetricLabel"] {
-          color: var(--accent-cyan) !important;
-          font-weight: 600 !important;
-        }
+    .stDataFrame {
+      background-color: var(--panel-dark) !important;
+    }
 
-        div[data-testid="stExpander"] {
-          background-color: var(--panel-dark) !important;
-          border: 1px solid #e0e0e0 !important;
-          border-radius: 10px !important;
-        }
+    .stTabs [data-baseweb="tab-list"] {
+      gap: 8px;
+      background-color: transparent;
+    }
 
-        .stDataFrame {
-          background-color: var(--panel-dark) !important;
-          border: 1px solid #e0e0e0 !important;
-        }
+    .stTabs [data-baseweb="tab"] {
+      background-color: var(--panel-dark);
+      border-radius: 8px 8px 0 0;
+      color: var(--text-light);
+      border: 1px solid var(--primary-blue);
+      padding: 10px 20px;
+    }
 
-        .stTabs [data-baseweb="tab-list"] {
-          gap: 8px;
-          background-color: transparent;
-        }
+    .stTabs [aria-selected="true"] {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+      color: white;
+    }
 
-        .stTabs [data-baseweb="tab"] {
-          background-color: var(--panel-dark);
-          border-radius: 8px 8px 0 0;
-          color: var(--text-light);
-          border: 1px solid #e0e0e0;
-          padding: 10px 20px;
-        }
+    .stAlert {
+      background-color: var(--panel-dark) !important;
+      border-left: 4px solid var(--accent-cyan) !important;
+    }
 
-        .stTabs [aria-selected="true"] {
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
-          color: white;
-        }
+    a {
+      color: var(--accent-cyan) !important;
+      text-decoration: none !important;
+    }
 
-        .stAlert {
-          background-color: var(--panel-dark) !important;
-          border-left: 4px solid var(--accent-cyan) !important;
-        }
+    a:hover {
+      color: var(--secondary-green) !important;
+    }
 
-        a {
-          color: var(--accent-cyan) !important;
-          text-decoration: none !important;
-        }
+    hr {
+      border-color: var(--primary-blue) !important;
+      opacity: 0.3 !important;
+    }
 
-        a:hover {
-          color: var(--secondary-green) !important;
-        }
+    .stDownloadButton > button {
+      background-color: var(--secondary-green) !important;
+      color: white !important;
+    }
 
-        hr {
-          border-color: #e0e0e0 !important;
-          opacity: 0.5 !important;
-        }
+    .metric-card {
+      background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.1) 100%);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--primary-blue);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
 
-        .stDownloadButton > button {
-          background-color: var(--secondary-green) !important;
-          color: white !important;
-        }
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--secondary-green);
+      margin: 0.5rem 0;
+    }
 
-        .metric-card {
-          background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.05) 100%);
-          padding: 1.5rem;
-          border-radius: 12px;
-          border: 1px solid #e0e0e0;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-          text-align: center;
-          margin-bottom: 1rem;
-        }
+    .metric-label {
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
 
-        .metric-value {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: var(--secondary-green);
-          margin: 0.5rem 0;
-        }
-
-        .metric-label {
-          font-size: 1rem;
-          color: var(--accent-cyan);
-          font-weight: 600;
-        }
-
-        .footer {
-          text-align: center;
-          padding: 2rem;
-          color: var(--text-light);
-          opacity: 0.7;
-          border-top: 1px solid #e0e0e0;
-          margin-top: 3rem;
-        }
-        
-        .theme-indicator {
-          display: inline-block;
-          padding: 5px 15px;
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
-          color: white;
-          border-radius: 20px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          margin: 10px 0;
-        }
-        </style>
-        """
-    else:
-        return """
-        <style>
-        :root {
-          --primary-blue: #1f77b4;
-          --secondary-green: #2ecc71;
-          --bg-dark: #0f1419;
-          --panel-dark: #1a1f2e;
-          --text-light: #f5f5f5;
-          --accent-cyan: #00d9ff;
-          --warning-orange: #ff9800;
-        }
-
-        html, body, .stApp {
-          background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%) !important;
-          color: var(--text-light) !important;
-        }
-
-        h1, h2, h3, h4, h5, h6,
-        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-          color: var(--accent-cyan) !important;
-          text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
-          font-weight: 700 !important;
-        }
-
-        section[data-testid="stSidebar"] {
-          background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%) !important;
-          border-right: 2px solid var(--primary-blue);
-        }
-
-        section[data-testid="stSidebar"] * {
-          color: var(--text-light) !important;
-        }
-
-        section[data-testid="stSidebar"] .stSelectbox label,
-        section[data-testid="stSidebar"] .stDateInput label {
-          color: var(--accent-cyan) !important;
-          font-weight: 600 !important;
-        }
-
-        div.stButton > button {
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
-          color: white !important;
-          border: none !important;
-          font-weight: 700 !important;
-          padding: 0.6rem 2rem !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
-          transition: all 0.3s ease !important;
-        }
-
-        div.stButton > button:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
-        }
-
-        [data-testid="stMetricValue"] {
-          color: var(--secondary-green) !important;
-          font-size: 2rem !important;
-          font-weight: 700 !important;
-        }
-
-        [data-testid="stMetricLabel"] {
-          color: var(--accent-cyan) !important;
-          font-weight: 600 !important;
-        }
-
-        div[data-testid="stExpander"] {
-          background-color: var(--panel-dark) !important;
-          border: 1px solid var(--primary-blue) !important;
-          border-radius: 10px !important;
-        }
-
-        .stDataFrame {
-          background-color: var(--panel-dark) !important;
-        }
-
-        .stTabs [data-baseweb="tab-list"] {
-          gap: 8px;
-          background-color: transparent;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-          background-color: var(--panel-dark);
-          border-radius: 8px 8px 0 0;
-          color: var(--text-light);
-          border: 1px solid var(--primary-blue);
-          padding: 10px 20px;
-        }
-
-        .stTabs [aria-selected="true"] {
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
-          color: white;
-        }
-
-        .stAlert {
-          background-color: var(--panel-dark) !important;
-          border-left: 4px solid var(--accent-cyan) !important;
-        }
-
-        a {
-          color: var(--accent-cyan) !important;
-          text-decoration: none !important;
-        }
-
-        a:hover {
-          color: var(--secondary-green) !important;
-        }
-
-        hr {
-          border-color: var(--primary-blue) !important;
-          opacity: 0.3 !important;
-        }
-
-        .stDownloadButton > button {
-          background-color: var(--secondary-green) !important;
-          color: white !important;
-        }
-
-        .metric-card {
-          background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.1) 100%);
-          padding: 1.5rem;
-          border-radius: 12px;
-          border: 1px solid var(--primary-blue);
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-          text-align: center;
-          margin-bottom: 1rem;
-        }
-
-        .metric-value {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: var(--secondary-green);
-          margin: 0.5rem 0;
-        }
-
-        .metric-label {
-          font-size: 1rem;
-          color: var(--accent-cyan);
-          font-weight: 600;
-        }
-
-        .footer {
-          text-align: center;
-          padding: 2rem;
-          color: var(--text-light);
-          opacity: 0.7;
-          border-top: 1px solid var(--primary-blue);
-          margin-top: 3rem;
-        }
-        
-        .theme-indicator {
-          display: inline-block;
-          padding: 5px 15px;
-          background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
-          color: white;
-          border-radius: 20px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          margin: 10px 0;
-        }
-        </style>
-        """
-
-# Function to update plotly charts based on theme
-def update_plotly_theme(fig, title=""):
-    """Update plotly chart theme based on current theme mode"""
-    if st.session_state.theme_mode == 'light':
-        # Light mode colors
-        fig.update_layout(
-            paper_bgcolor='#ffffff',
-            plot_bgcolor='#f8f9fa',
-            font_color='#333333',
-            title=dict(
-                text=title,
-                font=dict(color='#007bff')
-            ),
-            xaxis=dict(
-                gridcolor='#e0e0e0',
-                linecolor='#e0e0e0',
-                zerolinecolor='#e0e0e0',
-                tickfont=dict(color='#333333'),
-                title_font=dict(color='#007bff')
-            ),
-            yaxis=dict(
-                gridcolor='#e0e0e0',
-                linecolor='#e0e0e0',
-                zerolinecolor='#e0e0e0',
-                tickfont=dict(color='#333333'),
-                title_font=dict(color='#007bff')
-            ),
-            legend=dict(
-                bgcolor='#ffffff',
-                bordercolor='#e0e0e0',
-                font=dict(color='#333333')
-            )
-        )
-    else:
-        # Dark mode colors
-        fig.update_layout(
-            paper_bgcolor='#1a1f2e',
-            plot_bgcolor='#0f1419',
-            font_color='#f5f5f5',
-            title=dict(
-                text=title,
-                font=dict(color='#00d9ff')
-            ),
-            xaxis=dict(
-                gridcolor='#2a3240',
-                linecolor='#2a3240',
-                zerolinecolor='#2a3240',
-                tickfont=dict(color='#f5f5f5'),
-                title_font=dict(color='#00d9ff')
-            ),
-            yaxis=dict(
-                gridcolor='#2a3240',
-                linecolor='#2a3240',
-                zerolinecolor='#2a3240',
-                tickfont=dict(color='#f5f5f5'),
-                title_font=dict(color='#00d9ff')
-            ),
-            legend=dict(
-                bgcolor='#1a1f2e',
-                bordercolor='#2a3240',
-                font=dict(color='#f5f5f5')
-            )
-        )
-    return fig
-
-# Apply theme CSS at the beginning
-st.markdown(get_theme_css(), unsafe_allow_html=True)
-
-# =============================================================================
-# SIDEBAR NAVIGATION WITH THEME TOGGLE
-# =============================================================================
-st.sidebar.title("🎨 Theme Settings")
-
-# Theme toggle button
-theme_icon = "☀️" if st.session_state.theme_mode == 'dark' else "🌙"
-theme_text = "Switch to Light Mode" if st.session_state.theme_mode == 'dark' else "Switch to Dark Mode"
-
-if st.sidebar.button(f"{theme_icon} {theme_text}", use_container_width=True, type="primary"):
-    toggle_theme()
-
-# Display current theme status
-st.sidebar.markdown(f"""
-<div class='theme-indicator'>
-    Current Theme: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
-</div>
-""", unsafe_allow_html=True)
-
-st.sidebar.markdown("---")
-st.sidebar.title("🧭 Navigation")
-st.sidebar.markdown("---")
-
-page = st.sidebar.radio(
-    "Select Page",
-    ["🏠 Home", "📊 Analytics Dashboard", "🔍 Data Explorer", "ℹ️ About"],
-    index=0
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-light);
+      opacity: 0.7;
+      border-top: 1px solid var(--primary-blue);
+      margin-top: 3rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
-
-st.sidebar.markdown("---")
-st.sidebar.info(f"💡 **Tip**: {'Use Light Mode for daytime viewing' if st.session_state.theme_mode == 'dark' else 'Use Dark Mode for nighttime viewing'}")
 
 # =============================================================================
 # DATA LOADING
@@ -486,6 +195,21 @@ def load_data():
         st.error(f"❌ Error loading data: {str(e)}")
         return None
 
+# =============================================================================
+# SIDEBAR NAVIGATION
+# =============================================================================
+st.sidebar.title("🧭 Navigation")
+st.sidebar.markdown("---")
+
+page = st.sidebar.radio(
+    "Select Page",
+    ["🏠 Home", "📊 Analytics Dashboard", "🔍 Data Explorer", "ℹ️ About"],
+    index=0
+)
+
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Tip**: Use filters in Analytics Dashboard for detailed insights")
+
 # Load data
 df = load_data()
 
@@ -493,11 +217,11 @@ df = load_data()
 # HOME PAGE
 # =============================================================================
 if page == "🏠 Home":
-    st.markdown(f"""
+    st.markdown("""
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 style='font-size: 3.5rem; margin-bottom: 0;'>🛒 E-commerce Analytics Pro</h1>
-            <p style='font-size: 1.3rem; margin-top: 0.5rem;'>
-                Advanced Business Intelligence Dashboard • {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
+            <p style='font-size: 1.3rem; color: #00d9ff; margin-top: 0.5rem;'>
+                Advanced Business Intelligence Dashboard
             </p>
         </div>
     """, unsafe_allow_html=True)
@@ -573,13 +297,12 @@ if page == "🏠 Home":
             """)
 
         with col3:
-            theme_feature = "🌙 Dark Mode" if st.session_state.theme_mode == 'dark' else "☀️ Light Mode"
-            st.markdown(f"""
-                ### 🎨 Smart Themes
-                - {theme_feature} active
-                - Easy toggle switch
-                - Eye comfort optimization
-                - Professional design
+            st.markdown("""
+                ### 📈 Insights
+                - Revenue trends
+                - Customer segmentation
+                - Marketing ROI
+                - Channel performance
             """)
 
         st.markdown("---")
@@ -608,11 +331,11 @@ if page == "🏠 Home":
         st.warning("⚠️ No data available. Please check the CSV file.")
 
 # =============================================================================
-# ANALYTICS DASHBOARD - COMPLETE VERSION
+# ANALYTICS DASHBOARD
 # =============================================================================
 elif page == "📊 Analytics Dashboard":
     st.title("📊 Analytics Dashboard")
-    st.markdown(f"Interactive visualizations • Current Theme: **{'🌙 Dark' if st.session_state.theme_mode == 'dark' else '☀️ Light'}**")
+    st.markdown("Interactive visualizations with real-time filtering")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -656,9 +379,10 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-    # ========== KPIs ==========
+     # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
     
+    # إنشاء tabs للـ KPIs المختلفة
     kpi_tabs = st.tabs([
         "📊 Overall", 
         "📦 By Category", 
@@ -670,8 +394,9 @@ elif page == "📊 Analytics Dashboard":
     ])
     
     # ========== TAB 1: OVERALL KPIs ==========
+       # ========== TAB 1: OVERALL KPIs ==========
     with kpi_tabs[0]:
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)  # ⬅️ غيرت من 4 لـ 3
         
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
         total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
@@ -694,6 +419,7 @@ elif page == "📊 Analytics Dashboard":
             st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
             st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
             st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
+
     
     # ========== TAB 2: BY CATEGORY ==========
     with kpi_tabs[1]:
@@ -911,7 +637,7 @@ elif page == "📊 Analytics Dashboard":
 
     st.markdown("---")
 
-    # ========== COMPLETE CHARTS SECTION ==========
+    # ========== CHARTS FROM NOTEBOOK ==========
     st.header("📊 Data Visualizations")
 
     tab1, tab2, tab3 = st.tabs(["📈 Trends", "🎯 Marketing", "📦 Performance"])
@@ -937,11 +663,13 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Revenue Trends by Marketing Channel'
             )
             
-            fig_revenue_trend = update_plotly_theme(fig_revenue_trend, 'Monthly Revenue Trends by Marketing Channel')
             fig_revenue_trend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=500,
                 xaxis_title="Month",
-                yaxis_title="Revenue ($)",
+                yaxis_title="Revenue",
                 legend_title="Channel",
                 xaxis=dict(tickangle=45)
             )
@@ -966,8 +694,10 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Conversions Trends by Marketing Channel'
             )
             
-            fig_conv_trend = update_plotly_theme(fig_conv_trend, 'Monthly Conversions Trends by Marketing Channel')
             fig_conv_trend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=500,
                 xaxis_title="Month",
                 yaxis_title="Conversions (Unique Customers)",
@@ -1000,11 +730,13 @@ elif page == "📊 Analytics Dashboard":
                 marker=dict(size=10, color='#3647F5')
             )
             
-            fig_total_rev = update_plotly_theme(fig_total_rev, 'Overall Monthly Revenue Trend')
             fig_total_rev.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Month",
-                yaxis_title="Total Revenue ($)",
+                yaxis_title="Total Revenue",
                 xaxis=dict(tickangle=45)
             )
             
@@ -1032,8 +764,10 @@ elif page == "📊 Analytics Dashboard":
                 marker=dict(size=10, color='#FF9F0D')
             )
             
-            fig_total_conv = update_plotly_theme(fig_total_conv, 'Overall Monthly Conversions Trend')
             fig_total_conv.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Month",
                 yaxis_title="Total Conversions",
@@ -1043,6 +777,7 @@ elif page == "📊 Analytics Dashboard":
             st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========   
+             # ========== TAB 2: MARKETING ==========
     with tab2:
         if 'marketing_channel' in df.columns:
             revenue_col = 'net_revenue' if 'net_revenue' in df.columns else 'final_amount'
@@ -1089,8 +824,10 @@ elif page == "📊 Analytics Dashboard":
                         layer="below"
                     )
                 
-                fig_rev = update_plotly_theme(fig_rev, 'Total Revenue per Marketing Channel')
                 fig_rev.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
                     height=450,
                     margin=dict(t=60)
                 )
@@ -1114,8 +851,10 @@ elif page == "📊 Analytics Dashboard":
                     marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
                 )
                 
-                fig_conv = update_plotly_theme(fig_conv, 'Total Conversions per Channel')
                 fig_conv.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
                     height=450,
                     yaxis_title="Total Conversions",
                     xaxis_title="Marketing Channel"
@@ -1123,9 +862,10 @@ elif page == "📊 Analytics Dashboard":
                 
                 st.plotly_chart(fig_conv, use_container_width=True)
                 
-                # Chart 3: Total Orders per Channel
+                # Chart 3: Total Orders per Channel (بدل Spend)
                 st.subheader("Total Orders per Channel")
                 
+                # حساب عدد الطلبات لكل قناة
                 orders_data = df.groupby('marketing_channel').agg({
                     'order_id': 'count'
                 }).reset_index()
@@ -1145,8 +885,10 @@ elif page == "📊 Analytics Dashboard":
                     marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
                 )
                 
-                fig_spend = update_plotly_theme(fig_spend, 'Total Orders per Channel')
                 fig_spend.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
                     height=500,
                     yaxis_title="Total Orders",
                     xaxis_title="Marketing Channel"
@@ -1169,16 +911,23 @@ elif page == "📊 Analytics Dashboard":
                     title="Average ROI per Channel"
                 )
                 
-                fig_roi = update_plotly_theme(fig_roi, 'Average ROI per Channel')
                 fig_roi.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_color='#f5f5f5',
                     height=450,
                     xaxis_title="Average ROI",
                     yaxis_title="Marketing Channel"
                 )
                 
                 st.plotly_chart(fig_roi, use_container_width=True)
+            else:
+                st.error("❌ Required columns not found!")
+        else:
+            st.error("❌ Column 'marketing_channel' not found!")
 
-    # ========== TAB 3: PERFORMANCE ==========
+   
+           # ========== TAB 3: PERFORMANCE (NEW) ==========
     with tab3:
         st.subheader("📊 Marketing Channel Performance Analysis")
         
@@ -1205,18 +954,17 @@ elif page == "📊 Analytics Dashboard":
                 color='Revenue_Per_Order',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            
             fig_revenue_order.update_traces(
                 marker=dict(line=dict(width=1.5, color='#D9D9D9'))
             )
-            
-            fig_revenue_order = update_plotly_theme(fig_revenue_order, 'Revenue Per Order by Channel')
             fig_revenue_order.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Revenue Per Order ($)",
                 yaxis_title="Marketing Channel"
             )
-            
             st.plotly_chart(fig_revenue_order, use_container_width=True)
             
             # Chart 2: Customer Acquisition Rate
@@ -1239,19 +987,18 @@ elif page == "📊 Analytics Dashboard":
                 color='Customer_Acquisition_Rate_%',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            
             fig_acquisition.update_traces(
                 marker=dict(line=dict(width=1.5, color='#D9D9D9'))
             )
-            
-            fig_acquisition = update_plotly_theme(fig_acquisition, 'Customer Acquisition Rate by Channel')
             fig_acquisition.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Marketing Channel",
                 yaxis_title="Customer Acquisition Rate (%)",
                 xaxis=dict(tickangle=45)
             )
-            
             st.plotly_chart(fig_acquisition, use_container_width=True)
             
             # Chart 3: Channel Efficiency Ranking
@@ -1285,18 +1032,17 @@ elif page == "📊 Analytics Dashboard":
                 color='Efficiency_Score',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            
             fig_efficiency.update_traces(
                 marker=dict(line=dict(width=1.5, color='#D9D9D9'))
             )
-            
-            fig_efficiency = update_plotly_theme(fig_efficiency, 'Channel Efficiency Ranking')
             fig_efficiency.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Efficiency Score",
                 yaxis_title="Marketing Channel"
             )
-            
             st.plotly_chart(fig_efficiency, use_container_width=True)
             
             # Chart 4: Revenue vs Customer Acquisition
@@ -1323,21 +1069,20 @@ elif page == "📊 Analytics Dashboard":
                 size_max=60,
                 color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
             )
-            
             fig_revenue_customers.update_traces(
                 textposition='top center',
                 textfont=dict(size=12, color='#f5f5f5'),
                 marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
             )
-            
-            fig_revenue_customers = update_plotly_theme(fig_revenue_customers, 'Revenue vs Customer Acquisition')
             fig_revenue_customers.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=500,
                 showlegend=False,
                 xaxis_title="Unique Customers Acquired",
                 yaxis_title="Total Revenue ($)"
             )
-            
             st.plotly_chart(fig_revenue_customers, use_container_width=True)
             
             # Chart 5: Revenue Per Customer
@@ -1361,27 +1106,93 @@ elif page == "📊 Analytics Dashboard":
                 color='Revenue_Per_Customer',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            
             fig_revenue_customer.update_traces(
                 marker=dict(line=dict(width=1.5, color='#D9D9D9'))
             )
-            
-            fig_revenue_customer = update_plotly_theme(fig_revenue_customer, 'Revenue Per Customer by Channel')
             fig_revenue_customer.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Marketing Channel",
                 yaxis_title="Revenue Per Customer ($)",
                 xaxis=dict(tickangle=45)
             )
-            
             st.plotly_chart(fig_revenue_customer, use_container_width=True)
+            
+            # Chart 6: Performance Quadrant Analysis
+            st.subheader("🏆 Performance Quadrant Analysis")
+            
+            quadrant_analysis = filtered_df.groupby('marketing_channel').agg({
+                'customer_id': 'nunique',
+                'final_amount': 'sum',
+                'order_id': 'count'
+            }).reset_index()
+            quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
+            quadrant_analysis['Revenue_Per_Customer'] = (
+                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
+            ).round(2)
+            
+            avg_customers = quadrant_analysis['Unique_Customers'].mean()
+            avg_revenue = quadrant_analysis['Total_Revenue'].mean()
+            
+            fig_quadrant = px.scatter(
+                quadrant_analysis,
+                x='Unique_Customers',
+                y='Total_Revenue',
+                size='Revenue_Per_Customer',
+                color='Revenue_Per_Customer',
+                hover_name='Channel',
+                hover_data=['Revenue_Per_Customer', 'Total_Orders'],
+                title='Performance Quadrant Analysis: High Revenue/High Reach = Top Right 🏆',
+                size_max=50,
+                color_continuous_scale=['#FF9F0D', '#3647F5']
+            )
+            
+            fig_quadrant.update_traces(
+                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.9)
+            )
+            
+            fig_quadrant.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_color='#f5f5f5',
+                height=500,
+                xaxis_title="Unique Customers Acquired",
+                yaxis_title="Total Revenue ($)",
+                showlegend=False
+            )
+            
+            # Quadrant lines
+            fig_quadrant.add_hline(
+                y=avg_revenue,
+                line_dash="dash",
+                line_color="#FF9F0D",
+                annotation_text=f"Avg Revenue: ${avg_revenue:,.0f}",
+                annotation_position="right"
+            )
+            
+            fig_quadrant.add_vline(
+                x=avg_customers,
+                line_dash="dash",
+                line_color="#FF9F0D",
+                annotation_text=f"Avg Customers: {avg_customers:,.0f}",
+                annotation_position="top"
+            )
+            
+            st.plotly_chart(fig_quadrant, use_container_width=True)
+            
+            # Best performer info
+            best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
+            st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
+
 
 # =============================================================================
 # DATA EXPLORER
 # =============================================================================
 elif page == "🔍 Data Explorer":
     st.title("🔍 Data Explorer")
-    st.markdown(f"Browse and filter your data • Current Theme: **{'🌙 Dark' if st.session_state.theme_mode == 'dark' else '☀️ Light'}**")
+    st.markdown("Browse and filter your data")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -1443,17 +1254,10 @@ elif page == "🔍 Data Explorer":
 elif page == "ℹ️ About":
     st.title("ℹ️ About This Application")
 
-    st.markdown(f"""
+    st.markdown("""
     ## 🛒 E-commerce Analytics Pro
 
     A comprehensive business intelligence dashboard for e-commerce data analysis.
-
-    ### 🎨 Theme Features
-
-    - **🌙 Dark Mode**: Default professional dark theme
-    - **☀️ Light Mode**: Bright theme for daytime use
-    - **Easy Toggle**: Switch between themes with one click
-    - **Session Persistence**: Theme preferences saved during session
 
     ### 🎯 Features
 
@@ -1477,14 +1281,13 @@ elif page == "ℹ️ About":
     - **Framework**: Streamlit
     - **Data Processing**: Pandas, NumPy
     - **Visualizations**: Plotly
-    - **Styling**: Custom CSS with dual themes
+    - **Styling**: Custom CSS with gradient themes
 
     ### 📝 How to Use
 
-    1. **Toggle Theme**: Use the button in sidebar to switch between Dark/Light modes
-    2. **Home**: Get quick overview of your business
-    3. **Analytics Dashboard**: Dive deep into visualizations
-    4. **Data Explorer**: Filter and export specific data
+    1. **Home**: Get quick overview of your business
+    2. **Analytics Dashboard**: Dive deep into visualizations
+    3. **Data Explorer**: Filter and export specific data
 
     ### 💻 Requirements
 
@@ -1503,9 +1306,9 @@ elif page == "ℹ️ About":
 
     ---
 
-    **Version**: 1.2.0 (Complete Theme Support)  
+    **Version**: 1.0.0  
     **Last Updated**: December 2025  
-    **Current Theme**: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
+    **Built with** ❤️ **using Streamlit**
     """)
 
     st.markdown("---")
@@ -1523,9 +1326,9 @@ elif page == "ℹ️ About":
 # =============================================================================
 # FOOTER
 # =============================================================================
-st.markdown(f"""
+st.markdown("""
     <div class='footer'>
         <p>📊 E-commerce Analytics Pro | Built with Streamlit</p>
-        <p>© 2025 | Current Theme: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}</p>
+        <p>© 2025 | All Rights Reserved</p>
     </div>
 """, unsafe_allow_html=True)
