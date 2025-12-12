@@ -28,6 +28,8 @@ def toggle_theme():
         st.session_state.theme_mode = 'light'
     else:
         st.session_state.theme_mode = 'dark'
+    # Force rerun to apply theme changes everywhere
+    st.rerun()
 
 # Function to get current theme CSS
 def get_theme_css():
@@ -192,14 +194,6 @@ def get_theme_css():
           font-size: 0.9rem;
           font-weight: 600;
           margin: 10px 0;
-        }
-        
-        .plotly .modebar {
-          background-color: var(--panel-dark) !important;
-        }
-        
-        .plotly .modebar-btn path {
-          fill: var(--text-light) !important;
         }
         </style>
         """
@@ -367,7 +361,72 @@ def get_theme_css():
         </style>
         """
 
-# Apply theme CSS
+# Function to update plotly charts based on theme
+def update_plotly_theme(fig, title=""):
+    """Update plotly chart theme based on current theme mode"""
+    if st.session_state.theme_mode == 'light':
+        # Light mode colors
+        fig.update_layout(
+            paper_bgcolor='#ffffff',
+            plot_bgcolor='#f8f9fa',
+            font_color='#333333',
+            title=dict(
+                text=title,
+                font=dict(color='#007bff')
+            ),
+            xaxis=dict(
+                gridcolor='#e0e0e0',
+                linecolor='#e0e0e0',
+                zerolinecolor='#e0e0e0',
+                tickfont=dict(color='#333333'),
+                title_font=dict(color='#007bff')
+            ),
+            yaxis=dict(
+                gridcolor='#e0e0e0',
+                linecolor='#e0e0e0',
+                zerolinecolor='#e0e0e0',
+                tickfont=dict(color='#333333'),
+                title_font=dict(color='#007bff')
+            ),
+            legend=dict(
+                bgcolor='#ffffff',
+                bordercolor='#e0e0e0',
+                font=dict(color='#333333')
+            )
+        )
+    else:
+        # Dark mode colors
+        fig.update_layout(
+            paper_bgcolor='#1a1f2e',
+            plot_bgcolor='#0f1419',
+            font_color='#f5f5f5',
+            title=dict(
+                text=title,
+                font=dict(color='#00d9ff')
+            ),
+            xaxis=dict(
+                gridcolor='#2a3240',
+                linecolor='#2a3240',
+                zerolinecolor='#2a3240',
+                tickfont=dict(color='#f5f5f5'),
+                title_font=dict(color='#00d9ff')
+            ),
+            yaxis=dict(
+                gridcolor='#2a3240',
+                linecolor='#2a3240',
+                zerolinecolor='#2a3240',
+                tickfont=dict(color='#f5f5f5'),
+                title_font=dict(color='#00d9ff')
+            ),
+            legend=dict(
+                bgcolor='#1a1f2e',
+                bordercolor='#2a3240',
+                font=dict(color='#f5f5f5')
+            )
+        )
+    return fig
+
+# Apply theme CSS at the beginning
 st.markdown(get_theme_css(), unsafe_allow_html=True)
 
 # =============================================================================
@@ -381,7 +440,6 @@ theme_text = "Switch to Light Mode" if st.session_state.theme_mode == 'dark' els
 
 if st.sidebar.button(f"{theme_icon} {theme_text}", use_container_width=True, type="primary"):
     toggle_theme()
-    st.rerun()
 
 # Display current theme status
 st.sidebar.markdown(f"""
@@ -550,7 +608,7 @@ if page == "🏠 Home":
         st.warning("⚠️ No data available. Please check the CSV file.")
 
 # =============================================================================
-# ANALYTICS DASHBOARD
+# ANALYTICS DASHBOARD - COMPLETE VERSION
 # =============================================================================
 elif page == "📊 Analytics Dashboard":
     st.title("📊 Analytics Dashboard")
@@ -598,10 +656,9 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-     # ========== KPIs ==========
+    # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
     
-    # إنشاء tabs للـ KPIs المختلفة
     kpi_tabs = st.tabs([
         "📊 Overall", 
         "📦 By Category", 
@@ -637,7 +694,6 @@ elif page == "📊 Analytics Dashboard":
             st.metric("📊 Conversion Rate", f"{conversion_rate:.2f}%")
             st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
             st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
-
     
     # ========== TAB 2: BY CATEGORY ==========
     with kpi_tabs[1]:
@@ -855,7 +911,7 @@ elif page == "📊 Analytics Dashboard":
 
     st.markdown("---")
 
-    # ========== CHARTS FROM NOTEBOOK ==========
+    # ========== COMPLETE CHARTS SECTION ==========
     st.header("📊 Data Visualizations")
 
     tab1, tab2, tab3 = st.tabs(["📈 Trends", "🎯 Marketing", "📦 Performance"])
@@ -881,29 +937,13 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Revenue Trends by Marketing Channel'
             )
             
-            # تطبيق السمة على الرسوم البيانية
-            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
-            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
-            
+            fig_revenue_trend = update_plotly_theme(fig_revenue_trend, 'Monthly Revenue Trends by Marketing Channel')
             fig_revenue_trend.update_layout(
-                plot_bgcolor=bg_color,
-                paper_bgcolor=paper_color,
-                font_color=text_color,
                 height=500,
                 xaxis_title="Month",
-                yaxis_title="Revenue",
+                yaxis_title="Revenue ($)",
                 legend_title="Channel",
-                xaxis=dict(
-                    tickangle=45,
-                    gridcolor=grid_color,
-                    linecolor=grid_color
-                ),
-                yaxis=dict(
-                    gridcolor=grid_color,
-                    linecolor=grid_color
-                )
+                xaxis=dict(tickangle=45)
             )
             
             st.plotly_chart(fig_revenue_trend, use_container_width=True)
@@ -926,31 +966,81 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Conversions Trends by Marketing Channel'
             )
             
-            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
-            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
-            
+            fig_conv_trend = update_plotly_theme(fig_conv_trend, 'Monthly Conversions Trends by Marketing Channel')
             fig_conv_trend.update_layout(
-                plot_bgcolor=bg_color,
-                paper_bgcolor=paper_color,
-                font_color=text_color,
                 height=500,
                 xaxis_title="Month",
                 yaxis_title="Conversions (Unique Customers)",
                 legend_title="Channel",
-                xaxis=dict(
-                    tickangle=45,
-                    gridcolor=grid_color,
-                    linecolor=grid_color
-                ),
-                yaxis=dict(
-                    gridcolor=grid_color,
-                    linecolor=grid_color
-                )
+                xaxis=dict(tickangle=45)
             )
             
             st.plotly_chart(fig_conv_trend, use_container_width=True)
+
+        # Chart 3: Overall Monthly Revenue Trend
+        if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
+            st.subheader("Overall Monthly Revenue Trend")
+            
+            monthly_total = filtered_df.groupby('month_date').agg({
+                'net_revenue': 'sum',
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
+            
+            fig_total_rev = px.line(
+                monthly_total,
+                x='month',
+                y='total_revenue',
+                markers=True,
+                title='Overall Monthly Revenue Trend'
+            )
+            
+            fig_total_rev.update_traces(
+                line=dict(color='#FF9F0D', width=3),
+                marker=dict(size=10, color='#3647F5')
+            )
+            
+            fig_total_rev = update_plotly_theme(fig_total_rev, 'Overall Monthly Revenue Trend')
+            fig_total_rev.update_layout(
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Revenue ($)",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_total_rev, use_container_width=True)
+
+        # Chart 4: Overall Monthly Conversions Trend
+        if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
+            st.subheader("Overall Monthly Conversions Trend")
+            
+            monthly_total = filtered_df.groupby('month_date').agg({
+                'customer_id': 'nunique'
+            }).reset_index()
+            monthly_total.columns = ['month', 'total_conversions']
+            
+            fig_total_conv = px.line(
+                monthly_total,
+                x='month',
+                y='total_conversions',
+                markers=True,
+                title='Overall Monthly Conversions Trend'
+            )
+            
+            fig_total_conv.update_traces(
+                line=dict(color='#3647F5', width=3),
+                marker=dict(size=10, color='#FF9F0D')
+            )
+            
+            fig_total_conv = update_plotly_theme(fig_total_conv, 'Overall Monthly Conversions Trend')
+            fig_total_conv.update_layout(
+                height=450,
+                xaxis_title="Month",
+                yaxis_title="Total Conversions",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========   
     with tab2:
@@ -999,28 +1089,94 @@ elif page == "📊 Analytics Dashboard":
                         layer="below"
                     )
                 
-                bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-                paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-                text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
-                grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
-                
+                fig_rev = update_plotly_theme(fig_rev, 'Total Revenue per Marketing Channel')
                 fig_rev.update_layout(
-                    plot_bgcolor=bg_color,
-                    paper_bgcolor=paper_color,
-                    font_color=text_color,
                     height=450,
-                    margin=dict(t=60),
-                    xaxis=dict(
-                        gridcolor=grid_color,
-                        linecolor=grid_color
-                    ),
-                    yaxis=dict(
-                        gridcolor=grid_color,
-                        linecolor=grid_color
-                    )
+                    margin=dict(t=60)
                 )
                 
                 st.plotly_chart(fig_rev, use_container_width=True)
+                
+                # Chart 2: Total Conversions per Channel
+                st.subheader("Total Conversions per Channel")
+                
+                fig_conv = px.scatter(
+                    channel_perf,
+                    x=channel_perf.index,
+                    y="total_conversions",
+                    size="total_conversions",
+                    color="total_conversions",
+                    color_continuous_scale=["#FF9F0D", "#D9D9D9"],
+                    title="Total Conversions per Channel"
+                )
+                
+                fig_conv.update_traces(
+                    marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
+                )
+                
+                fig_conv = update_plotly_theme(fig_conv, 'Total Conversions per Channel')
+                fig_conv.update_layout(
+                    height=450,
+                    yaxis_title="Total Conversions",
+                    xaxis_title="Marketing Channel"
+                )
+                
+                st.plotly_chart(fig_conv, use_container_width=True)
+                
+                # Chart 3: Total Orders per Channel
+                st.subheader("Total Orders per Channel")
+                
+                orders_data = df.groupby('marketing_channel').agg({
+                    'order_id': 'count'
+                }).reset_index()
+                orders_data.columns = ['channel', 'total_orders']
+                orders_data = orders_data.set_index('channel')
+                
+                fig_spend = px.line(
+                    orders_data,
+                    x=orders_data.index,
+                    y="total_orders",
+                    markers=True,
+                    title="Total Orders per Channel"
+                )
+                
+                fig_spend.update_traces(
+                    line=dict(color="#FF9F0D", width=4),
+                    marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
+                )
+                
+                fig_spend = update_plotly_theme(fig_spend, 'Total Orders per Channel')
+                fig_spend.update_layout(
+                    height=500,
+                    yaxis_title="Total Orders",
+                    xaxis_title="Marketing Channel"
+                )
+                
+                st.plotly_chart(fig_spend, use_container_width=True)
+                
+                # Chart 4: Average ROI per Channel
+                st.subheader("Average ROI per Channel")
+                
+                channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
+                
+                fig_roi = px.bar(
+                    channel_perf_sorted,
+                    x='avg_roi',
+                    y=channel_perf_sorted.index,
+                    orientation='h',
+                    color='avg_roi',
+                    color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
+                    title="Average ROI per Channel"
+                )
+                
+                fig_roi = update_plotly_theme(fig_roi, 'Average ROI per Channel')
+                fig_roi.update_layout(
+                    height=450,
+                    xaxis_title="Average ROI",
+                    yaxis_title="Marketing Channel"
+                )
+                
+                st.plotly_chart(fig_roi, use_container_width=True)
 
     # ========== TAB 3: PERFORMANCE ==========
     with tab3:
@@ -1050,27 +1206,175 @@ elif page == "📊 Analytics Dashboard":
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
             
-            bg_color = '#ffffff' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            paper_color = '#f8f9fa' if st.session_state.theme_mode == 'light' else 'rgba(0,0,0,0)'
-            text_color = '#333333' if st.session_state.theme_mode == 'light' else '#f5f5f5'
-            grid_color = '#e0e0e0' if st.session_state.theme_mode == 'light' else '#2a3240'
-            
             fig_revenue_order.update_traces(
                 marker=dict(line=dict(width=1.5, color='#D9D9D9'))
             )
+            
+            fig_revenue_order = update_plotly_theme(fig_revenue_order, 'Revenue Per Order by Channel')
             fig_revenue_order.update_layout(
-                plot_bgcolor=bg_color,
-                paper_bgcolor=paper_color,
-                font_color=text_color,
                 height=450,
                 xaxis_title="Revenue Per Order ($)",
-                yaxis_title="Marketing Channel",
-                xaxis=dict(
-                    gridcolor=grid_color,
-                    linecolor=grid_color
-                )
+                yaxis_title="Marketing Channel"
             )
+            
             st.plotly_chart(fig_revenue_order, use_container_width=True)
+            
+            # Chart 2: Customer Acquisition Rate
+            st.subheader("📈 Customer Acquisition Rate by Channel")
+            conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
+                'customer_id': 'nunique',
+                'order_id': 'count'
+            }).reset_index()
+            conversion_by_channel.columns = ['Channel', 'Unique_Customers', 'Total_Orders']
+            conversion_by_channel['Customer_Acquisition_Rate_%'] = (
+                (conversion_by_channel['Unique_Customers'] / conversion_by_channel['Total_Orders']) * 100
+            ).round(2)
+            conversion_by_channel = conversion_by_channel.sort_values('Customer_Acquisition_Rate_%', ascending=False)
+            
+            fig_acquisition = px.bar(
+                conversion_by_channel,
+                x='Channel',
+                y='Customer_Acquisition_Rate_%',
+                title='Customer Acquisition Rate by Channel',
+                color='Customer_Acquisition_Rate_%',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            
+            fig_acquisition.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            
+            fig_acquisition = update_plotly_theme(fig_acquisition, 'Customer Acquisition Rate by Channel')
+            fig_acquisition.update_layout(
+                height=450,
+                xaxis_title="Marketing Channel",
+                yaxis_title="Customer Acquisition Rate (%)",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_acquisition, use_container_width=True)
+            
+            # Chart 3: Channel Efficiency Ranking
+            st.subheader("🏆 Channel Efficiency Ranking")
+            efficiency = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': ['sum', 'mean'],
+                'order_id': 'count',
+                'customer_id': 'nunique'
+            }).reset_index()
+            efficiency.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
+            efficiency['Revenue_Per_Order'] = (efficiency['Total_Revenue'] / efficiency['Total_Orders']).round(2)
+            efficiency['Customer_Acq_Rate_%'] = ((efficiency['Unique_Customers'] / efficiency['Total_Orders']) * 100).round(2)
+            
+            max_rev = efficiency['Revenue_Per_Order'].max()
+            max_cust = efficiency['Customer_Acq_Rate_%'].max()
+            max_order = efficiency['Avg_Order_Value'].max()
+            
+            efficiency['Efficiency_Score'] = (
+                (efficiency['Revenue_Per_Order'] / max_rev) * 40 +
+                (efficiency['Customer_Acq_Rate_%'] / max_cust) * 30 +
+                (efficiency['Avg_Order_Value'] / max_order) * 30
+            ).round(2)
+            efficiency = efficiency.sort_values('Efficiency_Score')
+            
+            fig_efficiency = px.bar(
+                efficiency,
+                x='Efficiency_Score',
+                y='Channel',
+                orientation='h',
+                title='Channel Efficiency Ranking',
+                color='Efficiency_Score',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            
+            fig_efficiency.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            
+            fig_efficiency = update_plotly_theme(fig_efficiency, 'Channel Efficiency Ranking')
+            fig_efficiency.update_layout(
+                height=450,
+                xaxis_title="Efficiency Score",
+                yaxis_title="Marketing Channel"
+            )
+            
+            st.plotly_chart(fig_efficiency, use_container_width=True)
+            
+            # Chart 4: Revenue vs Customer Acquisition
+            st.subheader("🎯 Revenue vs Customer Acquisition")
+            revenue_analysis = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': 'sum',
+                'customer_id': 'nunique',
+                'order_id': 'count'
+            }).reset_index()
+            revenue_analysis.columns = ['Channel', 'Total_Revenue', 'Unique_Customers', 'Total_Orders']
+            revenue_analysis['Revenue_Per_Customer'] = (
+                revenue_analysis['Total_Revenue'] / revenue_analysis['Unique_Customers']
+            ).round(2)
+            
+            fig_revenue_customers = px.scatter(
+                revenue_analysis,
+                x='Unique_Customers',
+                y='Total_Revenue',
+                size='Revenue_Per_Customer',
+                color='Revenue_Per_Customer',
+                hover_name='Channel',
+                text='Channel',
+                title='Revenue vs Customer Acquisition',
+                size_max=60,
+                color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
+            )
+            
+            fig_revenue_customers.update_traces(
+                textposition='top center',
+                textfont=dict(size=12, color='#f5f5f5'),
+                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
+            )
+            
+            fig_revenue_customers = update_plotly_theme(fig_revenue_customers, 'Revenue vs Customer Acquisition')
+            fig_revenue_customers.update_layout(
+                height=500,
+                showlegend=False,
+                xaxis_title="Unique Customers Acquired",
+                yaxis_title="Total Revenue ($)"
+            )
+            
+            st.plotly_chart(fig_revenue_customers, use_container_width=True)
+            
+            # Chart 5: Revenue Per Customer
+            st.subheader("💰 Revenue Per Customer by Channel")
+            customer_value = filtered_df.groupby('marketing_channel').agg({
+                'final_amount': 'sum',
+                'customer_id': 'nunique',
+                'order_id': 'count'
+            }).reset_index()
+            customer_value.columns = ['Channel', 'Total_Revenue', 'Total_Customers', 'Total_Orders']
+            customer_value['Revenue_Per_Customer'] = (
+                customer_value['Total_Revenue'] / customer_value['Total_Customers']
+            ).round(2)
+            customer_value = customer_value.sort_values('Revenue_Per_Customer')
+            
+            fig_revenue_customer = px.bar(
+                customer_value,
+                x='Channel',
+                y='Revenue_Per_Customer',
+                title='Revenue Per Customer by Channel',
+                color='Revenue_Per_Customer',
+                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
+            )
+            
+            fig_revenue_customer.update_traces(
+                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
+            )
+            
+            fig_revenue_customer = update_plotly_theme(fig_revenue_customer, 'Revenue Per Customer by Channel')
+            fig_revenue_customer.update_layout(
+                height=450,
+                xaxis_title="Marketing Channel",
+                yaxis_title="Revenue Per Customer ($)",
+                xaxis=dict(tickangle=45)
+            )
+            
+            st.plotly_chart(fig_revenue_customer, use_container_width=True)
 
 # =============================================================================
 # DATA EXPLORER
@@ -1199,7 +1503,7 @@ elif page == "ℹ️ About":
 
     ---
 
-    **Version**: 1.1.0 (with Theme Support)  
+    **Version**: 1.2.0 (Complete Theme Support)  
     **Last Updated**: December 2025  
     **Current Theme**: {'🌙 Dark Mode' if st.session_state.theme_mode == 'dark' else '☀️ Light Mode'}
     """)
