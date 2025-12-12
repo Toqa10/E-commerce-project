@@ -1539,86 +1539,435 @@ elif page == "🔍 Data Explorer":
     )
 
 # =============================================================================
-# ABOUT
-# =============================================================================
 elif page == "ℹ️ About":
-    st.title("ℹ️ About This Application")
-
     st.markdown("""
-    ## 🛒 E-commerce Analytics Pro
-
-    A comprehensive business intelligence dashboard for e-commerce data analysis.
-
-    ### 🎯 Features
-
-    - **Real-time Analytics**: Interactive KPIs and metrics
-    - **15+ Visualization Types**: Charts covering all business aspects
-    - **Advanced Filtering**: Multi-dimensional data exploration
-    - **Export Capabilities**: Download filtered data as CSV
-    - **Responsive Design**: Works on all screen sizes
-
-    ### 📊 Key Metrics Tracked
-
-    - Revenue (Gross & Net)
-    - Customer Lifetime Value
-    - Return on Investment
-    - Conversion Rates
-    - Customer Satisfaction
-    - Return Rates
-
-    ### 🔧 Technical Stack
-
-    - **Framework**: Streamlit
-    - **Data Processing**: Pandas, NumPy
-    - **Visualizations**: Plotly
-    - **Styling**: Custom CSS with gradient themes
-
-    ### 📝 How to Use
-
-    1. **Home**: Get quick overview of your business
-    2. **Analytics Dashboard**: Dive deep into visualizations
-    3. **Data Explorer**: Filter and export specific data
-
-    ### 💻 Requirements
-
-    ```
-    streamlit>=1.29.0
-    pandas>=2.1.0
-    plotly>=5.18.0
-    numpy>=1.24.0
-    ```
-
-    ### 🚀 Running the App
-
-    ```
-    streamlit run app.py
-    ```
-
-    ---
-
-    **Version**: 1.0.0  
-    **Last Updated**: December 2025  
-    **Built with** ❤️ **using Streamlit**
-    """)
-
+        <div style='text-align: center; padding: 2rem 0;'>
+            <h1 style='font-size: 3rem; margin-bottom: 0;'>📊 E-commerce Analytics Pro</h1>
+            <p style='font-size: 1.3rem; color: #00d9ff; margin-top: 0.5rem;'>
+                Professional Business Intelligence Solution
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("---")
-
-    with st.expander("🔍 System Information"):
-        if df is not None:
-            st.write("**Dataset Info:**")
-            st.write(f"- Total Records: {len(df):,}")
-            st.write(f"- Total Columns: {len(df.columns)}")
-            st.write(f"- Memory Usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
-
-            st.write("\n**Available Columns:**")
-            st.write(df.columns.tolist())
-
-# =============================================================================
-# FOOTER
-# =============================================================================
-st.markdown("""
-    <div class='footer'>
-        <p>📊 E-commerce Analytics Pro | Built with Streamlit</p>
-        <p>© 2025 | All Rights Reserved</p>
-    </div>
-""", unsafe_allow_html=True)
+    
+    if df is not None:
+        # ========== DATASET OVERVIEW ==========
+        st.header("📋 Dataset Overview")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown(f"""
+                <div class='metric-card'>
+                    <div class='metric-label'>📦 Total Records</div>
+                    <div class='metric-value' style='font-size: 2rem;'>{len(df):,}</div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+                <div class='metric-card'>
+                    <div class='metric-label'>📅 Time Period</div>
+                    <div class='metric-value' style='font-size: 1.3rem;'>Jan 2021<br>- Jan 2024</div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+                <div class='metric-card'>
+                    <div class='metric-label'>📊 Columns</div>
+                    <div class='metric-value' style='font-size: 2rem;'>{len(df.columns)}</div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(f"""
+                <div class='metric-card'>
+                    <div class='metric-label'>💾 Data Size</div>
+                    <div class='metric-value' style='font-size: 1.5rem;'>{df.memory_usage(deep=True).sum() / 1024**2:.1f} MB</div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # ========== PROJECT HIGHLIGHTS ==========
+        st.header("🎯 Project Highlights")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+                ### 📊 Dataset Highlights
+                
+                **Business Domain:**
+                - Online retail / e-commerce platform
+                - Orders, customers, products, and marketing
+                
+                **Time Coverage:**
+                - 3+ years of transactional data
+                - From early 2021 to early 2024
+                
+                **Granularity:**
+                - One row per order (or order line)
+                - Linked to customer, product, channel, campaign
+                
+                **Key Column Families:**
+                - 🆔 **Identifiers:** order_id, customer_id, product_id
+                - 📅 **Temporal:** date, month, quarter, season
+                - 💰 **Financials:** revenue, discount, CLV
+                - 📢 **Marketing:** channel, campaign, ROI
+                - 👥 **Customer/Product:** segment, region, category
+            """)
+        
+        with col2:
+            st.markdown("""
+                ### 🎯 Business Questions Supported
+                
+                **Revenue & Growth:**
+                - How revenue, orders, and customers evolve over time
+                - Trend analysis and growth rate calculations
+                
+                **Channel Performance:**
+                - Which channels/campaigns deliver highest ROI
+                - Conversion and acquisition effectiveness
+                
+                **Customer Value:**
+                - Which segments, regions, categories are most valuable
+                - CLV, retention, and satisfaction analysis
+                
+                **Profitability:**
+                - How pricing, discounting, and returns affect net revenue
+                - Cost efficiency and margin optimization
+            """)
+        
+        st.markdown("---")
+        
+        # ========== APPLICATION PAGES ==========
+        st.header("📱 Application Pages")
+        
+        with st.expander("🏠 Home", expanded=False):
+            st.markdown("""
+                **Hero dashboard with high-level KPIs:**
+                - Total revenue, orders, customers, AOV
+                - Quick feature overview and dataset preview
+                - Executive summary cards
+                - Key business insights and growth metrics
+            """)
+        
+        with st.expander("📊 Analytics Dashboard", expanded=False):
+            st.markdown("""
+                **Interactive filtering by channel and date range:**
+                - Overall KPI tab with growth metrics
+                - Category, Campaign, Channel breakdowns
+                - Segment, Region, and Time analysis
+                - Real-time data slicing with dynamic updates
+                - 7+ KPI tabs for multi-dimensional analysis
+            """)
+        
+        with st.expander("🔍 Data Explorer", expanded=False):
+            st.markdown("""
+                **Full filterable table view:**
+                - Enriched dataset with all columns
+                - Ideal for validation and spot-checking
+                - Export capabilities for offline analysis
+                - Sortable and searchable interface
+            """)
+        
+        with st.expander("ℹ️ About", expanded=False):
+            st.markdown("""
+                **Complete guide:**
+                - Dataset structure and processing pipeline
+                - Metrics definitions and calculations
+                - Tech stack and application architecture
+                - Professional positioning and audience
+            """)
+        
+        st.markdown("---")
+        
+        # ========== PROFESSIONAL POSITIONING ==========
+        st.header("🎓 Professional Positioning")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.info("""
+                ### 🎯 Purpose
+                
+                End-to-end BI solution for e-commerce performance
+                
+                Not just a static report - a dynamic analytics platform
+                
+                Enables data-driven decision making
+            """)
+        
+        with col2:
+            st.success("""
+                ### 👥 Audience
+                
+                - **Executives:** High-level KPIs and insights
+                - **Marketing:** Channels & campaigns ROI
+                - **Data teams:** Explorer & deep analysis
+                - **Analysts:** Custom filtering & exports
+            """)
+        
+        with col3:
+            st.warning("""
+                ### 🎨 Style
+                
+                Dark, modern UI with:
+                - Interactive metric cards
+                - Dynamic tabs & expanders
+                - Real-time filtering
+                - Clean professional design
+            """)
+        
+        st.markdown("---")
+        
+        # ========== DATA ROADMAP ==========
+        st.header("🗺️ Data Processing Roadmap")
+        
+        with st.expander("🔹 Stage 1: Raw Data Collection", expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown("### 📥")
+            with col2:
+                st.markdown("""
+                    **Source:** E-commerce Platform
+                    
+                    **Data Points Collected:**
+                    - Customer transactions and orders
+                    - Marketing campaigns and channels
+                    - Product catalog and inventory
+                    - Customer demographics and segments
+                    - Order details and fulfillment
+                    
+                    **Period:** 3+ years (2021-2024)
+                    
+                    **Volume:** 12,000+ records
+                """)
+        
+        with st.expander("🔹 Stage 2: Data Cleaning & Transformation", expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown("### 🧹")
+            with col2:
+                st.markdown("""
+                    **Cleaning Steps:**
+                    - ✅ Removed duplicates and invalid records
+                    - ✅ Handled missing values with imputation
+                    - ✅ Fixed data types (dates, numerics, categories)
+                    - ✅ Standardized formats and naming conventions
+                    - ✅ Validated ranges and business rules
+                    
+                    **Transformation:**
+                    - Date parsing & formatting (YYYY-MM-DD)
+                    - Revenue calculations (gross → net)
+                    - Customer segmentation (VIP, Regular, New)
+                    - Time-based features (month, quarter, season)
+                """)
+        
+        with st.expander("🔹 Stage 3: Feature Engineering", expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown("### ⚙️")
+            with col2:
+                st.markdown("""
+                    **Created Features:**
+                    - `net_revenue` = gross_revenue - discount_amount
+                    - `roi` = (revenue - cost) / cost × 100
+                    - `customer_lifetime_value` (CLV) - predictive metric
+                    - `retention_score` - customer loyalty indicator
+                    - `month_date`, `quarter`, `season` - time aggregation keys
+                    - `customer_segment` (VIP, Regular, New) - behavioral groups
+                    
+                    **Calculated Metrics:**
+                    - Revenue per customer (total revenue / unique customers)
+                    - Average order value (total revenue / order count)
+                    - Conversion rates (customers / orders)
+                    - Channel efficiency scores (normalized ROI)
+                """)
+        
+        with st.expander("🔹 Stage 4: Analysis & Insights", expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown("### 📊")
+            with col2:
+                st.markdown("""
+                    **Analysis Types:**
+                    - **Time Series:** Revenue & conversions trends over months/quarters
+                    - **Channel Performance:** ROI, efficiency, and acquisition by channel
+                    - **Customer Segmentation:** Behavior patterns and value analysis
+                    - **Geographic Analysis:** Regional performance and opportunities
+                    - **Campaign Effectiveness:** Marketing ROI and conversion rates
+                    
+                    **Key Findings:**
+                    - 8,414% revenue growth from Jan 2021 to Jan 2024
+                    - Email channel delivers best ROI at 1,107%
+                    - Strong seasonality patterns across all channels
+                    - Direct traffic shows organic brand strength
+                    - Peak performance in July 2023 ($1.56M revenue)
+                """)
+        
+        with st.expander("🔹 Stage 5: Visualization & Dashboard", expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown("### 📈")
+            with col2:
+                st.markdown("""
+                    **Dashboard Features:**
+                    - **Home Page:** Quick overview with key insights
+                    - **Analytics:** 15+ interactive charts and 7 KPI tabs
+                    - **Data Explorer:** Searchable, sortable data table
+                    - **Filters:** Real-time data slicing by channel and date
+                    - **Export:** Download filtered data for offline work
+                    
+                    **Technologies:**
+                    - **Streamlit** - Web framework for rapid app development
+                    - **Plotly** - Interactive charts with hover and zoom
+                    - **Pandas** - Data processing and aggregation
+                    - **Python** - Backend logic and calculations
+                """)
+        
+        st.markdown("---")
+        
+        # ========== DATA STRUCTURE ==========
+        st.header("🏗️ Data Structure")
+        
+        tab1, tab2, tab3 = st.tabs(["📊 Column Groups", "🔢 Data Types", "📏 Sample Data"])
+        
+        with tab1:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown("""
+                    ### 🆔 Identifiers
+                    - `order_id` - Unique order identifier
+                    - `customer_id` - Customer identifier
+                    - `product_id` - Product SKU
+                    
+                    ### 📅 Temporal
+                    - `date` - Order date
+                    - `registration_date` - Customer signup
+                    - `month_date` - Monthly aggregation key
+                    - `month`, `quarter`, `season` - Time groupings
+                """)
+            
+            with col2:
+                st.markdown("""
+                    ### 💰 Financial
+                    - `gross_revenue` - Pre-discount revenue
+                    - `net_revenue` - Post-discount revenue
+                    - `discount_amount` - Total discounts
+                    - `final_amount` - Customer payment
+                    - `customer_lifetime_value` - CLV prediction
+                    
+                    ### 📦 Product
+                    - `category` - Product category
+                    - `quantity` - Items ordered
+                    - `returned` - Return flag
+                """)
+            
+            with col3:
+                st.markdown("""
+                    ### 📢 Marketing
+                    - `marketing_channel` - Acquisition channel
+                    - `marketing_campaign` - Campaign name
+                    - `roi` - Return on investment %
+                    
+                    ### 👥 Customer
+                    - `customer_segment` - VIP/Regular/New
+                    - `region` - Geographic location
+                    - `retention_score` - Loyalty metric
+                    - `satisfaction_rating` - CSAT score
+                """)
+        
+        with tab2:
+            dtypes_df = pd.DataFrame({
+                'Column': df.dtypes.index,
+                'Data Type': df.dtypes.values.astype(str),
+                'Non-Null Count': df.count().values,
+                'Null Count': df.isnull().sum().values
+            })
+            
+            st.dataframe(
+                dtypes_df.style.apply(
+                    lambda x: ['background-color: #1a1f2e' if i % 2 == 0 else '' for i in range(len(x))],
+                    axis=0
+                ),
+                use_container_width=True,
+                height=400
+            )
+        
+        with tab3:
+            st.dataframe(df.head(20), use_container_width=True, height=400)
+        
+        st.markdown("---")
+        
+        # ========== KEY METRICS SUMMARY ==========
+        st.header("📈 Key Metrics Summary")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.success("""
+                ### 💰 Revenue Metrics
+                - **Total Revenue:** ${:,.0f}
+                - **Avg Revenue/Order:** ${:,.2f}
+                - **Growth Rate:** +8,414%
+                - **Peak Month:** July 2023 ($1.56M)
+                - **Starting Point:** Jan 2021 ($16.7K)
+            """.format(
+                df['net_revenue'].sum(),
+                df['net_revenue'].mean()
+            ))
+        
+        with col2:
+            st.info("""
+                ### 👥 Customer Metrics
+                - **Total Customers:** {:,}
+                - **Total Orders:** {:,}
+                - **Avg Orders/Customer:** {:.1f}
+                - **Conversion Growth:** +5,046%
+                - **Peak Conversions:** 696 (July 2023)
+            """.format(
+                df['customer_id'].nunique(),
+                len(df),
+                len(df) / df['customer_id'].nunique()
+            ))
+        
+        st.markdown("---")
+        
+        # ========== CHANNELS & CAMPAIGNS ==========
+        st.header("📡 Marketing Overview")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if 'marketing_channel' in df.columns:
+                st.markdown("### 📢 Marketing Channels")
+                channels = df['marketing_channel'].value_counts().head(12)
+                for i, (channel, count) in enumerate(channels.items(), 1):
+                    st.markdown(f"{i}. **{channel}:** {count:,} orders")
+        
+        with col2:
+            if 'category' in df.columns:
+                st.markdown("### 📦 Product Categories")
+                categories = df['category'].value_counts().head(10)
+                for i, (cat, count) in enumerate(categories.items(), 1):
+                    st.markdown(f"{i}. **{cat}:** {count:,} orders")
+        
+        st.markdown("---")
+        
+        # ========== FOOTER ==========
+        st.markdown("""
+            <div class='footer'>
+                <p>📊 <strong>E-commerce Analytics Pro</strong> | Version 1.0.0</p>
+                <p>Built with ❤️ using Streamlit, Plotly & Pandas</p>
+                <p>Data Period: January 2021 - January 2024 | 12,000+ Records</p>
+                <p>© 2024 Professional Analytics Dashboard</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    else:
+        st.error("⚠️ No data available. Please check the data source.")
