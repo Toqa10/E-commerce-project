@@ -190,9 +190,9 @@ def load_data():
         return df
     except FileNotFoundError:
         st.error("⚠️ File 'cleaned_data.csv' not found!")
-    return None
+        return None
     except Exception as e:
-    st.error(f"❌ Error loading data: {str(e)}")
+        st.error(f"❌ Error loading data: {str(e)}")
         return None
 
 # =============================================================================
@@ -230,9 +230,9 @@ if page == "🏠 Home":
 
     if df is not None:
         # Quick Stats
-    st.header("📈 Quick Overview")
+        st.header("📈 Quick Overview")
 
-    col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
 
         total_revenue = df['net_revenue'].sum() if 'net_revenue' in df.columns else 0
         total_orders = len(df)
@@ -240,7 +240,7 @@ if page == "🏠 Home":
         avg_order = df['final_amount'].mean() if 'final_amount' in df.columns else 0
 
         with col1:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>💰 Total Revenue</div>
                     <div class='metric-value'>${total_revenue:,.0f}</div>
@@ -248,7 +248,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col2:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>📦 Total Orders</div>
                     <div class='metric-value'>{total_orders:,}</div>
@@ -256,7 +256,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col3:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>👥 Customers</div>
                     <div class='metric-value'>{total_customers:,}</div>
@@ -264,22 +264,22 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col4:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>🛍️ Avg Order</div>
                     <div class='metric-value'>${avg_order:,.2f}</div>
                 </div>
             """, unsafe_allow_html=True)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Features Section
-    st.header("🚀 Key Features")
+        st.header("🚀 Key Features")
 
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
         with col1:
-    st.markdown("""
+            st.markdown("""
                 ### 📊 Analytics Dashboard
                 - 15+ Interactive charts
                 - 8 Key Performance Indicators
@@ -288,7 +288,7 @@ if page == "🏠 Home":
             """)
 
         with col2:
-    st.markdown("""
+            st.markdown("""
                 ### 🔍 Data Explorer
                 - Advanced filtering
                 - Sortable data table
@@ -297,7 +297,7 @@ if page == "🏠 Home":
             """)
 
         with col3:
-    st.markdown("""
+            st.markdown("""
                 ### 📈 Insights
                 - Revenue trends
                 - Customer segmentation
@@ -305,15 +305,15 @@ if page == "🏠 Home":
                 - Channel performance
             """)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Dataset Info
-    st.header("📋 Dataset Information")
+        st.header("📋 Dataset Information")
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
         with col1:
-    st.markdown(f"""
+            st.markdown(f"""
                 **Records**: {len(df):,}  
                 **Columns**: {len(df.columns)}  
                 **Date Range**: {df['date'].min().strftime('%Y-%m-%d') if 'date' in df.columns else 'N/A'} 
@@ -321,23 +321,23 @@ if page == "🏠 Home":
             """)
 
         with col2:
-    if st.button("📋 View Column Names"):
-    st.write(df.columns.tolist())
+            if st.button("📋 View Column Names"):
+                st.write(df.columns.tolist())
 
-    with st.expander("👁️ Preview Data (First 10 Rows)"):
-    st.dataframe(df.head(10), use_container_width=True)
+        with st.expander("👁️ Preview Data (First 10 Rows)"):
+            st.dataframe(df.head(10), use_container_width=True)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # ========== INSIGHTS SECTION ==========
-    st.header("💡 Key Business Insights")
+        st.header("💡 Key Business Insights")
 
         # Row 1: Channel Performance Overview
-    st.subheader("📌 Channel Performance Highlights")
-    col1, col2, col3, col4 = st.columns(4)
+        st.subheader("📌 Channel Performance Highlights")
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>🏆 Highest Revenue</div>
                     <div class='metric-value' style='font-size: 1.5rem;'>Email</div>
@@ -346,7 +346,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col2:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>⚡ Best ROI</div>
                     <div class='metric-value' style='font-size: 1.5rem;'>Email</div>
@@ -355,7 +355,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col3:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>👥 Most Conversions</div>
                     <div class='metric-value' style='font-size: 1.5rem;'>Direct</div>
@@ -364,7 +364,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col4:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>📈 Revenue Growth</div>
                     <div class='metric-value' style='font-size: 1.5rem;'>+8,414%</div>
@@ -372,14 +372,14 @@ if page == "🏠 Home":
                 </div>
             """, unsafe_allow_html=True)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 2: Customer Value & Efficiency
-    st.subheader("💰 Customer Value Analysis")
-    col1, col2, col3 = st.columns(3)
+        st.subheader("💰 Customer Value Analysis")
+        col1, col2, col3 = st.columns(3)
 
         with col1:
-    st.markdown("""
+            st.markdown("""
                 ### 💵 Revenue per Customer
                 - **Highest:** Email ($2,501.80)
                 - **Lowest:** Search Engine ($2,126.74)
@@ -387,7 +387,7 @@ if page == "🏠 Home":
             """)
 
         with col2:
-    st.markdown("""
+            st.markdown("""
                 ### ⚡ Efficiency Ranking
                 1. **Email** - Score: 99.19 🥇
                 2. **Radio** - Score: 95.46 🥈
@@ -395,19 +395,19 @@ if page == "🏠 Home":
             """)
 
         with col3:
-    st.markdown("""
+            st.markdown("""
                 ### 🎯 Best Acquisition
                 - **Radio:** 84.98% rate
                 - **Email:** 82.7% rate
                 - **Social Media:** High engagement
             """)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 3: Detailed Channel Analysis
-    st.subheader("🔍 Channel Performance Breakdown")
+        st.subheader("🔍 Channel Performance Breakdown")
 
-    with st.expander("📊 View All Channels Performance"):
+        with st.expander("📊 View All Channels Performance"):
             channels_data = {
                 'Channel': ['Email', 'Direct', 'Social Media', 'Outdoor', 'Print', 'Affiliate', 'Influencer', 'Mobile App', 'Referral', 'Radio', 'TV', 'Search Engine'],
                 'Spend': [18810, 19704, 20029, 20320, 18910, 18454, 19064, 18494, 18739, 18661, 18980, 19280],
@@ -420,7 +420,7 @@ if page == "🏠 Home":
             channels_df = pd.DataFrame(channels_data)
             channels_df = channels_df.sort_values('ROI (%)', ascending=False)
 
-    st.dataframe(
+            st.dataframe(
                 channels_df.style.format({
                     'Spend': '${:,.0f}',
                     'Revenue': '${:,.2f}',
@@ -430,14 +430,14 @@ if page == "🏠 Home":
                 use_container_width=True
             )
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 4: Growth Metrics & Trends
-    st.subheader("📈 Growth Metrics & Trends")
-    col1, col2 = st.columns(2)
+        st.subheader("📈 Growth Metrics & Trends")
+        col1, col2 = st.columns(2)
 
         with col1:
-    st.markdown("""
+            st.markdown("""
                 ### 📊 Monthly Revenue Trend
                 - **Starting Point:** $16,734 (Jan 2021)
                 - **Peak Performance:** $1,563,867 (July 2023)
@@ -451,7 +451,7 @@ if page == "🏠 Home":
             """)
 
         with col2:
-    st.markdown("""
+            st.markdown("""
                 ### 👥 Monthly Conversions Trend
                 - **Starting Point:** 13 customers (Jan 2021)
                 - **Peak Performance:** 696 customers (July 2023)
@@ -464,14 +464,14 @@ if page == "🏠 Home":
                 - Direct channel leads in total conversions
             """)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 5: Key Correlations
-    st.subheader("🔗 Key Business Correlations")
-    col1, col2, col3 = st.columns(3)
+        st.subheader("🔗 Key Business Correlations")
+        col1, col2, col3 = st.columns(3)
 
         with col1:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>Customers → Revenue</div>
                     <div class='metric-value' style='font-size: 2rem; color: #2ecc71;'>0.740</div>
@@ -480,7 +480,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col2:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>Orders → Revenue</div>
                     <div class='metric-value' style='font-size: 2rem; color: #2ecc71;'>0.784</div>
@@ -489,7 +489,7 @@ if page == "🏠 Home":
             """, unsafe_allow_html=True)
 
         with col3:
-    st.markdown("""
+            st.markdown("""
                 <div class='metric-card'>
                     <div class='metric-label'>Avg Price → Revenue</div>
                     <div class='metric-value' style='font-size: 2rem; color: #ff9800;'>0.543</div>
@@ -497,15 +497,15 @@ if page == "🏠 Home":
                 </div>
             """, unsafe_allow_html=True)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 6: Strategic Recommendations
-    st.subheader("💡 Strategic Recommendations")
+        st.subheader("💡 Strategic Recommendations")
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
         with col1:
-    st.success("""
+            st.success("""
                 ### 🎯 Top Priorities
 
                 **1. Scale Email Marketing**
@@ -525,7 +525,7 @@ if page == "🏠 Home":
             """)
 
         with col2:
-    st.warning("""
+            st.warning("""
                 ### ⚠️ Areas for Improvement
 
                 **1. Search Engine Optimization**
@@ -543,10 +543,10 @@ if page == "🏠 Home":
                 - Target: ROI > 130% for all channels
             """)
 
-    st.markdown("---")
+        st.markdown("---")
 
         # Row 7: Key Takeaways
-    st.info("""
+        st.info("""
             ### ✅ Key Takeaways
 
             - **All channels are profitable** - ROI ranges from 112.73% to 140.65%
@@ -560,7 +560,7 @@ if page == "🏠 Home":
 
 
     else:
-    st.warning("⚠️ No data available. Please check the CSV file.")
+        st.warning("⚠️ No data available. Please check the CSV file.")
 
 # =============================================================================
 # ANALYTICS DASHBOARD
@@ -570,8 +570,8 @@ elif page == "📊 Analytics Dashboard":
     st.markdown("Interactive visualizations with real-time filtering")
 
     if df is None:
-    st.error("❌ Data not loaded!")
-    st.stop()
+        st.error("❌ Data not loaded!")
+        st.stop()
 
     # ========== FILTERS ==========# في Analytics Dashboard:
 st.sidebar.header('🎯 Filters')
@@ -613,7 +613,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
     
         # ========== TAB 1: OVERALL KPIs WITH GROWTH RATES ==========
     with kpi_tabs[0]:
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
         
         # Current Period Metrics
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
@@ -654,42 +654,42 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
         satisfaction_delta = 0.1
         
         with col1:
-    st.metric(
+            st.metric(
                 "💰 Total Revenue",
                 f"${total_revenue:,.2f}",
                 delta=f"{revenue_delta:+.1f}%" if revenue_delta != 0 else "0%"
             )
-    st.metric(
+            st.metric(
                 "📦 Total Orders",
                 f"{total_orders:,}",
                 delta=f"{orders_delta:+.1f}%" if orders_delta != 0 else "0%"
             )
         
         with col2:
-    st.metric(
+            st.metric(
                 "👥 Total Customers",
                 f"{total_customers:,}",
                 delta=f"{customers_delta:+.1f}%" if customers_delta != 0 else "0%"
             )
-    st.metric(
+            st.metric(
                 "🛍️ Avg Order Value",
                 f"${avg_order_value:,.2f}",
                 delta=f"{order_value_delta:+.1f}%" if order_value_delta != 0 else "0%"
             )
         
         with col3:
-    st.metric(
+            st.metric(
                 "📊 Conversion Rate",
                 f"{conversion_rate:.2f}%",
                 delta=f"{conversion_delta:+.1f}%" if conversion_delta != 0 else "0%"
             )
-    st.metric(
+            st.metric(
                 "↩️ Return Rate",
                 f"{return_rate:.2f}%",
                 delta=f"{return_delta:+.1f}%",
                 delta_color="inverse"
             )
-    st.metric(
+            st.metric(
                 "⭐ Satisfaction",
                 f"{avg_satisfaction:.2f}/5",
                 delta=f"{satisfaction_delta:+.2f}" if satisfaction_delta != 0 else "0"
@@ -710,7 +710,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_category['avg_order_value'] = (kpi_category['net_revenue'] / kpi_category['quantity']).round(2)
             kpi_category['roi'] = ((kpi_category['net_revenue'] - kpi_category['discount_amount']) / kpi_category['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_category.style.format({
                     'gross_revenue': '${:,.2f}',
                     'net_revenue': '${:,.2f}',
@@ -735,7 +735,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_campaign['revenue_per_customer'] = (kpi_campaign['net_revenue'] / kpi_campaign['customer_id']).round(2)
             kpi_campaign['roi'] = ((kpi_campaign['net_revenue'] - kpi_campaign['discount_amount']) / kpi_campaign['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_campaign.style.format({
                     'net_revenue': '${:,.2f}',
                     'discount_amount': '${:,.2f}',
@@ -762,7 +762,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_channel['revenue_per_customer'] = (kpi_channel['net_revenue'] / kpi_channel['customer_id']).round(2)
             kpi_channel['roi'] = ((kpi_channel['net_revenue'] - kpi_channel['discount_amount']) / kpi_channel['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_channel.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -793,7 +793,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_segment['revenue_per_customer'] = (kpi_segment['net_revenue'] / kpi_segment['customer_id']).round(2)
             kpi_segment['roi'] = ((kpi_segment['net_revenue'] - kpi_segment['discount_amount']) / kpi_segment['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_segment.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -824,7 +824,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_region['revenue_per_customer'] = (kpi_region['net_revenue'] / kpi_region['customer_id']).round(2)
             kpi_region['roi'] = ((kpi_region['net_revenue'] - kpi_region['discount_amount']) / kpi_region['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_region.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -840,7 +840,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
     
     # ========== TAB 7: BY TIME ==========
     with kpi_tabs[6]:
-    time_view = st.radio("Select Time Period", ["Month", "Quarter", "Season"], horizontal=True)
+        time_view = st.radio("Select Time Period", ["Month", "Quarter", "Season"], horizontal=True)
         
         if time_view == "Month" and 'month' in filtered_df.columns:
             kpi_time = filtered_df.groupby('month').agg({
@@ -853,7 +853,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
             kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_time.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -876,7 +876,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
             kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_time.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -899,7 +899,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
             kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
             
-    st.dataframe(
+            st.dataframe(
                 kpi_time.style.format({
                     'net_revenue': '${:,.2f}',
                     'gross_revenue': '${:,.2f}',
@@ -922,7 +922,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
     with tab1:
         # Chart 1: Monthly Revenue Trends by Marketing Channel
         if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-    st.subheader("Monthly Revenue Trends by Marketing Channel")
+            st.subheader("Monthly Revenue Trends by Marketing Channel")
             
             monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
                 'net_revenue': 'sum',
@@ -950,11 +950,11 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis=dict(tickangle=45)
             )
             
-    st.plotly_chart(fig_revenue_trend, use_container_width=True)
+            st.plotly_chart(fig_revenue_trend, use_container_width=True)
 
         # Chart 2: Monthly Conversions Trends by Marketing Channel
         if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-    st.subheader("Monthly Conversions Trends by Marketing Channel")
+            st.subheader("Monthly Conversions Trends by Marketing Channel")
             
             monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
                 'customer_id': 'nunique'
@@ -981,11 +981,11 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis=dict(tickangle=45)
             )
             
-    st.plotly_chart(fig_conv_trend, use_container_width=True)
+            st.plotly_chart(fig_conv_trend, use_container_width=True)
 
         # Chart 3: Overall Monthly Revenue Trend
         if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-    st.subheader("Overall Monthly Revenue Trend")
+            st.subheader("Overall Monthly Revenue Trend")
             
             monthly_total = filtered_df.groupby('month_date').agg({
                 'net_revenue': 'sum',
@@ -1016,11 +1016,11 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis=dict(tickangle=45)
             )
             
-    st.plotly_chart(fig_total_rev, use_container_width=True)
+            st.plotly_chart(fig_total_rev, use_container_width=True)
 
         # Chart 4: Overall Monthly Conversions Trend
         if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-    st.subheader("Overall Monthly Conversions Trend")
+            st.subheader("Overall Monthly Conversions Trend")
             
             monthly_total = filtered_df.groupby('month_date').agg({
                 'customer_id': 'nunique'
@@ -1050,7 +1050,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis=dict(tickangle=45)
             )
             
-    st.plotly_chart(fig_total_conv, use_container_width=True)
+            st.plotly_chart(fig_total_conv, use_container_width=True)
 
     # ========== TAB 2: MARKETING ==========   
              # ========== TAB 2: MARKETING ==========
@@ -1073,7 +1073,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 channel_perf = channel_perf.set_index('channel')
                 
                 # Chart 1: Total Revenue per Marketing Channel
-    st.subheader("Total Revenue per Marketing Channel")
+                st.subheader("Total Revenue per Marketing Channel")
                 bar_width = 25
                 
                 fig_rev = px.scatter(
@@ -1108,10 +1108,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                     margin=dict(t=60)
                 )
                 
-    st.plotly_chart(fig_rev, use_container_width=True)
+                st.plotly_chart(fig_rev, use_container_width=True)
                 
                 # Chart 2: Total Conversions per Channel
-    st.subheader("Total Conversions per Channel")
+                st.subheader("Total Conversions per Channel")
                 
                 fig_conv = px.scatter(
                     channel_perf,
@@ -1136,10 +1136,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                     xaxis_title="Marketing Channel"
                 )
                 
-    st.plotly_chart(fig_conv, use_container_width=True)
+                st.plotly_chart(fig_conv, use_container_width=True)
                 
                 # Chart 3: Total Orders per Channel (بدل Spend)
-    st.subheader("Total Orders per Channel")
+                st.subheader("Total Orders per Channel")
                 
                 # حساب عدد الطلبات لكل قناة
                 orders_data = df.groupby('marketing_channel').agg({
@@ -1170,10 +1170,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                     xaxis_title="Marketing Channel"
                 )
                 
-    st.plotly_chart(fig_spend, use_container_width=True)
+                st.plotly_chart(fig_spend, use_container_width=True)
                 
                 # Chart 4: Average ROI per Channel
-    st.subheader("Average ROI per Channel")
+                st.subheader("Average ROI per Channel")
                 
                 channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
                 
@@ -1196,16 +1196,16 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                     yaxis_title="Marketing Channel"
                 )
                 
-    st.plotly_chart(fig_roi, use_container_width=True)
+                st.plotly_chart(fig_roi, use_container_width=True)
             else:
-    st.error("❌ Required columns not found!")
+                st.error("❌ Required columns not found!")
         else:
-    st.error("❌ Column 'marketing_channel' not found!")
+            st.error("❌ Column 'marketing_channel' not found!")
 
    
            # ========== TAB 3: PERFORMANCE (NEW) ==========
     with tab3:
-    st.subheader("📊 Marketing Channel Performance Analysis")
+        st.subheader("📊 Marketing Channel Performance Analysis")
         
         if 'marketing_channel' in filtered_df.columns:
             # تحضير البيانات الأساسية
@@ -1218,7 +1218,7 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
             performance_by_channel['Revenue_Per_Order'] = (performance_by_channel['Total_Revenue'] / performance_by_channel['Total_Orders']).round(2)
             
             # Chart 1: Revenue Per Order
-    st.subheader("💵 Revenue Per Order by Channel")
+            st.subheader("💵 Revenue Per Order by Channel")
             performance_sorted = performance_by_channel.sort_values('Revenue_Per_Order')
             
             fig_revenue_order = px.bar(
@@ -1241,10 +1241,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis_title="Revenue Per Order ($)",
                 yaxis_title="Marketing Channel"
             )
-    st.plotly_chart(fig_revenue_order, use_container_width=True)
+            st.plotly_chart(fig_revenue_order, use_container_width=True)
             
             # Chart 2: Customer Acquisition Rate
-    st.subheader("📈 Customer Acquisition Rate by Channel")
+            st.subheader("📈 Customer Acquisition Rate by Channel")
             conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
                 'customer_id': 'nunique',
                 'order_id': 'count'
@@ -1275,10 +1275,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 yaxis_title="Customer Acquisition Rate (%)",
                 xaxis=dict(tickangle=45)
             )
-    st.plotly_chart(fig_acquisition, use_container_width=True)
+            st.plotly_chart(fig_acquisition, use_container_width=True)
             
             # Chart 3: Channel Efficiency Ranking
-    st.subheader("🏆 Channel Efficiency Ranking")
+            st.subheader("🏆 Channel Efficiency Ranking")
             efficiency = filtered_df.groupby('marketing_channel').agg({
                 'final_amount': ['sum', 'mean'],
                 'order_id': 'count',
@@ -1319,10 +1319,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis_title="Efficiency Score",
                 yaxis_title="Marketing Channel"
             )
-    st.plotly_chart(fig_efficiency, use_container_width=True)
+            st.plotly_chart(fig_efficiency, use_container_width=True)
             
             # Chart 4: Revenue vs Customer Acquisition
-    st.subheader("🎯 Revenue vs Customer Acquisition")
+            st.subheader("🎯 Revenue vs Customer Acquisition")
             revenue_analysis = filtered_df.groupby('marketing_channel').agg({
                 'final_amount': 'sum',
                 'customer_id': 'nunique',
@@ -1359,10 +1359,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 xaxis_title="Unique Customers Acquired",
                 yaxis_title="Total Revenue ($)"
             )
-    st.plotly_chart(fig_revenue_customers, use_container_width=True)
+            st.plotly_chart(fig_revenue_customers, use_container_width=True)
             
             # Chart 5: Revenue Per Customer
-    st.subheader("💰 Revenue Per Customer by Channel")
+            st.subheader("💰 Revenue Per Customer by Channel")
             customer_value = filtered_df.groupby('marketing_channel').agg({
                 'final_amount': 'sum',
                 'customer_id': 'nunique',
@@ -1394,10 +1394,10 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 yaxis_title="Revenue Per Customer ($)",
                 xaxis=dict(tickangle=45)
             )
-    st.plotly_chart(fig_revenue_customer, use_container_width=True)
+            st.plotly_chart(fig_revenue_customer, use_container_width=True)
             
             # Chart 6: Performance Quadrant Analysis
-    st.subheader("🏆 Performance Quadrant Analysis")
+            st.subheader("🏆 Performance Quadrant Analysis")
             
             quadrant_analysis = filtered_df.groupby('marketing_channel').agg({
                 'customer_id': 'nunique',
@@ -1456,14 +1456,14 @@ st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
                 annotation_position="top"
             )
             
-    st.plotly_chart(fig_quadrant, use_container_width=True)
+            st.plotly_chart(fig_quadrant, use_container_width=True)
             
             # Best performer info
             if len(quadrant_analysis) > 0 and not quadrant_analysis['Revenue_Per_Customer'].isna().all():
                 best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
             else:
                 best_channel = pd.Series({'marketing_channel': 'N/A', 'Revenue_Per_Customer': 0, 'Efficiency_Score': 0})
-    st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
+            st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
 
 
 # =============================================================================
@@ -1474,8 +1474,8 @@ elif page == "🔍 Data Explorer":
     st.markdown("Browse and filter your data")
 
     if df is None:
-    st.error("❌ Data not loaded!")
-    st.stop()
+        st.error("❌ Data not loaded!")
+        st.stop()
 
     # Filters
     col1, col2, col3 = st.columns(3)
@@ -1483,21 +1483,21 @@ elif page == "🔍 Data Explorer":
     with col1:
         if 'category' in df.columns:
             categories = ['All'] + sorted(df['category'].dropna().unique().tolist())
-    selected_cat = st.selectbox("Category", categories)
+            selected_cat = st.selectbox("Category", categories)
         else:
             selected_cat = 'All'
 
     with col2:
         if 'region' in df.columns:
             regions = ['All'] + sorted(df['region'].dropna().unique().tolist())
-    selected_region = st.selectbox("Region", regions)
+            selected_region = st.selectbox("Region", regions)
         else:
             selected_region = 'All'
 
     with col3:
         if 'customer_segment' in df.columns:
             segments = ['All'] + sorted(df['customer_segment'].dropna().unique().tolist())
-    selected_segment = st.selectbox("Segment", segments)
+            selected_segment = st.selectbox("Segment", segments)
         else:
             selected_segment = 'All'
 
@@ -1542,12 +1542,12 @@ elif page == "ℹ️ About":
     
     if df is not None:
         # ========== DATASET OVERVIEW ==========
-    st.header("📋 Dataset Overview")
+        st.header("📋 Dataset Overview")
         
-    col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>📦 Total Records</div>
                     <div class='metric-value' style='font-size: 2rem;'>{len(df):,}</div>
@@ -1555,7 +1555,7 @@ elif page == "ℹ️ About":
             """, unsafe_allow_html=True)
         
         with col2:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>📅 Time Period</div>
                     <div class='metric-value' style='font-size: 1.3rem;'>Jan 2021<br>- Jan 2024</div>
@@ -1563,7 +1563,7 @@ elif page == "ℹ️ About":
             """, unsafe_allow_html=True)
         
         with col3:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>📊 Columns</div>
                     <div class='metric-value' style='font-size: 2rem;'>{len(df.columns)}</div>
@@ -1571,22 +1571,22 @@ elif page == "ℹ️ About":
             """, unsafe_allow_html=True)
         
         with col4:
-    st.markdown(f"""
+            st.markdown(f"""
                 <div class='metric-card'>
                     <div class='metric-label'>💾 Data Size</div>
                     <div class='metric-value' style='font-size: 1.5rem;'>{df.memory_usage(deep=True).sum() / 1024**2:.1f} MB</div>
                 </div>
             """, unsafe_allow_html=True)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== PROJECT HIGHLIGHTS ==========
-    st.header("🎯 Project Highlights")
+        st.header("🎯 Project Highlights")
         
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
         
         with col1:
-    st.markdown("""
+            st.markdown("""
                 ### 📊 Dataset Highlights
                 
                 **Business Domain:**
@@ -1610,7 +1610,7 @@ elif page == "ℹ️ About":
             """)
         
         with col2:
-    st.markdown("""
+            st.markdown("""
                 ### 🎯 Business Questions Supported
                 
                 **Revenue & Growth:**
@@ -1630,13 +1630,13 @@ elif page == "ℹ️ About":
                 - Cost efficiency and margin optimization
             """)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== APPLICATION PAGES ==========
-    st.header("📱 Application Pages")
+        st.header("📱 Application Pages")
         
-    with st.expander("🏠 Home", expanded=False):
-    st.markdown("""
+        with st.expander("🏠 Home", expanded=False):
+            st.markdown("""
                 **Hero dashboard with high-level KPIs:**
                 - Total revenue, orders, customers, AOV
                 - Quick feature overview and dataset preview
@@ -1644,8 +1644,8 @@ elif page == "ℹ️ About":
                 - Key business insights and growth metrics
             """)
         
-    with st.expander("📊 Analytics Dashboard", expanded=False):
-    st.markdown("""
+        with st.expander("📊 Analytics Dashboard", expanded=False):
+            st.markdown("""
                 **Interactive filtering by channel and date range:**
                 - Overall KPI tab with growth metrics
                 - Category, Campaign, Channel breakdowns
@@ -1654,8 +1654,8 @@ elif page == "ℹ️ About":
                 - 7+ KPI tabs for multi-dimensional analysis
             """)
         
-    with st.expander("🔍 Data Explorer", expanded=False):
-    st.markdown("""
+        with st.expander("🔍 Data Explorer", expanded=False):
+            st.markdown("""
                 **Full filterable table view:**
                 - Enriched dataset with all columns
                 - Ideal for validation and spot-checking
@@ -1663,8 +1663,8 @@ elif page == "ℹ️ About":
                 - Sortable and searchable interface
             """)
         
-    with st.expander("ℹ️ About", expanded=False):
-    st.markdown("""
+        with st.expander("ℹ️ About", expanded=False):
+            st.markdown("""
                 **Complete guide:**
                 - Dataset structure and processing pipeline
                 - Metrics definitions and calculations
@@ -1672,15 +1672,15 @@ elif page == "ℹ️ About":
                 - Professional positioning and audience
             """)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== PROFESSIONAL POSITIONING ==========
-    st.header("🎓 Professional Positioning")
+        st.header("🎓 Professional Positioning")
         
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-    st.info("""
+            st.info("""
                 ### 🎯 Purpose
                 
                 End-to-end BI solution for e-commerce performance
@@ -1691,7 +1691,7 @@ elif page == "ℹ️ About":
             """)
         
         with col2:
-    st.success("""
+            st.success("""
                 ### 👥 Audience
                 
                 - **Executives:** High-level KPIs and insights
@@ -1701,7 +1701,7 @@ elif page == "ℹ️ About":
             """)
         
         with col3:
-    st.warning("""
+            st.warning("""
                 ### 🎨 Style
                 
                 Dark, modern UI with:
@@ -1711,17 +1711,17 @@ elif page == "ℹ️ About":
                 - Clean professional design
             """)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== DATA ROADMAP ==========
-    st.header("🗺️ Data Processing Roadmap")
+        st.header("🗺️ Data Processing Roadmap")
         
-    with st.expander("🔹 Stage 1: Raw Data Collection", expanded=False):
-    col1, col2 = st.columns([1, 3])
+        with st.expander("🔹 Stage 1: Raw Data Collection", expanded=False):
+            col1, col2 = st.columns([1, 3])
             with col1:
-    st.markdown("### 📥")
+                st.markdown("### 📥")
             with col2:
-    st.markdown("""
+                st.markdown("""
                     **Source:** E-commerce Platform
                     
                     **Data Points Collected:**
@@ -1736,12 +1736,12 @@ elif page == "ℹ️ About":
                     **Volume:** 12,000+ records
                 """)
         
-    with st.expander("🔹 Stage 2: Data Cleaning & Transformation", expanded=False):
-    col1, col2 = st.columns([1, 3])
+        with st.expander("🔹 Stage 2: Data Cleaning & Transformation", expanded=False):
+            col1, col2 = st.columns([1, 3])
             with col1:
-    st.markdown("### 🧹")
+                st.markdown("### 🧹")
             with col2:
-    st.markdown("""
+                st.markdown("""
                     **Cleaning Steps:**
                     - ✅ Removed duplicates and invalid records
                     - ✅ Handled missing values with imputation
@@ -1756,12 +1756,12 @@ elif page == "ℹ️ About":
                     - Time-based features (month, quarter, season)
                 """)
         
-    with st.expander("🔹 Stage 3: Feature Engineering", expanded=False):
-    col1, col2 = st.columns([1, 3])
+        with st.expander("🔹 Stage 3: Feature Engineering", expanded=False):
+            col1, col2 = st.columns([1, 3])
             with col1:
-    st.markdown("### ⚙️")
+                st.markdown("### ⚙️")
             with col2:
-    st.markdown("""
+                st.markdown("""
                     **Created Features:**
                     - `net_revenue` = gross_revenue - discount_amount
                     - `roi` = (revenue - cost) / cost × 100
@@ -1777,12 +1777,12 @@ elif page == "ℹ️ About":
                     - Channel efficiency scores (normalized ROI)
                 """)
         
-    with st.expander("🔹 Stage 4: Analysis & Insights", expanded=False):
-    col1, col2 = st.columns([1, 3])
+        with st.expander("🔹 Stage 4: Analysis & Insights", expanded=False):
+            col1, col2 = st.columns([1, 3])
             with col1:
-    st.markdown("### 📊")
+                st.markdown("### 📊")
             with col2:
-    st.markdown("""
+                st.markdown("""
                     **Analysis Types:**
                     - **Time Series:** Revenue & conversions trends over months/quarters
                     - **Channel Performance:** ROI, efficiency, and acquisition by channel
@@ -1798,12 +1798,12 @@ elif page == "ℹ️ About":
                     - Peak performance in July 2023 ($1.56M revenue)
                 """)
         
-    with st.expander("🔹 Stage 5: Visualization & Dashboard", expanded=False):
-    col1, col2 = st.columns([1, 3])
+        with st.expander("🔹 Stage 5: Visualization & Dashboard", expanded=False):
+            col1, col2 = st.columns([1, 3])
             with col1:
-    st.markdown("### 📈")
+                st.markdown("### 📈")
             with col2:
-    st.markdown("""
+                st.markdown("""
                     **Dashboard Features:**
                     - **Home Page:** Quick overview with key insights
                     - **Analytics:** 15+ interactive charts and 7 KPI tabs
@@ -1818,18 +1818,18 @@ elif page == "ℹ️ About":
                     - **Python** - Backend logic and calculations
                 """)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== DATA STRUCTURE ==========
-    st.header("🏗️ Data Structure")
+        st.header("🏗️ Data Structure")
         
-    tab1, tab2, tab3 = st.tabs(["📊 Column Groups", "🔢 Data Types", "📏 Sample Data"])
+        tab1, tab2, tab3 = st.tabs(["📊 Column Groups", "🔢 Data Types", "📏 Sample Data"])
         
         with tab1:
-    col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3)
             
             with col1:
-    st.markdown("""
+                st.markdown("""
                     ### 🆔 Identifiers
                     - `order_id` - Unique order identifier
                     - `customer_id` - Customer identifier
@@ -1843,7 +1843,7 @@ elif page == "ℹ️ About":
                 """)
             
             with col2:
-    st.markdown("""
+                st.markdown("""
                     ### 💰 Financial
                     - `gross_revenue` - Pre-discount revenue
                     - `net_revenue` - Post-discount revenue
@@ -1858,7 +1858,7 @@ elif page == "ℹ️ About":
                 """)
             
             with col3:
-    st.markdown("""
+                st.markdown("""
                     ### 📢 Marketing
                     - `marketing_channel` - Acquisition channel
                     - `marketing_campaign` - Campaign name
@@ -1879,7 +1879,7 @@ elif page == "ℹ️ About":
                 'Null Count': df.isnull().sum().values
             })
             
-    st.dataframe(
+            st.dataframe(
                 dtypes_df.style.apply(
                     lambda x: ['background-color: #1a1f2e' if i % 2 == 0 else '' for i in range(len(x))],
                     axis=0
@@ -1889,17 +1889,17 @@ elif page == "ℹ️ About":
             )
         
         with tab3:
-    st.dataframe(df.head(20), use_container_width=True, height=400)
+            st.dataframe(df.head(20), use_container_width=True, height=400)
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== KEY METRICS SUMMARY ==========
-    st.header("📈 Key Metrics Summary")
+        st.header("📈 Key Metrics Summary")
         
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
         
         with col1:
-    st.success("""
+            st.success("""
                 ### 💰 Revenue Metrics
                 - **Total Revenue:** ${:,.0f}
                 - **Avg Revenue/Order:** ${:,.2f}
@@ -1912,7 +1912,7 @@ elif page == "ℹ️ About":
             ))
         
         with col2:
-    st.info("""
+            st.info("""
                 ### 👥 Customer Metrics
                 - **Total Customers:** {:,}
                 - **Total Orders:** {:,}
@@ -1925,31 +1925,31 @@ elif page == "ℹ️ About":
                 len(df) / df['customer_id'].nunique()
             ))
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== CHANNELS & CAMPAIGNS ==========
-    st.header("📡 Marketing Overview")
+        st.header("📡 Marketing Overview")
         
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
         
         with col1:
             if 'marketing_channel' in df.columns:
-    st.markdown("### 📢 Marketing Channels")
+                st.markdown("### 📢 Marketing Channels")
                 channels = df['marketing_channel'].value_counts().head(12)
                 for i, (channel, count) in enumerate(channels.items(), 1):
-    st.markdown(f"{i}. **{channel}:** {count:,} orders")
+                    st.markdown(f"{i}. **{channel}:** {count:,} orders")
         
         with col2:
             if 'category' in df.columns:
-    st.markdown("### 📦 Product Categories")
+                st.markdown("### 📦 Product Categories")
                 categories = df['category'].value_counts().head(10)
                 for i, (cat, count) in enumerate(categories.items(), 1):
-    st.markdown(f"{i}. **{cat}:** {count:,} orders")
+                    st.markdown(f"{i}. **{cat}:** {count:,} orders")
         
-    st.markdown("---")
+        st.markdown("---")
         
         # ========== FOOTER ==========
-    st.markdown("""
+        st.markdown("""
             <div class='footer'>
                 <p>📊 <strong>E-commerce Analytics Pro</strong> | Version 1.0.0</p>
                 <p>Built with ❤️ using Streamlit, Plotly & Pandas</p>
@@ -1959,4 +1959,4 @@ elif page == "ℹ️ About":
         """, unsafe_allow_html=True)
     
     else:
-    st.error("⚠️ No data available. Please check the data source.")
+        st.error("⚠️ No data available. Please check the data source.")
