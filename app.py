@@ -3,10 +3,247 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, time
 
 # =============================================================================
-# E-COMMERCE THEME (Professional Blue/Green)
+# THEME MANAGEMENT
+# =============================================================================
+def get_theme_css(theme_mode):
+    """إرجاع CSS حسب وضع السمة"""
+    
+    # إعدادات الألوان للوضع النهاري (لايت مود)
+    light_mode = {
+        "primary_blue": "#1f77b4",
+        "secondary_green": "#2ecc71",
+        "bg_color": "#ffffff",
+        "panel_color": "#f8f9fa",
+        "text_color": "#333333",
+        "accent_cyan": "#00bcd4",
+        "warning_orange": "#ff9800",
+        "border_color": "#e0e0e0",
+        "shadow_color": "rgba(0, 0, 0, 0.1)"
+    }
+    
+    # إعدادات الألوان للوضع الليلي (داكن)
+    dark_mode = {
+        "primary_blue": "#1f77b4",
+        "secondary_green": "#2ecc71",
+        "bg_color": "#0f1419",
+        "panel_color": "#1a1f2e",
+        "text_color": "#f5f5f5",
+        "accent_cyan": "#00d9ff",
+        "warning_orange": "#ff9800",
+        "border_color": "#2a3240",
+        "shadow_color": "rgba(0, 0, 0, 0.3)"
+    }
+    
+    # اختيار السمة بناءً على الوضع
+    colors = light_mode if theme_mode == "light" else dark_mode
+    
+    return f"""
+    <style>
+    :root {{
+      --primary-blue: {colors['primary_blue']};
+      --secondary-green: {colors['secondary_green']};
+      --bg-color: {colors['bg_color']};
+      --panel-color: {colors['panel_color']};
+      --text-color: {colors['text_color']};
+      --accent-cyan: {colors['accent_cyan']};
+      --warning-orange: {colors['warning_orange']};
+      --border-color: {colors['border_color']};
+      --shadow-color: {colors['shadow_color']};
+    }}
+
+    html, body, .stApp {{
+      background: {colors['bg_color']} !important;
+      color: {colors['text_color']} !important;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }}
+
+    h1, h2, h3, h4, h5, h6,
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
+      color: {colors['accent_cyan']} !important;
+      font-weight: 700 !important;
+    }}
+
+    section[data-testid="stSidebar"] {{
+      background: {colors['panel_color']} !important;
+      border-right: 2px solid {colors['primary_blue']};
+    }}
+
+    section[data-testid="stSidebar"] * {{
+      color: {colors['text_color']} !important;
+    }}
+
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stDateInput label {{
+      color: {colors['accent_cyan']} !important;
+      font-weight: 600 !important;
+    }}
+
+    div.stButton > button {{
+      background: linear-gradient(135deg, {colors['primary_blue']} 0%, {colors['secondary_green']} 100%) !important;
+      color: white !important;
+      border: none !important;
+      font-weight: 700 !important;
+      padding: 0.6rem 2rem !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
+      transition: all 0.3s ease !important;
+    }}
+
+    div.stButton > button:hover {{
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
+    }}
+
+    [data-testid="stMetricValue"] {{
+      color: {colors['secondary_green']} !important;
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+    }}
+
+    [data-testid="stMetricLabel"] {{
+      color: {colors['accent_cyan']} !important;
+      font-weight: 600 !important;
+    }}
+
+    div[data-testid="stExpander"] {{
+      background-color: {colors['panel_color']} !important;
+      border: 1px solid {colors['border_color']} !important;
+      border-radius: 10px !important;
+    }}
+
+    .stDataFrame {{
+      background-color: {colors['panel_color']} !important;
+      border: 1px solid {colors['border_color']} !important;
+    }}
+
+    .stTabs [data-baseweb="tab-list"] {{
+      gap: 8px;
+      background-color: transparent;
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+      background-color: {colors['panel_color']};
+      border-radius: 8px 8px 0 0;
+      color: {colors['text_color']};
+      border: 1px solid {colors['border_color']};
+      padding: 10px 20px;
+    }}
+
+    .stTabs [aria-selected="true"] {{
+      background: linear-gradient(135deg, {colors['primary_blue']} 0%, {colors['secondary_green']} 100%);
+      color: white;
+    }}
+
+    .stAlert {{
+      background-color: {colors['panel_color']} !important;
+      border-left: 4px solid {colors['accent_cyan']} !important;
+    }}
+
+    a {{
+      color: {colors['accent_cyan']} !important;
+      text-decoration: none !important;
+    }}
+
+    a:hover {{
+      color: {colors['secondary_green']} !important;
+    }}
+
+    hr {{
+      border-color: {colors['border_color']} !important;
+      opacity: 0.5 !important;
+    }}
+
+    .stDownloadButton > button {{
+      background-color: {colors['secondary_green']} !important;
+      color: white !important;
+    }}
+
+    .metric-card {{
+      background: linear-gradient(135deg, {colors['panel_color']} 0%, rgba(31, 119, 180, 0.1) 100%);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid {colors['border_color']};
+      box-shadow: 0 4px 15px {colors['shadow_color']};
+      text-align: center;
+      margin-bottom: 1rem;
+    }}
+
+    .metric-value {{
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: {colors['secondary_green']};
+      margin: 0.5rem 0;
+    }}
+
+    .metric-label {{
+      font-size: 1rem;
+      color: {colors['accent_cyan']};
+      font-weight: 600;
+    }}
+
+    .footer {{
+      text-align: center;
+      padding: 2rem;
+      color: {colors['text_color']};
+      opacity: 0.7;
+      border-top: 1px solid {colors['border_color']};
+      margin-top: 3rem;
+    }}
+
+    /* Chart styling */
+    .js-plotly-plot .plotly .modebar {{
+      background: {colors['panel_color']} !important;
+    }}
+
+    .theme-status {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      background: {colors['panel_color']};
+      border-radius: 20px;
+      border: 1px solid {colors['border_color']};
+      margin: 5px 0;
+    }}
+
+    .theme-status-icon {{
+      font-size: 20px;
+    }}
+    </style>
+    """
+
+def get_auto_theme():
+    """تحديد الوضع التلقائي بناءً على الوقت"""
+    current_hour = datetime.now().hour
+    
+    # الوضع النهاري من 6 صباحاً إلى 6 مساءً
+    if 6 <= current_hour < 18:
+        return "light"
+    else:
+        return "dark"
+
+def set_plotly_theme(theme_mode):
+    """تعيين سمة Plotly حسب الوضع"""
+    if theme_mode == "light":
+        return {
+            "paper_bgcolor": "#f8f9fa",
+            "plot_bgcolor": "#ffffff",
+            "font_color": "#333333",
+            "gridcolor": "#e0e0e0"
+        }
+    else:
+        return {
+            "paper_bgcolor": "#1a1f2e",
+            "plot_bgcolor": "#0f1419",
+            "font_color": "#f5f5f5",
+            "gridcolor": "#2a3240"
+        }
+
+# =============================================================================
+# STREAMLIT APP CONFIG
 # =============================================================================
 st.set_page_config(
     page_title="📊 E-commerce Analytics Pro",
@@ -15,160 +252,60 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown(
-    """
-    <style>
-    :root {
-      --primary-blue: #1f77b4;
-      --secondary-green: #2ecc71;
-      --bg-dark: #0f1419;
-      --panel-dark: #1a1f2e;
-      --text-light: #f5f5f5;
-      --accent-cyan: #00d9ff;
-      --warning-orange: #ff9800;
-    }
+# =============================================================================
+# THEME SELECTION IN SIDEBAR
+# =============================================================================
+with st.sidebar:
+    st.title("🎨 Theme Settings")
+    
+    # Theme selection
+    theme_mode = st.radio(
+        "Select Theme Mode",
+        ["🌙 Dark Mode", "☀️ Light Mode", "🔄 Auto Mode"],
+        index=0,
+        key="theme_mode"
+    )
+    
+    # Extract theme from selection
+    if "Light" in theme_mode:
+        current_theme = "light"
+        st.success("☀️ Light Mode Active")
+    elif "Dark" in theme_mode:
+        current_theme = "dark"
+        st.info("🌙 Dark Mode Active")
+    else:  # Auto Mode
+        current_theme = get_auto_theme()
+        if current_theme == "light":
+            st.success("🔆 Auto Mode: Daylight Hours (Light)")
+        else:
+            st.success("🌙 Auto Mode: Night Hours (Dark)")
+    
+    # Display current time
+    current_time = datetime.now().strftime("%I:%M %p")
+    st.caption(f"🕐 Current Time: {current_time}")
+    
+    st.markdown("---")
 
-    html, body, .stApp {
-      background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%) !important;
-      color: var(--text-light) !important;
-    }
+# Apply theme CSS
+st.markdown(get_theme_css(current_theme), unsafe_allow_html=True)
 
-    h1, h2, h3, h4, h5, h6,
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-      color: var(--accent-cyan) !important;
-      text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
-      font-weight: 700 !important;
-    }
+# =============================================================================
+# SIDEBAR NAVIGATION (المتبقي من السايدبار)
+# =============================================================================
+st.sidebar.title("🧭 Navigation")
+st.sidebar.markdown("---")
 
-    section[data-testid="stSidebar"] {
-      background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%) !important;
-      border-right: 2px solid var(--primary-blue);
-    }
-
-    section[data-testid="stSidebar"] * {
-      color: var(--text-light) !important;
-    }
-
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stDateInput label {
-      color: var(--accent-cyan) !important;
-      font-weight: 600 !important;
-    }
-
-    div.stButton > button {
-      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%) !important;
-      color: white !important;
-      border: none !important;
-      font-weight: 700 !important;
-      padding: 0.6rem 2rem !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4) !important;
-      transition: all 0.3s ease !important;
-    }
-
-    div.stButton > button:hover {
-      transform: translateY(-2px) !important;
-      box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6) !important;
-    }
-
-    [data-testid="stMetricValue"] {
-      color: var(--secondary-green) !important;
-      font-size: 2rem !important;
-      font-weight: 700 !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-      color: var(--accent-cyan) !important;
-      font-weight: 600 !important;
-    }
-
-    div[data-testid="stExpander"] {
-      background-color: var(--panel-dark) !important;
-      border: 1px solid var(--primary-blue) !important;
-      border-radius: 10px !important;
-    }
-
-    .stDataFrame {
-      background-color: var(--panel-dark) !important;
-    }
-
-    .stTabs [data-baseweb="tab-list"] {
-      gap: 8px;
-      background-color: transparent;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-      background-color: var(--panel-dark);
-      border-radius: 8px 8px 0 0;
-      color: var(--text-light);
-      border: 1px solid var(--primary-blue);
-      padding: 10px 20px;
-    }
-
-    .stTabs [aria-selected="true"] {
-      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
-      color: white;
-    }
-
-    .stAlert {
-      background-color: var(--panel-dark) !important;
-      border-left: 4px solid var(--accent-cyan) !important;
-    }
-
-    a {
-      color: var(--accent-cyan) !important;
-      text-decoration: none !important;
-    }
-
-    a:hover {
-      color: var(--secondary-green) !important;
-    }
-
-    hr {
-      border-color: var(--primary-blue) !important;
-      opacity: 0.3 !important;
-    }
-
-    .stDownloadButton > button {
-      background-color: var(--secondary-green) !important;
-      color: white !important;
-    }
-
-    .metric-card {
-      background: linear-gradient(135deg, var(--panel-dark) 0%, rgba(31, 119, 180, 0.1) 100%);
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid var(--primary-blue);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-    .metric-value {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--secondary-green);
-      margin: 0.5rem 0;
-    }
-
-    .metric-label {
-      font-size: 1rem;
-      color: var(--accent-cyan);
-      font-weight: 600;
-    }
-
-    .footer {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-light);
-      opacity: 0.7;
-      border-top: 1px solid var(--primary-blue);
-      margin-top: 3rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
+page = st.sidebar.radio(
+    "Select Page",
+    ["🏠 Home", "📊 Analytics Dashboard", "🔍 Data Explorer", "ℹ️ About"],
+    index=0
 )
+
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Tip**: Use filters in Analytics Dashboard for detailed insights")
+
+# Get plotly theme settings
+plotly_theme = set_plotly_theme(current_theme)
 
 # =============================================================================
 # DATA LOADING
@@ -195,34 +332,48 @@ def load_data():
         st.error(f"❌ Error loading data: {str(e)}")
         return None
 
-# =============================================================================
-# SIDEBAR NAVIGATION
-# =============================================================================
-st.sidebar.title("🧭 Navigation")
-st.sidebar.markdown("---")
-
-page = st.sidebar.radio(
-    "Select Page",
-    ["🏠 Home", "📊 Analytics Dashboard", "🔍 Data Explorer", "ℹ️ About"],
-    index=0
-)
-
-st.sidebar.markdown("---")
-st.sidebar.info("💡 **Tip**: Use filters in Analytics Dashboard for detailed insights")
-
 # Load data
 df = load_data()
 
 # =============================================================================
-# HOME PAGE
+# UPDATE ALL CHART FUNCTIONS TO USE DYNAMIC THEME
+# =============================================================================
+def create_chart_with_theme(fig, title=""):
+    """تحديث جميع الرسوم البيانية بالسمة المختارة"""
+    fig.update_layout(
+        title=title,
+        paper_bgcolor=plotly_theme["paper_bgcolor"],
+        plot_bgcolor=plotly_theme["plot_bgcolor"],
+        font_color=plotly_theme["font_color"],
+        xaxis=dict(
+            gridcolor=plotly_theme["gridcolor"],
+            linecolor=plotly_theme["gridcolor"]
+        ),
+        yaxis=dict(
+            gridcolor=plotly_theme["gridcolor"],
+            linecolor=plotly_theme["gridcolor"]
+        ),
+        legend=dict(
+            bgcolor=plotly_theme["paper_bgcolor"],
+            bordercolor=plotly_theme["gridcolor"]
+        )
+    )
+    return fig
+
+# =============================================================================
+# HOME PAGE (مع التحديثات)
 # =============================================================================
 if page == "🏠 Home":
-    st.markdown("""
+    st.markdown(f"""
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 style='font-size: 3.5rem; margin-bottom: 0;'>🛒 E-commerce Analytics Pro</h1>
-            <p style='font-size: 1.3rem; color: #00d9ff; margin-top: 0.5rem;'>
+            <p style='font-size: 1.3rem; margin-top: 0.5rem;'>
                 Advanced Business Intelligence Dashboard
             </p>
+            <div class='theme-status'>
+                <span class='theme-status-icon'>{"☀️" if current_theme == "light" else "🌙"}</span>
+                <span>Current Theme: {"Light Mode" if current_theme == "light" else "Dark Mode"}</span>
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -298,11 +449,11 @@ if page == "🏠 Home":
 
         with col3:
             st.markdown("""
-                ### 📈 Insights
-                - Revenue trends
-                - Customer segmentation
-                - Marketing ROI
-                - Channel performance
+                ### 🎨 Smart Themes
+                - Light & Dark modes
+                - Auto theme based on time
+                - Eye-friendly design
+                - Customizable colors
             """)
 
         st.markdown("---")
@@ -331,11 +482,11 @@ if page == "🏠 Home":
         st.warning("⚠️ No data available. Please check the CSV file.")
 
 # =============================================================================
-# ANALYTICS DASHBOARD
+# ANALYTICS DASHBOARD (مع تحديث الرسوم البيانية)
 # =============================================================================
 elif page == "📊 Analytics Dashboard":
     st.title("📊 Analytics Dashboard")
-    st.markdown("Interactive visualizations with real-time filtering")
+    st.markdown(f"Interactive visualizations • Current Theme: **{'☀️ Light' if current_theme == 'light' else '🌙 Dark'}**")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -379,10 +530,9 @@ elif page == "📊 Analytics Dashboard":
 
     st.sidebar.success(f"📊 Showing {len(filtered_df):,} / {len(df):,} records")
 
-     # ========== KPIs ==========
+    # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
     
-    # إنشاء tabs للـ KPIs المختلفة
     kpi_tabs = st.tabs([
         "📊 Overall", 
         "📦 By Category", 
@@ -394,9 +544,8 @@ elif page == "📊 Analytics Dashboard":
     ])
     
     # ========== TAB 1: OVERALL KPIs ==========
-       # ========== TAB 1: OVERALL KPIs ==========
     with kpi_tabs[0]:
-        col1, col2, col3 = st.columns(3)  # ⬅️ غيرت من 4 لـ 3
+        col1, col2, col3 = st.columns(3)
         
         total_revenue = filtered_df['net_revenue'].sum() if 'net_revenue' in filtered_df.columns else 0
         total_customers = filtered_df['customer_id'].nunique() if 'customer_id' in filtered_df.columns else 0
@@ -420,221 +569,6 @@ elif page == "📊 Analytics Dashboard":
             st.metric("↩️ Return Rate", f"{return_rate:.2f}%")
             st.metric("⭐ Satisfaction", f"{avg_satisfaction:.2f}/5")
 
-    
-    # ========== TAB 2: BY CATEGORY ==========
-    with kpi_tabs[1]:
-        if 'category' in filtered_df.columns:
-            kpi_category = filtered_df.groupby('category').agg({
-                'gross_revenue': 'sum',
-                'net_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum'
-            }).reset_index()
-            
-            kpi_category['avg_order_value'] = (kpi_category['net_revenue'] / kpi_category['quantity']).round(2)
-            kpi_category['roi'] = ((kpi_category['net_revenue'] - kpi_category['discount_amount']) / kpi_category['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_category.style.format({
-                    'gross_revenue': '${:,.2f}',
-                    'net_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-    
-    # ========== TAB 3: BY CAMPAIGN ==========
-    with kpi_tabs[2]:
-        if 'marketing_campaign' in filtered_df.columns:
-            kpi_campaign = filtered_df.groupby('marketing_campaign').agg({
-                'net_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum',
-                'customer_id': 'nunique'
-            }).reset_index()
-            
-            kpi_campaign['revenue_per_customer'] = (kpi_campaign['net_revenue'] / kpi_campaign['customer_id']).round(2)
-            kpi_campaign['roi'] = ((kpi_campaign['net_revenue'] - kpi_campaign['discount_amount']) / kpi_campaign['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_campaign.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'customer_id': '{:,.0f}',
-                    'revenue_per_customer': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-    
-    # ========== TAB 4: BY CHANNEL ==========
-    with kpi_tabs[3]:
-        if 'marketing_channel' in filtered_df.columns:
-            kpi_channel = filtered_df.groupby('marketing_channel').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum',
-                'customer_id': 'nunique'
-            }).reset_index()
-            
-            kpi_channel['avg_order_value'] = (kpi_channel['net_revenue'] / kpi_channel['quantity']).round(2)
-            kpi_channel['revenue_per_customer'] = (kpi_channel['net_revenue'] / kpi_channel['customer_id']).round(2)
-            kpi_channel['roi'] = ((kpi_channel['net_revenue'] - kpi_channel['discount_amount']) / kpi_channel['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_channel.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'customer_id': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'revenue_per_customer': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-    
-    # ========== TAB 5: BY SEGMENT ==========
-    with kpi_tabs[4]:
-        if 'customer_segment' in filtered_df.columns:
-            kpi_segment = filtered_df.groupby('customer_segment').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum',
-                'customer_id': 'nunique',
-                'customer_lifetime_value': 'mean',
-                'retention_score': 'mean'
-            }).reset_index()
-            
-            kpi_segment['avg_order_value'] = (kpi_segment['net_revenue'] / kpi_segment['quantity']).round(2)
-            kpi_segment['revenue_per_customer'] = (kpi_segment['net_revenue'] / kpi_segment['customer_id']).round(2)
-            kpi_segment['roi'] = ((kpi_segment['net_revenue'] - kpi_segment['discount_amount']) / kpi_segment['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_segment.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'customer_id': '{:,.0f}',
-                    'customer_lifetime_value': '${:,.2f}',
-                    'retention_score': '{:.2f}',
-                    'avg_order_value': '${:,.2f}',
-                    'revenue_per_customer': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-    
-    # ========== TAB 6: BY REGION ==========
-    with kpi_tabs[5]:
-        if 'region' in filtered_df.columns:
-            kpi_region = filtered_df.groupby('region').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum',
-                'customer_id': 'nunique'
-            }).reset_index()
-            
-            kpi_region['avg_order_value'] = (kpi_region['net_revenue'] / kpi_region['quantity']).round(2)
-            kpi_region['revenue_per_customer'] = (kpi_region['net_revenue'] / kpi_region['customer_id']).round(2)
-            kpi_region['roi'] = ((kpi_region['net_revenue'] - kpi_region['discount_amount']) / kpi_region['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_region.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'customer_id': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'revenue_per_customer': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-    
-    # ========== TAB 7: BY TIME ==========
-    with kpi_tabs[6]:
-        time_view = st.radio("Select Time Period", ["Month", "Quarter", "Season"], horizontal=True)
-        
-        if time_view == "Month" and 'month' in filtered_df.columns:
-            kpi_time = filtered_df.groupby('month').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum'
-            }).reset_index()
-            
-            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
-            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_time.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-        
-        elif time_view == "Quarter" and 'quarter' in filtered_df.columns:
-            kpi_time = filtered_df.groupby('quarter').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum'
-            }).reset_index()
-            
-            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
-            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_time.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-        
-        elif time_view == "Season" and 'season' in filtered_df.columns:
-            kpi_time = filtered_df.groupby('season').agg({
-                'net_revenue': 'sum',
-                'gross_revenue': 'sum',
-                'discount_amount': 'sum',
-                'quantity': 'sum'
-            }).reset_index()
-            
-            kpi_time['avg_order_value'] = (kpi_time['net_revenue'] / kpi_time['quantity']).round(2)
-            kpi_time['roi'] = ((kpi_time['net_revenue'] - kpi_time['discount_amount']) / kpi_time['discount_amount'] * 100).round(2)
-            
-            st.dataframe(
-                kpi_time.style.format({
-                    'net_revenue': '${:,.2f}',
-                    'gross_revenue': '${:,.2f}',
-                    'discount_amount': '${:,.2f}',
-                    'quantity': '{:,.0f}',
-                    'avg_order_value': '${:,.2f}',
-                    'roi': '{:.2f}%'
-                }),
-                use_container_width=True
-            )
-
     st.markdown("---")
 
     # ========== CHARTS FROM NOTEBOOK ==========
@@ -642,7 +576,7 @@ elif page == "📊 Analytics Dashboard":
 
     tab1, tab2, tab3 = st.tabs(["📈 Trends", "🎯 Marketing", "📦 Performance"])
 
-    # ========== TAB 1: TRENDS ==========
+    # ========== TAB 1: TRENDS (مع السمة الديناميكية) ==========
     with tab1:
         # Chart 1: Monthly Revenue Trends by Marketing Channel
         if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
@@ -663,10 +597,8 @@ elif page == "📊 Analytics Dashboard":
                 title='Monthly Revenue Trends by Marketing Channel'
             )
             
+            fig_revenue_trend = create_chart_with_theme(fig_revenue_trend)
             fig_revenue_trend.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
                 height=500,
                 xaxis_title="Month",
                 yaxis_title="Revenue",
@@ -676,108 +608,7 @@ elif page == "📊 Analytics Dashboard":
             
             st.plotly_chart(fig_revenue_trend, use_container_width=True)
 
-        # Chart 2: Monthly Conversions Trends by Marketing Channel
-        if 'month_date' in filtered_df.columns and 'marketing_channel' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-            st.subheader("Monthly Conversions Trends by Marketing Channel")
-            
-            monthly_channel = filtered_df.groupby(['month_date', 'marketing_channel']).agg({
-                'customer_id': 'nunique'
-            }).reset_index()
-            monthly_channel.columns = ['month', 'channel', 'conversions']
-            
-            fig_conv_trend = px.line(
-                monthly_channel,
-                x='month',
-                y='conversions',
-                color='channel',
-                markers=True,
-                title='Monthly Conversions Trends by Marketing Channel'
-            )
-            
-            fig_conv_trend.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                xaxis_title="Month",
-                yaxis_title="Conversions (Unique Customers)",
-                legend_title="Channel",
-                xaxis=dict(tickangle=45)
-            )
-            
-            st.plotly_chart(fig_conv_trend, use_container_width=True)
-
-        # Chart 3: Overall Monthly Revenue Trend
-        if 'month_date' in filtered_df.columns and 'net_revenue' in filtered_df.columns:
-            st.subheader("Overall Monthly Revenue Trend")
-            
-            monthly_total = filtered_df.groupby('month_date').agg({
-                'net_revenue': 'sum',
-                'customer_id': 'nunique'
-            }).reset_index()
-            monthly_total.columns = ['month', 'total_revenue', 'total_conversions']
-            
-            fig_total_rev = px.line(
-                monthly_total,
-                x='month',
-                y='total_revenue',
-                markers=True,
-                title='Overall Monthly Revenue Trend'
-            )
-            
-            fig_total_rev.update_traces(
-                line=dict(color='#FF9F0D', width=3),
-                marker=dict(size=10, color='#3647F5')
-            )
-            
-            fig_total_rev.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Month",
-                yaxis_title="Total Revenue",
-                xaxis=dict(tickangle=45)
-            )
-            
-            st.plotly_chart(fig_total_rev, use_container_width=True)
-
-        # Chart 4: Overall Monthly Conversions Trend
-        if 'month_date' in filtered_df.columns and 'customer_id' in filtered_df.columns:
-            st.subheader("Overall Monthly Conversions Trend")
-            
-            monthly_total = filtered_df.groupby('month_date').agg({
-                'customer_id': 'nunique'
-            }).reset_index()
-            monthly_total.columns = ['month', 'total_conversions']
-            
-            fig_total_conv = px.line(
-                monthly_total,
-                x='month',
-                y='total_conversions',
-                markers=True,
-                title='Overall Monthly Conversions Trend'
-            )
-            
-            fig_total_conv.update_traces(
-                line=dict(color='#3647F5', width=3),
-                marker=dict(size=10, color='#FF9F0D')
-            )
-            
-            fig_total_conv.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Month",
-                yaxis_title="Total Conversions",
-                xaxis=dict(tickangle=45)
-            )
-            
-            st.plotly_chart(fig_total_conv, use_container_width=True)
-
-    # ========== TAB 2: MARKETING ==========   
-             # ========== TAB 2: MARKETING ==========
+    # ========== TAB 2: MARKETING (مع السمة الديناميكية) ==========
     with tab2:
         if 'marketing_channel' in df.columns:
             revenue_col = 'net_revenue' if 'net_revenue' in df.columns else 'final_amount'
@@ -798,7 +629,6 @@ elif page == "📊 Analytics Dashboard":
                 
                 # Chart 1: Total Revenue per Marketing Channel
                 st.subheader("Total Revenue per Marketing Channel")
-                bar_width = 25
                 
                 fig_rev = px.scatter(
                     channel_perf,
@@ -810,124 +640,20 @@ elif page == "📊 Analytics Dashboard":
                 )
                 
                 fig_rev.update_traces(
-                    marker=dict(size=bar_width),
+                    marker=dict(size=25),
                     textposition='top center',
                     texttemplate='%{text:.2s}'
                 )
                 
-                for x_val, y_val in zip(channel_perf.index, channel_perf["total_revenue"]):
-                    fig_rev.add_shape(
-                        type="line",
-                        x0=x_val, y0=0,
-                        x1=x_val, y1=y_val,
-                        line=dict(color="#3647F5", width=bar_width),
-                        layer="below"
-                    )
-                
+                fig_rev = create_chart_with_theme(fig_rev)
                 fig_rev.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='#f5f5f5',
                     height=450,
                     margin=dict(t=60)
                 )
                 
                 st.plotly_chart(fig_rev, use_container_width=True)
-                
-                # Chart 2: Total Conversions per Channel
-                st.subheader("Total Conversions per Channel")
-                
-                fig_conv = px.scatter(
-                    channel_perf,
-                    x=channel_perf.index,
-                    y="total_conversions",
-                    size="total_conversions",
-                    color="total_conversions",
-                    color_continuous_scale=["#FF9F0D", "#D9D9D9"],
-                    title="Total Conversions per Channel"
-                )
-                
-                fig_conv.update_traces(
-                    marker=dict(symbol='circle', line=dict(width=2, color='#D9D9D9'))
-                )
-                
-                fig_conv.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='#f5f5f5',
-                    height=450,
-                    yaxis_title="Total Conversions",
-                    xaxis_title="Marketing Channel"
-                )
-                
-                st.plotly_chart(fig_conv, use_container_width=True)
-                
-                # Chart 3: Total Orders per Channel (بدل Spend)
-                st.subheader("Total Orders per Channel")
-                
-                # حساب عدد الطلبات لكل قناة
-                orders_data = df.groupby('marketing_channel').agg({
-                    'order_id': 'count'
-                }).reset_index()
-                orders_data.columns = ['channel', 'total_orders']
-                orders_data = orders_data.set_index('channel')
-                
-                fig_spend = px.line(
-                    orders_data,
-                    x=orders_data.index,
-                    y="total_orders",
-                    markers=True,
-                    title="Total Orders per Channel"
-                )
-                
-                fig_spend.update_traces(
-                    line=dict(color="#FF9F0D", width=4),
-                    marker=dict(size=10, color="#D9D9D9", line=dict(width=2, color="#D9D9D9"))
-                )
-                
-                fig_spend.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='#f5f5f5',
-                    height=500,
-                    yaxis_title="Total Orders",
-                    xaxis_title="Marketing Channel"
-                )
-                
-                st.plotly_chart(fig_spend, use_container_width=True)
-                
-                # Chart 4: Average ROI per Channel
-                st.subheader("Average ROI per Channel")
-                
-                channel_perf_sorted = channel_perf.sort_values(by='avg_roi', ascending=True)
-                
-                fig_roi = px.bar(
-                    channel_perf_sorted,
-                    x='avg_roi',
-                    y=channel_perf_sorted.index,
-                    orientation='h',
-                    color='avg_roi',
-                    color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D'],
-                    title="Average ROI per Channel"
-                )
-                
-                fig_roi.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='#f5f5f5',
-                    height=450,
-                    xaxis_title="Average ROI",
-                    yaxis_title="Marketing Channel"
-                )
-                
-                st.plotly_chart(fig_roi, use_container_width=True)
-            else:
-                st.error("❌ Required columns not found!")
-        else:
-            st.error("❌ Column 'marketing_channel' not found!")
 
-   
-           # ========== TAB 3: PERFORMANCE (NEW) ==========
+    # ========== TAB 3: PERFORMANCE (مع السمة الديناميكية) ==========
     with tab3:
         st.subheader("📊 Marketing Channel Performance Analysis")
         
@@ -954,245 +680,22 @@ elif page == "📊 Analytics Dashboard":
                 color='Revenue_Per_Order',
                 color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
             )
-            fig_revenue_order.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
+            
+            fig_revenue_order = create_chart_with_theme(fig_revenue_order)
             fig_revenue_order.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
                 height=450,
                 xaxis_title="Revenue Per Order ($)",
                 yaxis_title="Marketing Channel"
             )
+            
             st.plotly_chart(fig_revenue_order, use_container_width=True)
-            
-            # Chart 2: Customer Acquisition Rate
-            st.subheader("📈 Customer Acquisition Rate by Channel")
-            conversion_by_channel = filtered_df.groupby('marketing_channel').agg({
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            conversion_by_channel.columns = ['Channel', 'Unique_Customers', 'Total_Orders']
-            conversion_by_channel['Customer_Acquisition_Rate_%'] = (
-                (conversion_by_channel['Unique_Customers'] / conversion_by_channel['Total_Orders']) * 100
-            ).round(2)
-            conversion_by_channel = conversion_by_channel.sort_values('Customer_Acquisition_Rate_%', ascending=False)
-            
-            fig_acquisition = px.bar(
-                conversion_by_channel,
-                x='Channel',
-                y='Customer_Acquisition_Rate_%',
-                title='Customer Acquisition Rate by Channel',
-                color='Customer_Acquisition_Rate_%',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig_acquisition.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig_acquisition.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Customer Acquisition Rate (%)",
-                xaxis=dict(tickangle=45)
-            )
-            st.plotly_chart(fig_acquisition, use_container_width=True)
-            
-            # Chart 3: Channel Efficiency Ranking
-            st.subheader("🏆 Channel Efficiency Ranking")
-            efficiency = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': ['sum', 'mean'],
-                'order_id': 'count',
-                'customer_id': 'nunique'
-            }).reset_index()
-            efficiency.columns = ['Channel', 'Total_Revenue', 'Avg_Order_Value', 'Total_Orders', 'Unique_Customers']
-            efficiency['Revenue_Per_Order'] = (efficiency['Total_Revenue'] / efficiency['Total_Orders']).round(2)
-            efficiency['Customer_Acq_Rate_%'] = ((efficiency['Unique_Customers'] / efficiency['Total_Orders']) * 100).round(2)
-            
-            max_rev = efficiency['Revenue_Per_Order'].max()
-            max_cust = efficiency['Customer_Acq_Rate_%'].max()
-            max_order = efficiency['Avg_Order_Value'].max()
-            
-            efficiency['Efficiency_Score'] = (
-                (efficiency['Revenue_Per_Order'] / max_rev) * 40 +
-                (efficiency['Customer_Acq_Rate_%'] / max_cust) * 30 +
-                (efficiency['Avg_Order_Value'] / max_order) * 30
-            ).round(2)
-            efficiency = efficiency.sort_values('Efficiency_Score')
-            
-            fig_efficiency = px.bar(
-                efficiency,
-                x='Efficiency_Score',
-                y='Channel',
-                orientation='h',
-                title='Channel Efficiency Ranking',
-                color='Efficiency_Score',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig_efficiency.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig_efficiency.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Efficiency Score",
-                yaxis_title="Marketing Channel"
-            )
-            st.plotly_chart(fig_efficiency, use_container_width=True)
-            
-            # Chart 4: Revenue vs Customer Acquisition
-            st.subheader("🎯 Revenue vs Customer Acquisition")
-            revenue_analysis = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': 'sum',
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            revenue_analysis.columns = ['Channel', 'Total_Revenue', 'Unique_Customers', 'Total_Orders']
-            revenue_analysis['Revenue_Per_Customer'] = (
-                revenue_analysis['Total_Revenue'] / revenue_analysis['Unique_Customers']
-            ).round(2)
-            
-            fig_revenue_customers = px.scatter(
-                revenue_analysis,
-                x='Unique_Customers',
-                y='Total_Revenue',
-                size='Revenue_Per_Customer',
-                color='Revenue_Per_Customer',
-                hover_name='Channel',
-                text='Channel',
-                title='Revenue vs Customer Acquisition',
-                size_max=60,
-                color_continuous_scale=['#FF9F0D', '#3647F5', '#D9D9D9']
-            )
-            fig_revenue_customers.update_traces(
-                textposition='top center',
-                textfont=dict(size=12, color='#f5f5f5'),
-                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.85)
-            )
-            fig_revenue_customers.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                showlegend=False,
-                xaxis_title="Unique Customers Acquired",
-                yaxis_title="Total Revenue ($)"
-            )
-            st.plotly_chart(fig_revenue_customers, use_container_width=True)
-            
-            # Chart 5: Revenue Per Customer
-            st.subheader("💰 Revenue Per Customer by Channel")
-            customer_value = filtered_df.groupby('marketing_channel').agg({
-                'final_amount': 'sum',
-                'customer_id': 'nunique',
-                'order_id': 'count'
-            }).reset_index()
-            customer_value.columns = ['Channel', 'Total_Revenue', 'Total_Customers', 'Total_Orders']
-            customer_value['Revenue_Per_Customer'] = (
-                customer_value['Total_Revenue'] / customer_value['Total_Customers']
-            ).round(2)
-            customer_value = customer_value.sort_values('Revenue_Per_Customer')
-            
-            fig_revenue_customer = px.bar(
-                customer_value,
-                x='Channel',
-                y='Revenue_Per_Customer',
-                title='Revenue Per Customer by Channel',
-                color='Revenue_Per_Customer',
-                color_continuous_scale=['#3647F5', '#D9D9D9', '#FF9F0D']
-            )
-            fig_revenue_customer.update_traces(
-                marker=dict(line=dict(width=1.5, color='#D9D9D9'))
-            )
-            fig_revenue_customer.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=450,
-                xaxis_title="Marketing Channel",
-                yaxis_title="Revenue Per Customer ($)",
-                xaxis=dict(tickangle=45)
-            )
-            st.plotly_chart(fig_revenue_customer, use_container_width=True)
-            
-            # Chart 6: Performance Quadrant Analysis
-            st.subheader("🏆 Performance Quadrant Analysis")
-            
-            quadrant_analysis = filtered_df.groupby('marketing_channel').agg({
-                'customer_id': 'nunique',
-                'final_amount': 'sum',
-                'order_id': 'count'
-            }).reset_index()
-            quadrant_analysis.columns = ['Channel', 'Unique_Customers', 'Total_Revenue', 'Total_Orders']
-            quadrant_analysis['Revenue_Per_Customer'] = (
-                quadrant_analysis['Total_Revenue'] / quadrant_analysis['Unique_Customers']
-            ).round(2)
-            
-            avg_customers = quadrant_analysis['Unique_Customers'].mean()
-            avg_revenue = quadrant_analysis['Total_Revenue'].mean()
-            
-            fig_quadrant = px.scatter(
-                quadrant_analysis,
-                x='Unique_Customers',
-                y='Total_Revenue',
-                size='Revenue_Per_Customer',
-                color='Revenue_Per_Customer',
-                hover_name='Channel',
-                hover_data=['Revenue_Per_Customer', 'Total_Orders'],
-                title='Performance Quadrant Analysis: High Revenue/High Reach = Top Right 🏆',
-                size_max=50,
-                color_continuous_scale=['#FF9F0D', '#3647F5']
-            )
-            
-            fig_quadrant.update_traces(
-                marker=dict(line=dict(width=2, color='#D9D9D9'), opacity=0.9)
-            )
-            
-            fig_quadrant.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#f5f5f5',
-                height=500,
-                xaxis_title="Unique Customers Acquired",
-                yaxis_title="Total Revenue ($)",
-                showlegend=False
-            )
-            
-            # Quadrant lines
-            fig_quadrant.add_hline(
-                y=avg_revenue,
-                line_dash="dash",
-                line_color="#FF9F0D",
-                annotation_text=f"Avg Revenue: ${avg_revenue:,.0f}",
-                annotation_position="right"
-            )
-            
-            fig_quadrant.add_vline(
-                x=avg_customers,
-                line_dash="dash",
-                line_color="#FF9F0D",
-                annotation_text=f"Avg Customers: {avg_customers:,.0f}",
-                annotation_position="top"
-            )
-            
-            st.plotly_chart(fig_quadrant, use_container_width=True)
-            
-            # Best performer info
-            best_channel = quadrant_analysis.loc[quadrant_analysis['Revenue_Per_Customer'].idxmax()]
-            st.success(f"🌟 **Best Performer:** {best_channel['Channel']} - Revenue/Customer: ${best_channel['Revenue_Per_Customer']:,.2f}")
-
 
 # =============================================================================
 # DATA EXPLORER
 # =============================================================================
 elif page == "🔍 Data Explorer":
     st.title("🔍 Data Explorer")
-    st.markdown("Browse and filter your data")
+    st.markdown(f"Browse and filter your data • Current Theme: **{'☀️ Light' if current_theme == 'light' else '🌙 Dark'}**")
 
     if df is None:
         st.error("❌ Data not loaded!")
@@ -1254,10 +757,17 @@ elif page == "🔍 Data Explorer":
 elif page == "ℹ️ About":
     st.title("ℹ️ About This Application")
 
-    st.markdown("""
+    st.markdown(f"""
     ## 🛒 E-commerce Analytics Pro
 
     A comprehensive business intelligence dashboard for e-commerce data analysis.
+
+    ### 🎨 Smart Theme Features
+
+    - **Light Mode**: Eye-friendly daytime theme
+    - **Dark Mode**: Comfortable night viewing
+    - **Auto Mode**: Automatically switches based on time
+    - **Dynamic Charts**: All visualizations adapt to theme
 
     ### 🎯 Features
 
@@ -1281,13 +791,14 @@ elif page == "ℹ️ About":
     - **Framework**: Streamlit
     - **Data Processing**: Pandas, NumPy
     - **Visualizations**: Plotly
-    - **Styling**: Custom CSS with gradient themes
+    - **Styling**: Dynamic CSS themes
 
     ### 📝 How to Use
 
-    1. **Home**: Get quick overview of your business
-    2. **Analytics Dashboard**: Dive deep into visualizations
-    3. **Data Explorer**: Filter and export specific data
+    1. **Select Theme**: Choose from Light/Dark/Auto modes
+    2. **Home**: Get quick overview of your business
+    3. **Analytics Dashboard**: Dive deep into visualizations
+    4. **Data Explorer**: Filter and export specific data
 
     ### 💻 Requirements
 
@@ -1306,9 +817,9 @@ elif page == "ℹ️ About":
 
     ---
 
-    **Version**: 1.0.0  
+    **Version**: 2.0.0 (with Theme Support)  
     **Last Updated**: December 2025  
-    **Built with** ❤️ **using Streamlit**
+    **Current Theme**: {'☀️ Light' if current_theme == 'light' else '🌙 Dark'} Mode
     """)
 
     st.markdown("---")
@@ -1326,9 +837,9 @@ elif page == "ℹ️ About":
 # =============================================================================
 # FOOTER
 # =============================================================================
-st.markdown("""
+st.markdown(f"""
     <div class='footer'>
         <p>📊 E-commerce Analytics Pro | Built with Streamlit</p>
-        <p>© 2025 | All Rights Reserved</p>
+        <p>© 2025 | Current Theme: {'☀️ Light' if current_theme == 'light' else '🌙 Dark'} Mode</p>
     </div>
 """, unsafe_allow_html=True)
