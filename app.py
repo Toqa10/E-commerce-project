@@ -587,18 +587,19 @@ if 'month_date' in df.columns:
     max_date = df['month_date'].max()
     date_range = st.sidebar.date_input('Date Range', value=(min_date, maxdate))
 
-# Apply Filters
+    # Apply Filters
 filtered_df = df.copy()
 if selected_channel != 'All Channels':
     filtered_df = filtered_df[filtered_df['marketing_channel'] == selected_channel]
 if len(date_range) == 2:
     filtered_df = filtered_df[(filtered_df['month_date'] >= start) & (filtered_df['month_date'] <= end)]
 
-st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
+    st.sidebar.success(f'Showing {len(filtered_df):,} / {len(df):,} records')
+
 
     # ========== KPIs ==========
     st.header("📈 Key Performance Indicators")
-    
+
     # إنشاء tabs للـ KPIs المختلفة
     kpi_tabs = st.tabs([
         "📊 Overall", 
