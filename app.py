@@ -189,7 +189,8 @@ def load_data():
 
         return df
     except FileNotFoundError:
-    st.error("⚠️ File 'cleaned_data.csv' not found!")
+        st.error("⚠️ File 'cleaned_data.csv' not found!")
+
         return None
     except Exception as e:
     st.error(f"❌ Error loading data: {str(e)}")
